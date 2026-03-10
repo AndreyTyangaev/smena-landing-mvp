@@ -116,7 +116,7 @@ function grantBadge(text) { if (!state.badges.includes(text)) state.badges.push(
 
 function finish() {
   const profile = detectProfile();
-  const ranked = rankRoles(state.answers);
+  const ranked = enforceTopRule(rankRoles(state.answers));
   const top = ranked.slice(0, 3);
 
   ui.quizSection.classList.add("hidden");
@@ -136,6 +136,19 @@ function finish() {
   drawRadar();
 }
 
+function enforceTopRule(ranked) {
+  if (!ranked.length) return ranked;
+  if (ranked[0].family !== "Клининг") return ranked;
+
+  const fallbackIdx = ranked.findIndex((r) => r.family !== "Клининг");
+  if (fallbackIdx <= 0) return ranked;
+
+  const reordered = [...ranked];
+  const first = reordered[0];
+  reordered[0] = reordered[fallbackIdx];
+  reordered[fallbackIdx] = first;
+  return reordered;
+}
 function detectProfile() {
   for (const p of profileMap) if (p.when(state.answers)) return p;
   return { key: "balanced_explorer", title: "Сбалансированный исследователь", desc: "Ты выбираешь комфортный старт и постепенно открываешь подходящие профессии по мере опыта." };
