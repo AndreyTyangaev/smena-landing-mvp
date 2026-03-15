@@ -34,7 +34,10 @@
         <div id="badges" class="badges"></div>
         <div id="options" class="options"></div>
         <div id="inputWrap" class="input-wrap hidden">
-          <input id="textAnswer" class="text-answer" type="text" autocomplete="address-level2" list="citySuggestions" />
+          <div class="suggest-input">
+            <input id="textAnswer" class="text-answer" type="text" autocomplete="address-level2" />
+            <div id="cityAutocomplete" class="autocomplete hidden"></div>
+          </div>
           <button id="textNextBtn" class="btn btn-primary">Продолжить</button>
         </div>
         <div id="multiActions" class="multi-actions hidden">
@@ -62,7 +65,10 @@
           </div>
           <div id="locationEditor" class="location-editor hidden">
             <div class="location-editor-grid">
-              <input id="resultCityInput" class="text-answer" type="text" autocomplete="address-level2" list="citySuggestions" placeholder="Город" />
+              <div class="suggest-input">
+                <input id="resultCityInput" class="text-answer" type="text" autocomplete="address-level2" placeholder="Город" />
+                <div id="resultCityAutocomplete" class="autocomplete hidden"></div>
+              </div>
               <input id="resultMetroInput" class="text-answer" type="text" placeholder="Метро, например: Белорусская, Савеловская" />
             </div>
             <p id="resultMetroHint" class="inline-note">Метро можно не указывать.</p>
@@ -85,8 +91,6 @@
       <div class="tile large hidden" id="fallbackBox"></div>
     </section>
   </main>
-
-  <datalist id="citySuggestions"></datalist>
 
   <script src="./landing.js"></script>
 </body>

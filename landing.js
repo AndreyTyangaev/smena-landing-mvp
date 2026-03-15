@@ -3,6 +3,7 @@ let CITY_SUPPORT = {
   moscow: { id: 213, slug: "moscow", label: "Москва", supportsMetro: true }
 };
 let CITY_OPTIONS = ["Москва"];
+let ACTIVE_CITY_INPUT = null;
 
 const QUESTIONS = [
   ["work_goal", "Для чего ты сейчас ищешь смены?", "Определи главный мотив", "single", ["Подработка", "Основной доход", "Временная работа", "Изучаю варианты"]],
@@ -48,7 +49,7 @@ const UI = {
   inputWrap: document.getElementById("inputWrap"),
   textAnswer: document.getElementById("textAnswer"),
   textNextBtn: document.getElementById("textNextBtn"),
-  citySuggestions: document.getElementById("citySuggestions"),
+  cityAutocomplete: document.getElementById("cityAutocomplete"),
   badges: document.getElementById("badges"),
   progressText: document.getElementById("progressText"),
   progressBar: document.getElementById("progressBar"),
@@ -67,6 +68,7 @@ const UI = {
   editLocationBtn: document.getElementById("editLocationBtn"),
   locationEditor: document.getElementById("locationEditor"),
   resultCityInput: document.getElementById("resultCityInput"),
+  resultCityAutocomplete: document.getElementById("resultCityAutocomplete"),
   resultMetroInput: document.getElementById("resultMetroInput"),
   resultMetroHint: document.getElementById("resultMetroHint"),
   saveLocationBtn: document.getElementById("saveLocationBtn"),
@@ -80,12 +82,17 @@ UI.startBtn.addEventListener("click", startQuiz);
 UI.doneMultiBtn.addEventListener("click", submitMulti);
 UI.textNextBtn.addEventListener("click", submitText);
 UI.textAnswer.addEventListener("keydown", (e) => { if (e.key === "Enter") submitText(); });
+UI.textAnswer.addEventListener("input", () => handleCityInput(UI.textAnswer, UI.cityAutocomplete));
+UI.textAnswer.addEventListener("focus", () => handleCityInput(UI.textAnswer, UI.cityAutocomplete));
 UI.editLocationBtn?.addEventListener("click", openLocationEditor);
 UI.saveLocationBtn?.addEventListener("click", applyLocationChanges);
 UI.cancelLocationBtn?.addEventListener("click", closeLocationEditor);
 UI.resultCityInput?.addEventListener("input", syncLocationEditorState);
+UI.resultCityInput?.addEventListener("input", () => handleCityInput(UI.resultCityInput, UI.resultCityAutocomplete));
+UI.resultCityInput?.addEventListener("focus", () => handleCityInput(UI.resultCityInput, UI.resultCityAutocomplete));
 UI.restartBtn.addEventListener("click", () => window.location.reload());
 UI.downloadBtn.addEventListener("click", downloadProfile);
+document.addEventListener("click", handleOutsideAutocompleteClick);
 
 loadCitiesConfig();
 
@@ -118,6 +125,8 @@ function resetState() {
   if (UI.textAnswer) UI.textAnswer.value = "";
   if (UI.resultCityInput) UI.resultCityInput.value = "";
   if (UI.resultMetroInput) UI.resultMetroInput.value = "";
+  hideAutocomplete(UI.cityAutocomplete);
+  hideAutocomplete(UI.resultCityAutocomplete);
   UI.inputWrap?.classList.add("hidden");
   UI.multiActions?.classList.add("hidden");
   UI.metroSummary?.classList.add("hidden");
@@ -139,7 +148,8 @@ function render() {
   if (type === "multi") { options.forEach((o) => UI.options.appendChild(makeOption(o, () => toggleMulti(o)))); UI.multiActions.classList.remove("hidden"); }
   if (type === "text" || type === "text_optional") {
     UI.inputWrap.classList.remove("hidden");
-    UI.textAnswer.setAttribute("list", id === "city" ? "citySuggestions" : "");
+    ACTIVE_CITY_INPUT = id === "city" ? UI.textAnswer : null;
+    hideAutocomplete(UI.cityAutocomplete);
     UI.textAnswer.placeholder = id === "city" ? "Введите город" : "Например: Белорусская, Савеловская";
     UI.textAnswer.value = STATE.answers[id] || "";
     setTimeout(() => UI.textAnswer.focus(), 50);
@@ -251,10 +261,12 @@ function finish() {
 function openLocationEditor() {
   syncLocationEditorFields();
   syncLocationEditorState();
+  ACTIVE_CITY_INPUT = UI.resultCityInput;
   UI.locationEditor?.classList.remove("hidden");
 }
 
 function closeLocationEditor() {
+  hideAutocomplete(UI.resultCityAutocomplete);
   UI.locationEditor?.classList.add("hidden");
 }
 
@@ -529,10 +541,59 @@ async function loadCitiesConfig() {
 }
 
 function renderCitySuggestions() {
-  if (!UI.citySuggestions) return;
-  UI.citySuggestions.innerHTML = CITY_OPTIONS
-    .map((label) => `<option value="${escapeHtml(label)}"></option>`)
+  // Suggestions are rendered on input for better browser consistency
+}
+
+function handleCityInput(input, box) {
+  if (!input || !box) return;
+  ACTIVE_CITY_INPUT = input;
+  const query = normalizeCity(input.value || "");
+  if (!query) {
+    hideAutocomplete(box);
+    return;
+  }
+
+  const matches = CITY_OPTIONS
+    .filter((label) => normalizeCity(label).includes(query))
+    .slice(0, 6);
+
+  if (!matches.length) {
+    box.innerHTML = `<div class="autocomplete-empty">Город не найден в доступном списке</div>`;
+    box.classList.remove("hidden");
+    return;
+  }
+
+  box.innerHTML = matches
+    .map((label) => `<button type="button" class="autocomplete-item" data-city="${escapeHtml(label)}">${escapeHtml(label)}</button>`)
     .join("");
+  box.classList.remove("hidden");
+  box.querySelectorAll(".autocomplete-item").forEach((button) => {
+    button.addEventListener("click", () => selectCitySuggestion(labelFromDataset(button), input, box));
+  });
+}
+
+function selectCitySuggestion(label, input, box) {
+  input.value = label;
+  hideAutocomplete(box);
+  if (input === UI.resultCityInput) syncLocationEditorState();
+}
+
+function labelFromDataset(node) {
+  return node.getAttribute("data-city") || "";
+}
+
+function hideAutocomplete(box) {
+  if (!box) return;
+  box.classList.add("hidden");
+  box.innerHTML = "";
+}
+
+function handleOutsideAutocompleteClick(event) {
+  const insideQuizInput = event.target.closest(".suggest-input");
+  if (!insideQuizInput) {
+    hideAutocomplete(UI.cityAutocomplete);
+    hideAutocomplete(UI.resultCityAutocomplete);
+  }
 }
 
 function renderShiftLink(shift) {
