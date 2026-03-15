@@ -14,8 +14,9 @@ module.exports = async (req, res) => {
     const targetDates = dates.length ? dates : upcomingDates(2);
     const shifts = await loadShiftsForDates(meta, targetDates.slice(0, 2));
     let extendedRange = false;
-    if (!shifts.length && !dates.length) {
-      shifts.push(...await loadShiftsForDates(meta, upcomingDates(4).slice(2)));
+    if (!shifts.length) {
+      const extendedDates = buildExtendedDates(targetDates);
+      shifts.push(...await loadShiftsForDates(meta, extendedDates));
       extendedRange = shifts.length > 0;
     }
 
@@ -46,13 +47,13 @@ function parseOffersPage(html, listUrl, fallbackDate) {
   for (let i = 0; i < lines.length; i += 1) {
     if (!looksLikeDateTime(lines[i])) continue;
     const title = findTitle(lines, i);
-    const address = findAddress(lines, i + 1);
+    const location = findLocation(lines, i + 1);
     const payText = findPay(lines, i + 1);
     if (!title || !payText) continue;
     const timeMatch = lines[i].match(/(\d{2}:\d{2}\s*[-–]\s*\d{2}:\d{2})/);
     const dateLabel = lines[i].replace(/\s*[•·]\s*\d{2}:\d{2}\s*[-–]\s*\d{2}:\d{2}.*/, "").trim() || fallbackDate;
     const directUrl = matchOfferUrl(title, links);
-    shifts.push({ title, date: fallbackDate, dateLabel, time: timeMatch ? timeMatch[1].replace(/\s+/g, "") : "", address, payText, payAmount: parsePay(payText), url: directUrl || "", listUrl, isDirectUrl: Boolean(directUrl) });
+    shifts.push({ title, date: fallbackDate, dateLabel, time: timeMatch ? timeMatch[1].replace(/\s+/g, "") : "", address: location.address, station: location.station, landmark: location.landmark, payText, payAmount: parsePay(payText), url: directUrl || "", listUrl, isDirectUrl: Boolean(directUrl) });
   }
 
   return shifts;
@@ -93,14 +94,47 @@ function findTitle(lines, index) {
   return "";
 }
 
-function findAddress(lines, start) {
-  for (let i = start; i < Math.min(lines.length, start + 6); i += 1) {
-    const line = lines[i];
+function findLocation(lines, start) {
+  let address = "";
+  let station = "";
+  let landmark = "";
+
+  for (let i = start; i < Math.min(lines.length, start + 10); i += 1) {
+    const line = String(lines[i] || "").trim();
     if (!line || looksLikeDateTime(line) || /₽/.test(line)) continue;
-    if (/взять задание/i.test(line)) continue;
-    if ((/[А-Яа-яЁё]/.test(line) || /[A-Za-z]/.test(line)) && line.length >= 4) return line;
+    if (/взять задание|поделиться|смена|войти/i.test(line)) continue;
+
+    if (!station) {
+      const stationMatch = line.match(/(?:м\.?|метро|ст\.?\s*м\.?)[\s:,-]*([А-Яа-яЁёA-Za-z0-9\- ]{3,})/i);
+      if (stationMatch) {
+        station = stationMatch[1].trim();
+        continue;
+      }
+    }
+
+    if (!address && looksLikeStreetAddress(line)) {
+      address = line;
+      continue;
+    }
+
+    if (!landmark && !looksLikeBrandOnly(line)) {
+      landmark = line;
+    }
   }
-  return "";
+
+  return {
+    address: address || landmark || "",
+    station,
+    landmark: landmark || ""
+  };
+}
+
+function looksLikeStreetAddress(line) {
+  return /(ул\.?|улица|просп\.?|проспект|шоссе|наб\.?|набережная|пер\.?|переулок|бульвар|пл\.?|площадь|д\.?\s*\d|,\s*\d)/i.test(line);
+}
+
+function looksLikeBrandOnly(line) {
+  return /^(перекр[её]сток|магнит|пят[её]рочка|вкусвилл|лента|fix price|дикси|ozon|самокат|купер)$/i.test(line);
 }
 
 function findPay(lines, start) {
@@ -114,10 +148,16 @@ function parsePay(value) {
   const match = String(value || "").replace(/\s/g, "").match(/(\d{3,6})/);
   return match ? Number(match[1]) : 0;
 }
-function dedupeShifts(shifts) { const seen = new Set(); return shifts.filter((shift) => { const key = `${shift.title}|${shift.dateLabel}|${shift.time}|${shift.address}|${shift.payText}`; if (seen.has(key)) return false; seen.add(key); return true; }); }
+function dedupeShifts(shifts) { const seen = new Set(); return shifts.filter((shift) => { const key = `${shift.title}|${shift.dateLabel}|${shift.time}|${shift.address}|${shift.station}|${shift.payText}`; if (seen.has(key)) return false; seen.add(key); return true; }); }
 function dedupeLinks(links) { const seen = new Set(); return links.filter((item) => { const key = `${item.href}|${item.key}`; if (seen.has(key)) return false; seen.add(key); return true; }); }
 function normalizeForMatch(value) { return String(value || "").toLowerCase().replace(/ё/g, "е").replace(/[^a-zа-я0-9\s-]/gi, " ").replace(/\s+/g, " ").trim(); }
 function upcomingDates(days = 2) { const now = new Date(); const out = []; for (let d = 1; d <= days; d += 1) { const date = new Date(now); date.setDate(now.getDate() + d); out.push(date.toISOString().slice(0, 10)); } return out; }
+function buildExtendedDates(initialDates) {
+  const set = new Set(initialDates.filter(Boolean));
+  upcomingDates(7).forEach((date) => set.add(date));
+  return Array.from(set).slice(0, 7);
+}
 function absolutizeUrl(href, sourceUrl) { try { return new URL(href, sourceUrl).toString(); } catch { return ""; } }
 function decodeEntities(value) { return String(value || "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">"); }
 function json(res, statusCode, payload) { res.statusCode = statusCode; res.setHeader("content-type", "application/json; charset=utf-8"); res.end(JSON.stringify(payload)); }
+
