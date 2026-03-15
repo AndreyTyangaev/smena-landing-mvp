@@ -67,12 +67,39 @@ const UI = {
   radar: document.getElementById("radar")
 };
 
-UI.startBtn.addEventListener("click", () => { UI.quiz.classList.remove("hidden"); UI.quiz.scrollIntoView({ behavior: "smooth", block: "start" }); render(); });
+UI.startBtn.addEventListener("click", startQuiz);
 UI.doneMultiBtn.addEventListener("click", submitMulti);
 UI.textNextBtn.addEventListener("click", submitText);
 UI.textAnswer.addEventListener("keydown", (e) => { if (e.key === "Enter") submitText(); });
 UI.restartBtn.addEventListener("click", () => window.location.reload());
 UI.downloadBtn.addEventListener("click", downloadProfile);
+
+function startQuiz() {
+  resetState();
+  UI.result.classList.add("hidden");
+  UI.recommendations.innerHTML = "";
+  UI.realShifts.innerHTML = "";
+  UI.familyFit.innerHTML = "";
+  UI.fallbackBox.innerHTML = "";
+  UI.fallbackBox.classList.add("hidden");
+  UI.quiz.classList.remove("hidden");
+  UI.quiz.scrollIntoView({ behavior: "smooth", block: "start" });
+  render();
+}
+
+function resetState() {
+  STATE.i = 0;
+  STATE.answers = {};
+  STATE.selected = [];
+  STATE.badges = [];
+  STATE.score = {
+    physical: 50,
+    communication: 50,
+    digital: 50,
+    stability: 50,
+    learning: 50
+  };
+}
 
 function render() {
   const [id, text, hint, type, options] = QUESTIONS[STATE.i];
