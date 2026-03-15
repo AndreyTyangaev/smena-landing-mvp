@@ -1,12 +1,12 @@
-const CITY_SUPPORT = {
-  "москва": { id: 213, slug: "moscow", label: "Москва" },
-  moscow: { id: 213, slug: "moscow", label: "Москва" },
-  msk: { id: 213, slug: "moscow", label: "Москва" }
+let CITY_SUPPORT = {
+  "москва": { id: 213, slug: "moscow", label: "Москва", supportsMetro: true },
+  moscow: { id: 213, slug: "moscow", label: "Москва", supportsMetro: true }
 };
 
 const QUESTIONS = [
   ["work_goal", "Для чего ты сейчас ищешь смены?", "Определи главный мотив", "single", ["Подработка", "Основной доход", "Временная работа", "Изучаю варианты"]],
   ["city", "Из какого ты города?", "Напиши город так, как тебе удобно. Например: Москва", "text"],
+  ["metro", "Какие станции метро тебе удобнее всего?", "Необязательно. Можно перечислить 1-3 станции через запятую", "text_optional"],
   ["shifts_week", "Сколько смен в неделю комфортно?", "Выберем ритм без перегруза", "single", ["1-2", "3-4", "5+"]],
   ["age_group", "Твой возрастной диапазон?", "Это помогает точнее подобрать формат входа и сложность старта", "single", ["18-24", "25-34", "35-44", "45-54", "55+"]],
   ["physical", "Какая физнагрузка комфортна?", "От легких ролей до активных смен", "single", ["Легкая", "Средняя", "Тяжелая"]],
@@ -37,7 +37,6 @@ const ROLES = [
 ];
 
 const STATE = { i: 0, answers: {}, selected: [], badges: [], score: { physical: 50, communication: 50, digital: 50, stability: 50, learning: 50 } };
-
 const UI = {
   startBtn: document.getElementById("startBtn"),
   quiz: document.getElementById("quizSection"),
@@ -55,6 +54,7 @@ const UI = {
   doneMultiBtn: document.getElementById("doneMultiBtn"),
   profileName: document.getElementById("profileName"),
   profileDesc: document.getElementById("profileDesc"),
+  metroSummary: document.getElementById("metroSummary"),
   incomeForecast: document.getElementById("incomeForecast"),
   trainReadiness: document.getElementById("trainReadiness"),
   topScore: document.getElementById("topScore"),
@@ -62,6 +62,13 @@ const UI = {
   realShifts: document.getElementById("realShifts"),
   familyFit: document.getElementById("familyFit"),
   fallbackBox: document.getElementById("fallbackBox"),
+  editLocationBtn: document.getElementById("editLocationBtn"),
+  locationEditor: document.getElementById("locationEditor"),
+  resultCityInput: document.getElementById("resultCityInput"),
+  resultMetroInput: document.getElementById("resultMetroInput"),
+  resultMetroHint: document.getElementById("resultMetroHint"),
+  saveLocationBtn: document.getElementById("saveLocationBtn"),
+  cancelLocationBtn: document.getElementById("cancelLocationBtn"),
   restartBtn: document.getElementById("restartBtn"),
   downloadBtn: document.getElementById("downloadBtn"),
   radar: document.getElementById("radar")
@@ -71,8 +78,14 @@ UI.startBtn.addEventListener("click", startQuiz);
 UI.doneMultiBtn.addEventListener("click", submitMulti);
 UI.textNextBtn.addEventListener("click", submitText);
 UI.textAnswer.addEventListener("keydown", (e) => { if (e.key === "Enter") submitText(); });
+UI.editLocationBtn?.addEventListener("click", openLocationEditor);
+UI.saveLocationBtn?.addEventListener("click", applyLocationChanges);
+UI.cancelLocationBtn?.addEventListener("click", closeLocationEditor);
+UI.resultCityInput?.addEventListener("input", syncLocationEditorState);
 UI.restartBtn.addEventListener("click", () => window.location.reload());
 UI.downloadBtn.addEventListener("click", downloadProfile);
+
+loadCitiesConfig();
 
 function startQuiz() {
   resetState();
@@ -83,6 +96,7 @@ function startQuiz() {
   UI.fallbackBox.innerHTML = "";
   UI.fallbackBox.classList.add("hidden");
   UI.quiz.classList.remove("hidden");
+  closeLocationEditor();
   UI.quiz.scrollIntoView({ behavior: "smooth", block: "start" });
   render();
 }
@@ -114,7 +128,12 @@ function render() {
   UI.multiActions.classList.add("hidden");
   if (type === "single") options.forEach((o) => UI.options.appendChild(makeOption(o, () => answerSingle(id, o))));
   if (type === "multi") { options.forEach((o) => UI.options.appendChild(makeOption(o, () => toggleMulti(o)))); UI.multiActions.classList.remove("hidden"); }
-  if (type === "text") { UI.inputWrap.classList.remove("hidden"); UI.textAnswer.placeholder = "Введите город"; UI.textAnswer.value = STATE.answers[id] || ""; setTimeout(() => UI.textAnswer.focus(), 50); }
+  if (type === "text" || type === "text_optional") {
+    UI.inputWrap.classList.remove("hidden");
+    UI.textAnswer.placeholder = id === "city" ? "Введите город" : "Например: Белорусская, Савеловская";
+    UI.textAnswer.value = STATE.answers[id] || "";
+    setTimeout(() => UI.textAnswer.focus(), 50);
+  }
 }
 
 function makeOption(text, handler) {
@@ -146,11 +165,15 @@ function answerSingle(id, answer) {
 }
 
 function submitText() {
+  const [id, , , type] = QUESTIONS[STATE.i];
   const value = UI.textAnswer.value.trim();
-  if (!value) return;
-  STATE.answers.city = value;
-  const norm = normalizeCity(value);
-  addBadge(`Город: ${CITY_SUPPORT[norm]?.label || value}`);
+  if (!value && type !== "text_optional") return;
+  STATE.answers[id] = value;
+  if (id === "city") {
+    const norm = normalizeCity(value);
+    addBadge(`Город: ${CITY_SUPPORT[norm]?.label || value}`);
+  }
+  if (id === "metro" && value) addBadge("Есть ориентир по метро");
   next();
 }
 
@@ -165,8 +188,15 @@ function submitMulti() {
 
 function next() {
   STATE.i += 1;
+  while (STATE.i < QUESTIONS.length && shouldSkipQuestion(QUESTIONS[STATE.i][0])) STATE.i += 1;
   if (STATE.i < QUESTIONS.length) return render();
   finish();
+}
+
+function shouldSkipQuestion(id) {
+  if (id !== "metro") return false;
+  const cityMeta = CITY_SUPPORT[normalizeCity(STATE.answers.city || "")];
+  return !cityMeta?.supportsMetro;
 }
 
 function adaptScore(id, answer) {
@@ -196,6 +226,8 @@ function finish() {
   UI.result.classList.remove("hidden");
   UI.profileName.textContent = profile.title;
   UI.profileDesc.textContent = profile.desc;
+  syncLocationEditorFields();
+  renderMetroSummary();
   UI.incomeForecast.textContent = `${avgPay * 4} - ${(avgPay + 900) * 4} ₽`;
   UI.trainReadiness.textContent = `${STATE.score.learning}/100`;
   UI.topScore.textContent = `${top[0]?.score || 0}%`;
@@ -205,6 +237,47 @@ function finish() {
   drawRadar();
   renderRealShifts(top);
   UI.result.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function openLocationEditor() {
+  syncLocationEditorFields();
+  syncLocationEditorState();
+  UI.locationEditor?.classList.remove("hidden");
+}
+
+function closeLocationEditor() {
+  UI.locationEditor?.classList.add("hidden");
+}
+
+function syncLocationEditorFields() {
+  if (UI.resultCityInput) UI.resultCityInput.value = STATE.answers.city || "";
+  if (UI.resultMetroInput) UI.resultMetroInput.value = STATE.answers.metro || "";
+}
+
+function syncLocationEditorState() {
+  if (!UI.resultCityInput || !UI.resultMetroInput || !UI.resultMetroHint) return;
+  const cityMeta = CITY_SUPPORT[normalizeCity(UI.resultCityInput.value || "")];
+  const supportsMetro = Boolean(cityMeta?.supportsMetro);
+  UI.resultMetroInput.disabled = !supportsMetro;
+  UI.resultMetroInput.placeholder = supportsMetro
+    ? "Метро, например: Белорусская, Савеловская"
+    : "Для этого города метро не используется";
+  UI.resultMetroHint.textContent = supportsMetro
+    ? "Метро можно не указывать."
+    : "Для этого города мы ищем смены без привязки к метро.";
+  if (!supportsMetro) UI.resultMetroInput.value = "";
+}
+
+async function applyLocationChanges() {
+  const city = (UI.resultCityInput?.value || "").trim();
+  if (!city) return;
+  const cityMeta = CITY_SUPPORT[normalizeCity(city)];
+  const metro = cityMeta?.supportsMetro ? (UI.resultMetroInput?.value || "").trim() : "";
+  STATE.answers.city = city;
+  STATE.answers.metro = metro;
+  renderMetroSummary();
+  closeLocationEditor();
+  await renderRealShifts(normalizeCleaning(rankRoles()).slice(0, 3));
 }
 
 function detectProfile() {
@@ -267,7 +340,7 @@ async function renderRealShifts(topRoles) {
       return;
     }
     const ranked = rankPublicShifts(data.shifts, topRoles).slice(0, 3);
-    UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">Публичная витрина Смены на ${data.cityLabel || city}. Ниже 2-3 самые близкие по профилю смены.</p>${ranked.map((x) => `<div class="rec-card"><h4>${escapeHtml(x.title)} - fit ${x.match}%</h4><p><strong>Когда:</strong> ${escapeHtml(x.dateLabel || x.date)}${x.time ? `, ${escapeHtml(x.time)}` : ""}</p><p><strong>Где:</strong> ${escapeHtml(x.address || "Адрес уточняется")}</p><p><strong>Оплата:</strong> ${escapeHtml(x.payText || "Ставка на витрине")}</p><p class="inline-note">${escapeHtml(x.why)}</p>${x.url ? `<a class="shift-link" href="${x.url}" target="_blank" rel="noreferrer">Открыть смену</a>` : ""}</div>`).join("")}`;
+    UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">Публичная витрина Смены на ${data.cityLabel || city}. Ниже 2-3 самые близкие по профилю смены.</p>${ranked.map((x) => `<div class="rec-card"><h4>${escapeHtml(x.title)} - fit ${x.match}%</h4>${renderShiftLinkBadge(x)}<p><strong>Когда:</strong> ${escapeHtml(x.dateLabel || x.date)}${x.time ? `, ${escapeHtml(x.time)}` : ""}</p><p><strong>Где:</strong> ${escapeHtml(x.address || "Адрес уточняется")}</p><p><strong>Оплата:</strong> ${escapeHtml(x.payText || "Ставка на витрине")}</p><p class="inline-note">${escapeHtml(x.why)}</p>${renderShiftLink(x)}</div>`).join("")}`;
   } catch {
     UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">Профиль уже готов. Блок с реальными сменами недоступен локально или не ответил вовремя.</p>`;
   }
@@ -284,6 +357,7 @@ function rankPublicShifts(shifts, topRoles) {
     if (STATE.answers.digital === "Уверенно" && ["collector", "cashier"].includes(code)) match += 5;
     if (STATE.answers.outdoor === "Да, в любую погоду" && ["courier", "cleaner_outdoor", "promoter"].includes(code)) match += 4;
     if (STATE.answers.cleaning === "Лучше без уборки" && code.startsWith("cleaner")) match -= 25;
+    if (matchesMetro(s.address, STATE.answers.metro)) match += 12;
     return { ...s, match: Math.max(1, Math.min(99, match)), why: explainShift(code) };
   }).sort((a, b) => b.match - a.match);
 }
@@ -332,6 +406,67 @@ function downloadProfile() {
   a.href = url; a.download = "smena-profile.json"; a.click(); URL.revokeObjectURL(url);
 }
 
+function renderMetroSummary() {
+  const metro = String(STATE.answers.metro || "").trim();
+  if (!metro) {
+    UI.metroSummary.classList.add("hidden");
+    UI.metroSummary.classList.remove("metro-summary");
+    UI.metroSummary.textContent = "";
+    return;
+  }
+  UI.metroSummary.classList.remove("hidden");
+  UI.metroSummary.classList.add("metro-summary");
+  UI.metroSummary.textContent = `Ищем смены рядом с метро: ${metro}`;
+}
+
 function normalizeCity(city) { return city.toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ").trim(); }
 function upcomingDates() { const n = new Date(), out = []; for (let d = 1; d <= 2; d += 1) { const x = new Date(n); x.setDate(n.getDate() + d); out.push(x.toISOString().slice(0, 10)); } return out; }
 function escapeHtml(x) { return String(x || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;"); }
+
+function matchesMetro(address, metroRaw) {
+  if (!address || !metroRaw) return false;
+  const haystack = String(address).toLowerCase().replace(/ё/g, "е");
+  return metroRaw
+    .split(",")
+    .map((x) => x.trim().toLowerCase().replace(/ё/g, "е"))
+    .filter(Boolean)
+    .some((station) => haystack.includes(station));
+}
+
+async function loadCitiesConfig() {
+  try {
+    const response = await fetch("/api/cities");
+    if (!response.ok) return;
+    const payload = await response.json();
+    const map = {};
+    (payload.cities || []).forEach((city) => {
+      (city.aliases || []).forEach((alias) => {
+        map[normalizeCity(alias)] = {
+          id: city.id,
+          slug: city.slug,
+          label: city.label,
+          supportsMetro: Boolean(city.supportsMetro)
+        };
+      });
+    });
+    if (Object.keys(map).length) CITY_SUPPORT = map;
+  } catch {
+    // Fallback to bundled config
+  }
+}
+
+function renderShiftLink(shift) {
+  if (shift.isDirectUrl && shift.url) {
+    return `<a class="shift-link" href="${shift.url}" target="_blank" rel="noreferrer">Открыть смену</a>`;
+  }
+  if (shift.listUrl) {
+    return `<a class="shift-link" href="${shift.listUrl}" target="_blank" rel="noreferrer">Открыть список смен на эту дату</a>`;
+  }
+  return "";
+}
+
+function renderShiftLinkBadge(shift) {
+  const label = shift.isDirectUrl ? "Прямая ссылка" : "Ссылка на список смен";
+  const cls = shift.isDirectUrl ? "tag tag-direct" : "tag tag-list";
+  return `<div><span class="${cls}">${label}</span></div>`;
+}
