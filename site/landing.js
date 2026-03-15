@@ -47,3 +47,148 @@ function applyLocationChanges(){const meta=resolveCityMeta(UI.resultCityInput.va
 function drawRadar(){const canvas=UI.radar;const ctx=canvas.getContext("2d");const width=canvas.width;const height=canvas.height;ctx.clearRect(0,0,width,height);const labels=[["Р¤РёР·РЅР°РіСЂСѓР·РєР°",STATE.score.physical],["РћР±С‰РµРЅРёРµ",STATE.score.communication],["Р¦РёС„СЂР°",STATE.score.digital],["РЎС‚Р°Р±РёР»СЊРЅРѕСЃС‚СЊ",STATE.score.stability],["РћР±СѓС‡РµРЅРёРµ",STATE.score.learning]];const cx=width/2;const cy=height/2;const radius=82;const angleStep=(Math.PI*2)/labels.length;ctx.strokeStyle="#dbe4ee";for(let ring=1;ring<=4;ring+=1){ctx.beginPath();labels.forEach((_,index)=>{const angle=-Math.PI/2+index*angleStep;const r=(radius/4)*ring;const x=cx+Math.cos(angle)*r;const y=cy+Math.sin(angle)*r;if(!index)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.stroke();}ctx.strokeStyle="#94a3b8";labels.forEach((label,index)=>{const angle=-Math.PI/2+index*angleStep;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius);ctx.stroke();const lx=cx+Math.cos(angle)*(radius+20);const ly=cy+Math.sin(angle)*(radius+20);ctx.fillStyle="#14213d";ctx.font="12px Segoe UI";ctx.textAlign="center";ctx.fillText(label[0],lx,ly);});ctx.beginPath();labels.forEach((label,index)=>{const angle=-Math.PI/2+index*angleStep;const r=radius*(label[1]/100);const x=cx+Math.cos(angle)*r;const y=cy+Math.sin(angle)*r;if(!index)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle="rgba(15, 118, 110, 0.24)";ctx.strokeStyle="#0f766e";ctx.lineWidth=2;ctx.fill();ctx.stroke();}
 function upcomingDates(days){const out=[];const today=new Date();for(let i=1;i<=days;i+=1){const date=new Date(today);date.setDate(today.getDate()+i);out.push(date.toISOString().slice(0,10));}return out;}function clamp(value,min,max){return Math.max(min,Math.min(max,value));}function formatMoney(value){return new Intl.NumberFormat("ru-RU").format(value);}function escapeHtml(value){return String(value||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");}function escapeHtmlAttr(value){return escapeHtml(value).replace(/'/g,"&#39;");}
 
+
+function fixText(value){
+  let text=String(value||"");
+  for(let i=0;i<3;i+=1){
+    if(!/[РСЃ]/.test(text))break;
+    try{
+      const bytes=Uint8Array.from(Array.from(text).map(ch=>ch.charCodeAt(0)&255));
+      const decoded=new TextDecoder("utf-8").decode(bytes);
+      if(!decoded||decoded===text)break;
+      text=decoded;
+    }catch{
+      break;
+    }
+  }
+  return text;
+}
+
+function render(){
+  const [id,text,hint,type,options]=QUESTIONS[STATE.i];
+  STATE.selected=Array.isArray(STATE.answers[id])?[...STATE.answers[id]]:[];
+  UI.title.textContent=fixText(text);
+  UI.hint.textContent=fixText(hint);
+  UI.progressText.textContent=`${STATE.i+1}/${QUESTIONS.length}`;
+  UI.progressBar.style.width=`${((STATE.i+1)/QUESTIONS.length)*100}%`;
+  UI.badges.innerHTML=STATE.badges.map(x=>`<span class="badge">${escapeHtml(x)}</span>`).join("");
+  UI.options.innerHTML="";
+  UI.inputWrap.classList.add("hidden");
+  UI.multiActions.classList.add("hidden");
+  UI.voiceControls.classList.add("hidden");
+  UI.skipTextBtn.classList.add("hidden");
+  ACTIVE_CITY_INPUT=null;
+  if(type==="single"){
+    options.forEach(o=>UI.options.appendChild(makeOption(o,()=>answerSingle(id,o))));
+    return;
+  }
+  if(type==="multi"){
+    options.forEach(o=>{
+      const button=makeOption(o,()=>toggleMulti(o));
+      if(STATE.selected.includes(o))button.classList.add("selected");
+      UI.options.appendChild(button);
+    });
+    UI.multiActions.classList.remove("hidden");
+    return;
+  }
+  UI.inputWrap.classList.remove("hidden");
+  UI.textAnswer.placeholder=getTextPlaceholder(id);
+  UI.textAnswer.value=STATE.answers[id]||"";
+  if(id==="city")ACTIVE_CITY_INPUT=UI.textAnswer;
+  if(type==="text_optional"||type==="text_voice_optional")UI.skipTextBtn.classList.remove("hidden");
+  configureVoiceControls(id);
+  handleCityInput(UI.textAnswer,UI.cityAutocomplete);
+  setTimeout(()=>UI.textAnswer.focus(),30);
+}
+
+function makeOption(text,handler){
+  const button=document.createElement("button");
+  button.type="button";
+  button.className="option";
+  button.textContent=fixText(text);
+  button.addEventListener("click",handler);
+  return button;
+}
+
+function getTextPlaceholder(id){
+  if(id==="city")return"Например: Москва";
+  if(id==="metro")return"Например: Белорусская, Савеловская";
+  if(id==="experience_details")return"Коротко расскажите, где работали и что умеете";
+  return"Введите ответ";
+}
+
+function toggleVoiceInput(){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition)return;
+  if(speechActive){stopVoiceInput();return;}
+  speechRecognition=new SpeechRecognition();
+  speechRecognition.lang="ru-RU";
+  speechRecognition.interimResults=true;
+  speechRecognition.continuous=false;
+  speechRecognition.onstart=()=>{
+    speechActive=true;
+    UI.voiceControls.classList.add("is-recording");
+    UI.voiceStatus.textContent="Слушаю...";
+    UI.voiceBtn.textContent="Остановить запись";
+  };
+  speechRecognition.onresult=event=>{
+    const transcript=Array.from(event.results).map(result=>result[0]?.transcript||"").join(" ").trim();
+    UI.textAnswer.value=transcript;
+  };
+  speechRecognition.onerror=()=>{
+    UI.voiceStatus.textContent="Не удалось распознать голосовой ответ";
+    stopVoiceInput();
+  };
+  speechRecognition.onend=()=>{
+    if(speechActive){
+      speechActive=false;
+      UI.voiceControls.classList.remove("is-recording");
+      UI.voiceStatus.textContent="Можно надиктовать ответ голосом";
+      UI.voiceBtn.textContent="Голосовой ответ";
+    }
+  };
+  speechRecognition.start();
+}
+
+function stopVoiceInput(){
+  if(speechRecognition){try{speechRecognition.stop();}catch{}}
+  speechActive=false;
+  UI.voiceControls.classList.remove("is-recording");
+  UI.voiceStatus.textContent="Можно надиктовать ответ голосом";
+  UI.voiceBtn.textContent="Голосовой ответ";
+}
+
+function syncLocationEditorState(){
+  const meta=resolveCityMeta(UI.resultCityInput.value);
+  if(meta&&meta.supportsMetro){
+    UI.resultMetroInput.disabled=false;
+    UI.resultMetroHint.textContent="Можно указать 1-3 станции метро через запятую.";
+  }else{
+    UI.resultMetroInput.value="";
+    UI.resultMetroInput.disabled=true;
+    UI.resultMetroHint.textContent="Для этого города метро не используется.";
+  }
+}
+
+function normalize(value){
+  return fixText(String(value||""))
+    .toLowerCase()
+    .replace(/ё/g,"е")
+    .replace(/^г\.\s*/g,"")
+    .replace(/^город\s+/g,"")
+    .replace(/[.,]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function escapeHtml(value){
+  return fixText(String(value||""))
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/\"/g,"&quot;");
+}
+
+function escapeHtmlAttr(value){
+  return escapeHtml(value).replace(/'/g,"&#39;");
+}
