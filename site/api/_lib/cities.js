@@ -1,4 +1,4 @@
-﻿const fs = require("fs");
+const fs = require("fs");
 const path = require("path");
 
 const DEFAULT_CITIES = [
@@ -173,11 +173,20 @@ function isEnabled(value) {
 
 function cleanText(value) {
   const text = String(value || "");
-  if (!/[ÐÑРС]/.test(text)) return text;
+  if (!/[ÐÑРСЃв]/.test(text)) return text;
 
   try {
-    const decoded = Buffer.from(text, "latin1").toString("utf8");
-    return scoreCyrillic(decoded) > scoreCyrillic(text) ? decoded : text;
+    let best = text;
+    let current = text;
+
+    for (let i = 0; i < 3; i += 1) {
+      const decoded = Buffer.from(current, "cp1251").toString("utf8");
+      if (scoreCyrillic(decoded) > scoreCyrillic(best)) best = decoded;
+      if (decoded === current) break;
+      current = decoded;
+    }
+
+    return best;
   } catch {
     return text;
   }

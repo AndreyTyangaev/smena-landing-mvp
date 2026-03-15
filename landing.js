@@ -531,11 +531,20 @@ function normalizeCity(city) {
 
 function decodeMojibake(value) {
   const text = String(value || "");
-  if (!/[ÐÑРС]/.test(text)) return text;
+  if (!/[ÐÑРСЃв]/.test(text)) return text;
   try {
-    const bytes = Uint8Array.from(Array.from(text), (char) => cp1251Byte(char));
-    const decoded = new TextDecoder("utf-8").decode(bytes);
-    return scoreCyrillic(decoded) > scoreCyrillic(text) ? decoded : text;
+    let best = text;
+    let current = text;
+
+    for (let i = 0; i < 3; i += 1) {
+      const bytes = Uint8Array.from(Array.from(current), (char) => cp1251Byte(char));
+      const decoded = new TextDecoder("utf-8").decode(bytes);
+      if (scoreCyrillic(decoded) > scoreCyrillic(best)) best = decoded;
+      if (decoded === current) break;
+      current = decoded;
+    }
+
+    return best;
   } catch {
     return text;
   }
@@ -547,6 +556,16 @@ function cp1251Byte(char) {
   if (code >= 0x0410 && code <= 0x044f) return code - 0x350;
   if (code === 0x0401) return 0xa8;
   if (code === 0x0451) return 0xb8;
+  if (code === 0x00ab) return 0xbb;
+  if (code === 0x00bb) return 0xbb;
+  if (code === 0x2013) return 0x96;
+  if (code === 0x2014) return 0x97;
+  if (code === 0x2018) return 0x91;
+  if (code === 0x2019) return 0x92;
+  if (code === 0x201c) return 0x93;
+  if (code === 0x201d) return 0x94;
+  if (code === 0x2026) return 0x85;
+  if (code === 0x20ac) return 0x88;
   return 0x3f;
 }
 
