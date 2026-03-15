@@ -53,6 +53,30 @@ h1 { margin: 14px 0 10px; font-size: clamp(30px, 5vw, 52px); line-height: 1.05; 
 .suggest-input {
   position: relative;
 }
+.voice-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.text-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.text-actions .btn-primary {
+  flex: 1;
+}
+.text-actions .btn-ghost {
+  flex: 0 0 auto;
+}
+.voice-controls .btn {
+  padding: 10px 14px;
+}
+.voice-controls.is-recording .btn {
+  background: #fee2e2;
+  color: #991b1b;
+}
 .text-answer {
   width: 100%;
   border: 2px solid #dbe4ee;
@@ -159,4 +183,6 @@ h1 { margin: 14px 0 10px; font-size: clamp(30px, 5vw, 52px); line-height: 1.05; 
   .hero-actions { flex-direction: column; align-items: flex-start; }
   .location-editor-grid { grid-template-columns: 1fr; }
   .location-editor-actions { flex-direction: column; align-items: stretch; }
+  .voice-controls { align-items: stretch; }
+  .text-actions { flex-direction: column; align-items: stretch; }
 }

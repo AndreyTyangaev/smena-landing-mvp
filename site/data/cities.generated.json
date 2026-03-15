@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "city_name_ru": "Москва",
     "city_name_en": "Moscow",
@@ -15,7 +15,7 @@
     "location_id": 2,
     "enabled": true,
     "supports_metro": true,
-    "aliases": ["Санкт-Петербург", "Петербург", "СПб", "saint-petersburg", "saint petersburg"]
+    "aliases": ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "saint-petersburg", "saint petersburg"]
   },
   {
     "city_name_ru": "Астрахань",

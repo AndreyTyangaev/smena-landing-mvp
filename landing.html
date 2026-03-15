@@ -38,7 +38,14 @@
             <input id="textAnswer" class="text-answer" type="text" autocomplete="address-level2" />
             <div id="cityAutocomplete" class="autocomplete hidden"></div>
           </div>
-          <button id="textNextBtn" class="btn btn-primary">Продолжить</button>
+          <div id="voiceControls" class="voice-controls hidden">
+              <button id="voiceBtn" class="btn btn-ghost" type="button">Голосовой ответ</button>
+              <span id="voiceStatus" class="inline-note">Можно надиктовать ответ голосом</span>
+            </div>
+          <div class="text-actions">
+            <button id="skipTextBtn" class="btn btn-ghost hidden" type="button">Пропустить</button>
+            <button id="textNextBtn" class="btn btn-primary">Продолжить</button>
+          </div>
         </div>
         <div id="multiActions" class="multi-actions hidden">
           <button id="doneMultiBtn" class="btn btn-primary">Готово</button>
