@@ -3,9 +3,9 @@ const path = require("path");
 
 const DEFAULT_CITIES = [
   { city_name_ru: "Москва", city_name_en: "Moscow", city_slug: "moscow", location_id: 213, offers_url: "https://offers.smena.yandex.ru/location-213-moscow/podrabotka", enabled: true, supports_metro: true, aliases: ["Москва", "moscow", "msk"] },
-  { city_name_ru: "Санкт-Петербург", city_name_en: "Saint Petersburg", city_slug: "saint-petersburg", location_id: 2, enabled: true, supports_metro: true, aliases: ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "saint-petersburg", "saint petersburg"] },
-  { city_name_ru: "Астрахань", city_name_en: "Astrakhan", city_slug: "astrahan", location_id: 37, enabled: true, supports_metro: false, aliases: ["Астрахань", "astrakhan", "astrahan"] },
-  { city_name_ru: "Архангельск", city_name_en: "Arkhangelsk", city_slug: "arkhangelsk", location_id: 20, enabled: true, supports_metro: false, aliases: ["Архангельск", "arkhangelsk"] }
+  { city_name_ru: "Санкт-Петербург", city_name_en: "Saint Petersburg", city_slug: "", location_id: 2, offers_url: "https://offers.smena.yandex.ru/location-2/podrabotka", enabled: true, supports_metro: true, aliases: ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "spb", "saint-petersburg", "saint petersburg"] },
+  { city_name_ru: "Екатеринбург", city_name_en: "Yekaterinburg", city_slug: "yekaterinburg", location_id: 54, offers_url: "https://offers.smena.yandex.ru/location-54-yekaterinburg/podrabotka", enabled: true, supports_metro: true, aliases: ["Екатеринбург", "ekaterinburg", "yekaterinburg", "екб"] },
+  { city_name_ru: "Нижний Новгород", city_name_en: "Nizhny Novgorod", city_slug: "nizhny-novgorod", location_id: 47, offers_url: "https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka", enabled: true, supports_metro: true, aliases: ["Нижний Новгород", "Нижний", "nizhny novgorod", "nizhny-novgorod"] }
 ];
 
 function loadCityItems() {
@@ -22,8 +22,8 @@ function loadCityItems() {
     } catch {}
   }
 
-  const jsonPath = path.join(process.cwd(), "site", "data", "cities.generated.json");
-  if (fs.existsSync(jsonPath)) {
+  const jsonPath = findJsonPath();
+  if (jsonPath && fs.existsSync(jsonPath)) {
     try {
       const parsed = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
       if (Array.isArray(parsed) && parsed.length) return parsed.map(normalizeItem);
@@ -65,7 +65,7 @@ function normalizeAliases(item) {
 function loadCitySupport() {
   const support = {};
   loadCityItems().forEach((item) => {
-    if (!item.enabled || !item.city_slug || !item.location_id) return;
+    if (!item.enabled || !item.location_id || (!item.city_slug && !item.offers_url)) return;
     const meta = { id: item.location_id, slug: item.city_slug, label: item.city_name_ru || item.city_name_en || item.city_slug, supportsMetro: Boolean(item.supports_metro), offersUrl: item.offers_url || "" };
     item.aliases.forEach((alias) => {
       support[normalizeCity(alias)] = { ...meta, aliases: item.aliases };
@@ -114,7 +114,19 @@ function parseCsvLine(line, headers) {
 function findCsvPath() {
   const candidates = [
     path.join(process.cwd(), "Cities.csv"),
-    path.join(process.cwd(), "cities.csv")
+    path.join(process.cwd(), "cities.csv"),
+    path.join(process.cwd(), "data", "cities.csv"),
+    path.join(__dirname, "..", "..", "data", "cities.csv"),
+    path.join(__dirname, "..", "..", "..", "cities.csv")
+  ];
+  return candidates.find((candidate) => fs.existsSync(candidate)) || "";
+}
+
+function findJsonPath() {
+  const candidates = [
+    path.join(process.cwd(), "site", "data", "cities.generated.json"),
+    path.join(process.cwd(), "data", "cities.generated.json"),
+    path.join(__dirname, "..", "..", "data", "cities.generated.json")
   ];
   return candidates.find((candidate) => fs.existsSync(candidate)) || "";
 }

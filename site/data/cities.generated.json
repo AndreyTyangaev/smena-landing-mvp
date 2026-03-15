@@ -1,38 +1,42 @@
 ﻿[
   {
     "city_name_ru": "Москва",
-    "city_name_en": "Moscow",
+    "city_name_en": "",
     "city_slug": "moscow",
+    "offers_url": "https://offers.smena.yandex.ru/location-213-moscow/podrabotka",
     "location_id": 213,
     "enabled": true,
     "supports_metro": true,
-    "aliases": ["Москва", "moscow", "msk"]
+    "aliases": ["Москва", "Moscow", "moscow", "мск", "msk"]
   },
   {
     "city_name_ru": "Санкт-Петербург",
-    "city_name_en": "Saint Petersburg",
-    "city_slug": "saint-petersburg",
+    "city_name_en": "",
+    "city_slug": "",
+    "offers_url": "https://offers.smena.yandex.ru/location-2/podrabotka",
     "location_id": 2,
     "enabled": true,
     "supports_metro": true,
-    "aliases": ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "saint-petersburg", "saint petersburg"]
+    "aliases": ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "spb", "saint petersburg", "saint-petersburg"]
   },
   {
-    "city_name_ru": "Астрахань",
-    "city_name_en": "Astrakhan",
-    "city_slug": "astrahan",
-    "location_id": 37,
+    "city_name_ru": "Екатеринбург",
+    "city_name_en": "",
+    "city_slug": "yekaterinburg",
+    "offers_url": "https://offers.smena.yandex.ru/location-54-yekaterinburg/podrabotka",
+    "location_id": 54,
     "enabled": true,
-    "supports_metro": false,
-    "aliases": ["Астрахань", "astrakhan", "astrahan"]
+    "supports_metro": true,
+    "aliases": ["Екатеринбург", "ekaterinburg", "yekaterinburg", "екб"]
   },
   {
-    "city_name_ru": "Архангельск",
-    "city_name_en": "Arkhangelsk",
-    "city_slug": "arkhangelsk",
-    "location_id": 20,
+    "city_name_ru": "Нижний Новгород",
+    "city_name_en": "",
+    "city_slug": "nizhny-novgorod",
+    "offers_url": "https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka",
+    "location_id": 47,
     "enabled": true,
-    "supports_metro": false,
-    "aliases": ["Архангельск", "arkhangelsk"]
+    "supports_metro": true,
+    "aliases": ["Нижний Новгород", "Нижний", "nizhny novgorod", "nizhny-novgorod"]
   }
 ]
