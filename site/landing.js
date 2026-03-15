@@ -1,4 +1,4 @@
-﻿let CITY_SUPPORT = {
+let CITY_SUPPORT = {
   "\u043c\u043e\u0441\u043a\u0432\u0430": { id: 213, slug: "moscow", label: "\u041c\u043e\u0441\u043a\u0432\u0430", supportsMetro: true },
   "moscow": { id: 213, slug: "moscow", label: "\u041c\u043e\u0441\u043a\u0432\u0430", supportsMetro: true },
   "\u0441\u0430\u043d\u043a\u0442-\u043f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433": { id: 2, slug: "saint-petersburg", label: "\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433", supportsMetro: true },
@@ -158,11 +158,11 @@ function resetState() {
 function render() {
   const [id, text, hint, type, options] = QUESTIONS[STATE.i];
   STATE.selected = [];
-  UI.title.textContent = text;
-  UI.hint.textContent = hint;
+  UI.title.textContent = uiText(text);
+  UI.hint.textContent = uiText(hint);
   UI.progressText.textContent = `${STATE.i + 1}/${QUESTIONS.length}`;
   UI.progressBar.style.width = `${((STATE.i + 1) / QUESTIONS.length) * 100}%`;
-  UI.badges.innerHTML = STATE.badges.map((x) => `<span class="badge">${x}</span>`).join("");
+  UI.badges.innerHTML = STATE.badges.map((x) => `<span class="badge">${escapeUi(x)}</span>`).join("");
   UI.options.innerHTML = "";
   UI.inputWrap.classList.add("hidden");
   UI.multiActions.classList.add("hidden");
@@ -188,7 +188,7 @@ function makeOption(text, handler) {
   const b = document.createElement("button");
   b.type = "button";
   b.className = "option";
-  b.textContent = text;
+  b.textContent = uiText(text);
   b.addEventListener("click", handler);
   return b;
 }
@@ -277,14 +277,14 @@ function finish() {
   const avgPay = Math.round(top.reduce((s, x) => s + x.pay, 0) / Math.max(1, top.length));
   UI.quiz.classList.add("hidden");
   UI.result.classList.remove("hidden");
-  UI.profileName.textContent = profile.title;
-  UI.profileDesc.textContent = profile.desc;
+  UI.profileName.textContent = uiText(profile.title);
+  UI.profileDesc.textContent = uiText(profile.desc);
   syncLocationEditorFields();
   renderMetroSummary();
-  UI.incomeForecast.textContent = `${avgPay * 4} - ${(avgPay + 900) * 4} в‚Ѕ`;
+  UI.incomeForecast.textContent = `${avgPay * 4} - ${(avgPay + 900) * 4} ₽`;
   UI.trainReadiness.textContent = `${STATE.score.learning}/100`;
   UI.topScore.textContent = `${top[0]?.score || 0}%`;
-  UI.recommendations.innerHTML = `<h3>РўРѕРї-3 РїСЂРѕС„РµСЃСЃРёРё РґР»СЏ С‚РµР±СЏ</h3>${top.map((x) => `<div class="rec-card"><h4>${x.role} - match ${x.score}%</h4><p><strong>РЎРµРјРµР№СЃС‚РІРѕ:</strong> ${x.family} | <strong>РћСЂРёРµРЅС‚РёСЂ РїРѕ СЃС‚Р°РІРєРµ:</strong> ${x.pay} в‚Ѕ Р·Р° СЃРјРµРЅСѓ</p><div>${x.tags.map((t) => `<span class="tag">${t}</span>`).join("")}</div></div>`).join("")}`;
+  UI.recommendations.innerHTML = `<h3>Топ-3 профессии для тебя</h3>${top.map((x) => `<div class="rec-card"><h4>${escapeUi(x.role)} - match ${x.score}%</h4><p><strong>Семейство:</strong> ${escapeUi(x.family)} | <strong>Ориентир по ставке:</strong> ${x.pay} ₽ за смену</p><div>${x.tags.map((t) => `<span class="tag">${escapeUi(t)}</span>`).join("")}</div></div>`).join("")}`;
   renderFamilies(ranked);
   renderFallback(top);
   drawRadar();
@@ -315,11 +315,11 @@ function syncLocationEditorState() {
   const supportsMetro = Boolean(cityMeta?.supportsMetro);
   UI.resultMetroInput.disabled = !supportsMetro;
   UI.resultMetroInput.placeholder = supportsMetro
-    ? "РњРµС‚СЂРѕ, РЅР°РїСЂРёРјРµСЂ: Р‘РµР»РѕСЂСѓСЃСЃРєР°СЏ, РЎР°РІРµР»РѕРІСЃРєР°СЏ"
-    : "Р”Р»СЏ СЌС‚РѕРіРѕ РіРѕСЂРѕРґР° РјРµС‚СЂРѕ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ";
+    ? "Метро, например: Белорусская, Савеловская"
+    : "Для этого города метро не используется";
   UI.resultMetroHint.textContent = supportsMetro
-    ? "РњРµС‚СЂРѕ РјРѕР¶РЅРѕ РЅРµ СѓРєР°Р·С‹РІР°С‚СЊ."
-    : "Р”Р»СЏ СЌС‚РѕРіРѕ РіРѕСЂРѕРґР° РјС‹ РёС‰РµРј СЃРјРµРЅС‹ Р±РµР· РїСЂРёРІСЏР·РєРё Рє РјРµС‚СЂРѕ.";
+    ? "Метро можно не указывать."
+    : "Для этого города мы ищем смены без привязки к метро.";
   if (!supportsMetro) UI.resultMetroInput.value = "";
 }
 
@@ -405,7 +405,7 @@ function renderFamilies(ranked) {
       return { family, fit: Math.round(avg * 0.7 + max * 0.3) };
     })
     .sort((a, b) => b.fit - a.fit);
-  UI.familyFit.innerHTML = `<h3>РљР°С‚Р°Р»РѕРі РїСЂРѕС„РµСЃСЃРёР№ РЎРјРµРЅС‹: С‚РІРѕР№ СѓСЂРѕРІРµРЅСЊ СЃРѕРІРїР°РґРµРЅРёСЏ</h3>${rows.map((x) => `<div class="rec-card"><p><strong>${x.family}</strong> - ${x.fit}%</p><div class="progress"><span style="width:${x.fit}%"></span></div></div>`).join("")}`;
+  UI.familyFit.innerHTML = `<h3>Каталог профессий Смены: твой уровень совпадения</h3>${rows.map((x) => `<div class="rec-card"><p><strong>${escapeUi(x.family)}</strong> - ${x.fit}%</p><div class="progress"><span style="width:${x.fit}%"></span></div></div>`).join("")}`;
 }
 
 function renderFallback(top) {
@@ -413,28 +413,28 @@ function renderFallback(top) {
   const wl = (STATE.answers.interests || []).slice(0, 3);
   UI.fallbackBox.classList.remove("hidden");
   UI.fallbackBox.classList.add("fallback");
-  UI.fallbackBox.innerHTML = `<h3>РџР»Р°РЅ Р‘: РµСЃР»Рё СЃРёР»СЊРЅС‹С… СЃРѕРІРїР°РґРµРЅРёР№ РјР°Р»Рѕ</h3><p>РЎРµР№С‡Р°СЃ РїРѕРґ С‚РІРѕР№ РїСЂРѕС„РёР»СЊ РјР°Р»Рѕ СЂРѕР»РµР№ СЃ РІС‹СЃРѕРєРёРј РјР°С‚С‡РµРј. Р­С‚Рѕ РЅРµ РѕС‚РєР°Р·, Р° СЃРёРіРЅР°Р», С‡С‚Рѕ СЃС‚РѕРёС‚ Р»РёР±Рѕ СЂР°СЃС€РёСЂРёС‚СЊ С„РёР»СЊС‚СЂС‹, Р»РёР±Рѕ РїРѕРґРїРёСЃР°С‚СЊ С‚РµР±СЏ РЅР° РЅСѓР¶РЅС‹Рµ РЅР°РїСЂР°РІР»РµРЅРёСЏ.</p><p><strong>Р§С‚Рѕ РёРјРµРµС‚ СЃРјС‹СЃР» РѕС‚СЃР»РµР¶РёРІР°С‚СЊ:</strong> ${wl.length ? wl.join(", ") : "РљР°СЃСЃР°, РІС‹РєР»Р°РґРєР° С‚РѕРІР°СЂР°, СЃР±РѕСЂРєР° Р·Р°РєР°Р·РѕРІ"}.</p>`;
+  UI.fallbackBox.innerHTML = `<h3>План Б: если сильных совпадений мало</h3><p>Сейчас под твой профиль мало ролей с высоким матчем. Это не отказ, а сигнал, что стоит либо расширить фильтры, либо подписать тебя на нужные направления.</p><p><strong>Что имеет смысл отслеживать:</strong> ${wl.length ? wl.map((item) => escapeUi(item)).join(", ") : "Касса, выкладка товара, сборка заказов"}.</p>`;
 }
 
 async function renderRealShifts(topRoles) {
   const city = (STATE.answers.city || "").trim();
-  UI.realShifts.innerHTML = `<h3>Р РµР°Р»СЊРЅС‹Рµ СЃРјРµРЅС‹ РІ С‚РІРѕРµРј РіРѕСЂРѕРґРµ</h3><p class="inline-note">РС‰Сѓ РїСѓР±Р»РёС‡РЅС‹Рµ СЃРјРµРЅС‹ РЅР° Р·Р°РІС‚СЂР° Рё РїРѕСЃР»РµР·Р°РІС‚СЂР°...</p>`;
+  UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">Ищу публичные смены на завтра и послезавтра...</p>`;
   try {
     const dates = upcomingDates();
     const res = await fetch(`/api/shifts?city=${encodeURIComponent(city)}&dates=${dates.join(",")}`);
     const data = await res.json();
-    if (!res.ok || !(data.shifts || []).length) {
-      UI.realShifts.innerHTML = `<h3>Р РµР°Р»СЊРЅС‹Рµ СЃРјРµРЅС‹ РІ С‚РІРѕРµРј РіРѕСЂРѕРґРµ</h3><p class="inline-note">${data.message || "РџРѕРєР° РЅРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РїСѓР±Р»РёС‡РЅС‹Рµ СЃРјРµРЅС‹ РґР»СЏ СЌС‚РѕРіРѕ РіРѕСЂРѕРґР°."}</p>`;
-      return;
+      if (!res.ok || !(data.shifts || []).length) {
+        UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">${escapeUi(data.message || "Пока не удалось получить публичные смены для этого города.")}</p>`;
+        return;
+      }
+      const ranked = rankPublicShifts(data.shifts, topRoles).slice(0, 3);
+      const rangeNote = data.extendedRange
+        ? `Публичная витрина Смены на ${uiText(data.cityLabel || city)}. На завтра и послезавтра подходящих смен не нашлось, поэтому я расширил поиск еще на несколько ближайших дней.`
+        : `Публичная витрина Смены на ${uiText(data.cityLabel || city)}. Ниже 2-3 самые близкие по профилю смены.`;
+      UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">${escapeUi(rangeNote)}</p>${ranked.map((x) => `<div class="rec-card"><h4>${escapeUi(x.title)} - fit ${x.match}%</h4>${renderShiftLinkBadge(x)}<p><strong>Когда:</strong> ${escapeUi(x.dateLabel || x.date)}${x.time ? `, ${escapeUi(x.time)}` : ""}</p><p><strong>Где:</strong> ${escapeUi(x.address || "Адрес уточняется")}</p><p><strong>Оплата:</strong> ${escapeUi(x.payText || "Ставка на витрине")}</p><p class="inline-note">${escapeUi(x.why)}</p>${renderShiftLink(x)}</div>`).join("")}`;
+    } catch {
+      UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">Профиль уже готов. Блок с реальными сменами недоступен локально или не ответил вовремя.</p>`;
     }
-    const ranked = rankPublicShifts(data.shifts, topRoles).slice(0, 3);
-    const rangeNote = data.extendedRange
-      ? `РџСѓР±Р»РёС‡РЅР°СЏ РІРёС‚СЂРёРЅР° РЎРјРµРЅС‹ РЅР° ${data.cityLabel || city}. РќР° Р·Р°РІС‚СЂР° Рё РїРѕСЃР»РµР·Р°РІС‚СЂР° РїРѕРґС…РѕРґСЏС‰РёС… СЃРјРµРЅ РЅРµ РЅР°С€Р»РѕСЃСЊ, РїРѕСЌС‚РѕРјСѓ СЏ СЂР°СЃС€РёСЂРёР» РїРѕРёСЃРє РµС‰Рµ РЅР° РЅРµСЃРєРѕР»СЊРєРѕ Р±Р»РёР¶Р°Р№С€РёС… РґРЅРµР№.`
-      : `РџСѓР±Р»РёС‡РЅР°СЏ РІРёС‚СЂРёРЅР° РЎРјРµРЅС‹ РЅР° ${data.cityLabel || city}. РќРёР¶Рµ 2-3 СЃР°РјС‹Рµ Р±Р»РёР·РєРёРµ РїРѕ РїСЂРѕС„РёР»СЋ СЃРјРµРЅС‹.`;
-    UI.realShifts.innerHTML = `<h3>Р РµР°Р»СЊРЅС‹Рµ СЃРјРµРЅС‹ РІ С‚РІРѕРµРј РіРѕСЂРѕРґРµ</h3><p class="inline-note">${rangeNote}</p>${ranked.map((x) => `<div class="rec-card"><h4>${escapeHtml(x.title)} - fit ${x.match}%</h4>${renderShiftLinkBadge(x)}<p><strong>РљРѕРіРґР°:</strong> ${escapeHtml(x.dateLabel || x.date)}${x.time ? `, ${escapeHtml(x.time)}` : ""}</p><p><strong>Р“РґРµ:</strong> ${escapeHtml(x.address || "РђРґСЂРµСЃ СѓС‚РѕС‡РЅСЏРµС‚СЃСЏ")}</p><p><strong>РћРїР»Р°С‚Р°:</strong> ${escapeHtml(x.payText || "РЎС‚Р°РІРєР° РЅР° РІРёС‚СЂРёРЅРµ")}</p><p class="inline-note">${escapeHtml(x.why)}</p>${renderShiftLink(x)}</div>`).join("")}`;
-  } catch {
-    UI.realShifts.innerHTML = `<h3>Р РµР°Р»СЊРЅС‹Рµ СЃРјРµРЅС‹ РІ С‚РІРѕРµРј РіРѕСЂРѕРґРµ</h3><p class="inline-note">РџСЂРѕС„РёР»СЊ СѓР¶Рµ РіРѕС‚РѕРІ. Р‘Р»РѕРє СЃ СЂРµР°Р»СЊРЅС‹РјРё СЃРјРµРЅР°РјРё РЅРµРґРѕСЃС‚СѓРїРµРЅ Р»РѕРєР°Р»СЊРЅРѕ РёР»Рё РЅРµ РѕС‚РІРµС‚РёР» РІРѕРІСЂРµРјСЏ.</p>`;
-  }
 }
 
 function rankPublicShifts(shifts, topRoles) {
@@ -515,7 +515,7 @@ function renderMetroSummary() {
   }
   UI.metroSummary.classList.remove("hidden");
   UI.metroSummary.classList.add("metro-summary");
-  UI.metroSummary.textContent = `РС‰РµРј СЃРјРµРЅС‹ СЂСЏРґРѕРј СЃ РјРµС‚СЂРѕ: ${metro}`;
+  UI.metroSummary.textContent = `Ищем смены рядом с метро: ${metro}`;
 }
 
 function normalizeCity(city) {
@@ -533,11 +533,29 @@ function decodeMojibake(value) {
   const text = String(value || "");
   if (!/[ÐÑРС]/.test(text)) return text;
   try {
-    const decoded = decodeURIComponent(escape(text));
+    const bytes = Uint8Array.from(Array.from(text), (char) => cp1251Byte(char));
+    const decoded = new TextDecoder("utf-8").decode(bytes);
     return scoreCyrillic(decoded) > scoreCyrillic(text) ? decoded : text;
   } catch {
     return text;
   }
+}
+
+function cp1251Byte(char) {
+  const code = char.charCodeAt(0);
+  if (code <= 0x7f) return code;
+  if (code >= 0x0410 && code <= 0x044f) return code - 0x350;
+  if (code === 0x0401) return 0xa8;
+  if (code === 0x0451) return 0xb8;
+  return 0x3f;
+}
+
+function uiText(value) {
+  return decodeMojibake(String(value || ""));
+}
+
+function escapeUi(value) {
+  return escapeHtml(uiText(value));
 }
 
 function scoreCyrillic(value) {
@@ -611,9 +629,9 @@ function renderCitySuggestions() {
 }
 
 function getTextPlaceholder(id) {
-  if (id === "city") return "Р’РІРµРґРёС‚Рµ РіРѕСЂРѕРґ";
-  if (id === "metro") return "РќР°РїСЂРёРјРµСЂ: Р‘РµР»РѕСЂСѓСЃСЃРєР°СЏ, РЎР°РІРµР»РѕРІСЃРєР°СЏ";
-  if (id === "experience_details") return "РќР°РїСЂРёРјРµСЂ: 2 РіРѕРґР° РІ СЂРёС‚РµР№Р»Рµ, СѓРјРµСЋ СЂР°Р±РѕС‚Р°С‚СЊ СЃ РєР°СЃСЃРѕР№, РІС‹РєР»Р°РґРєРѕР№ Рё РєР»РёРµРЅС‚Р°РјРё";
+  if (id === "city") return "Введите город";
+  if (id === "metro") return "Например: Белорусская, Савеловская";
+  if (id === "experience_details") return "Например: 2 года в ритейле, умею работать с кассой, выкладкой и клиентами";
   return "";
 }
 
@@ -628,8 +646,8 @@ function configureVoiceControls(type) {
   const supported = Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
   UI.voiceBtn.disabled = !supported;
   UI.voiceStatus.textContent = supported
-    ? "РњРѕР¶РЅРѕ РЅР°РїРёСЃР°С‚СЊ РѕС‚РІРµС‚ РёР»Рё РЅР°РґРёРєС‚РѕРІР°С‚СЊ РµРіРѕ РіРѕР»РѕСЃРѕРј"
-    : "Р’ СЌС‚РѕРј Р±СЂР°СѓР·РµСЂРµ РіРѕР»РѕСЃРѕРІРѕР№ РІРІРѕРґ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ. РњРѕР¶РЅРѕ РѕС‚РІРµС‚РёС‚СЊ С‚РµРєСЃС‚РѕРј.";
+    ? "Можно написать ответ или надиктовать его голосом"
+    : "В этом браузере голосовой ввод не поддерживается. Можно ответить текстом.";
   if (!supported) return;
   initVoiceRecognition();
 }
@@ -645,8 +663,8 @@ function initVoiceRecognition() {
   speechRecognition.onstart = () => {
     speechActive = true;
     UI.voiceControls?.classList.add("is-recording");
-    if (UI.voiceBtn) UI.voiceBtn.textContent = "РћСЃС‚Р°РЅРѕРІРёС‚СЊ Р·Р°РїРёСЃСЊ";
-    if (UI.voiceStatus) UI.voiceStatus.textContent = "РЎР»СѓС€Р°СЋ... РјРѕР¶РЅРѕ РіРѕРІРѕСЂРёС‚СЊ СЃРІРѕР±РѕРґРЅРѕ";
+    if (UI.voiceBtn) UI.voiceBtn.textContent = "Остановить запись";
+    if (UI.voiceStatus) UI.voiceStatus.textContent = "Слушаю... можно говорить свободно";
   };
 
   speechRecognition.onresult = (event) => {
@@ -660,15 +678,15 @@ function initVoiceRecognition() {
   speechRecognition.onend = () => {
     speechActive = false;
     UI.voiceControls?.classList.remove("is-recording");
-    if (UI.voiceBtn) UI.voiceBtn.textContent = "Р“РѕР»РѕСЃРѕРІРѕР№ РѕС‚РІРµС‚";
-    if (UI.voiceStatus) UI.voiceStatus.textContent = "РњРѕР¶РЅРѕ РїРѕРґРїСЂР°РІРёС‚СЊ С‚РµРєСЃС‚ РІСЂСѓС‡РЅСѓСЋ Рё РїСЂРѕРґРѕР»Р¶РёС‚СЊ";
+    if (UI.voiceBtn) UI.voiceBtn.textContent = "Голосовой ответ";
+    if (UI.voiceStatus) UI.voiceStatus.textContent = "Можно подправить текст вручную и продолжить";
   };
 
   speechRecognition.onerror = () => {
     speechActive = false;
     UI.voiceControls?.classList.remove("is-recording");
-    if (UI.voiceBtn) UI.voiceBtn.textContent = "Р“РѕР»РѕСЃРѕРІРѕР№ РѕС‚РІРµС‚";
-    if (UI.voiceStatus) UI.voiceStatus.textContent = "РќРµ СѓРґР°Р»РѕСЃСЊ СЂР°СЃРїРѕР·РЅР°С‚СЊ РіРѕР»РѕСЃ. РњРѕР¶РЅРѕ РѕС‚РІРµС‚РёС‚СЊ С‚РµРєСЃС‚РѕРј.";
+    if (UI.voiceBtn) UI.voiceBtn.textContent = "Голосовой ответ";
+    if (UI.voiceStatus) UI.voiceStatus.textContent = "Не удалось распознать голос. Можно ответить текстом.";
   };
 }
 
@@ -688,7 +706,7 @@ function stopVoiceInput() {
   if (speechRecognition && speechActive) speechRecognition.stop();
   speechActive = false;
   UI.voiceControls?.classList.remove("is-recording");
-  if (UI.voiceBtn) UI.voiceBtn.textContent = "Р“РѕР»РѕСЃРѕРІРѕР№ РѕС‚РІРµС‚";
+  if (UI.voiceBtn) UI.voiceBtn.textContent = "Голосовой ответ";
 }
 
 function handleCityInput(input, box) {
@@ -705,7 +723,7 @@ function handleCityInput(input, box) {
     .slice(0, 6);
 
   if (!matches.length) {
-    box.innerHTML = `<div class="autocomplete-empty">Р“РѕСЂРѕРґ РЅРµ РЅР°Р№РґРµРЅ РІ РґРѕСЃС‚СѓРїРЅРѕРј СЃРїРёСЃРєРµ</div>`;
+    box.innerHTML = `<div class="autocomplete-empty">Город не найден в доступном списке</div>`;
     box.classList.remove("hidden");
     return;
   }
@@ -745,16 +763,16 @@ function handleOutsideAutocompleteClick(event) {
 
 function renderShiftLink(shift) {
   if (shift.isDirectUrl && shift.url) {
-    return `<a class="shift-link shift-cta" href="${shift.url}" target="_blank" rel="noreferrer">РћС‚РєСЂС‹С‚СЊ СЃРјРµРЅСѓ</a>`;
+    return `<a class="shift-link shift-cta" href="${shift.url}" target="_blank" rel="noreferrer">Открыть смену</a>`;
   }
   if (shift.listUrl) {
-    return `<a class="shift-link shift-cta" href="${shift.listUrl}" target="_blank" rel="noreferrer">РћС‚РєСЂС‹С‚СЊ СЃРїРёСЃРѕРє СЃРјРµРЅ РЅР° СЌС‚Сѓ РґР°С‚Сѓ</a>`;
+    return `<a class="shift-link shift-cta" href="${shift.listUrl}" target="_blank" rel="noreferrer">Открыть список смен на эту дату</a>`;
   }
   return "";
 }
 
 function renderShiftLinkBadge(shift) {
-  const label = shift.isDirectUrl ? "РџСЂСЏРјР°СЏ СЃСЃС‹Р»РєР°" : "РЎСЃС‹Р»РєР° РЅР° СЃРїРёСЃРѕРє СЃРјРµРЅ";
+  const label = shift.isDirectUrl ? "Прямая ссылка" : "Ссылка на список смен";
   const cls = shift.isDirectUrl ? "tag tag-direct" : "tag tag-list";
   const href = shift.isDirectUrl ? shift.url : shift.listUrl;
   if (href) {
@@ -762,6 +780,8 @@ function renderShiftLinkBadge(shift) {
   }
   return `<div><span class="${cls}">${label}</span></div>`;
 }
+
+
 
 
 
