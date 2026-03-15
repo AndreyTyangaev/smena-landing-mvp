@@ -26,27 +26,29 @@
             <p id="questionHint" class="muted">Выбери один вариант</p>
           </div>
           <div class="progress-block">
-            <span id="progressText">1/10</span>
+            <span id="progressText">1/17</span>
             <div class="progress"><span id="progressBar"></span></div>
           </div>
         </div>
 
         <div id="badges" class="badges"></div>
         <div id="options" class="options"></div>
+
         <div id="inputWrap" class="input-wrap hidden">
           <div class="suggest-input">
             <input id="textAnswer" class="text-answer" type="text" autocomplete="address-level2" />
             <div id="cityAutocomplete" class="autocomplete hidden"></div>
           </div>
           <div id="voiceControls" class="voice-controls hidden">
-              <button id="voiceBtn" class="btn btn-ghost" type="button">Голосовой ответ</button>
-              <span id="voiceStatus" class="inline-note">Можно надиктовать ответ голосом</span>
-            </div>
+            <button id="voiceBtn" class="btn btn-ghost" type="button">Голосовой ответ</button>
+            <span id="voiceStatus" class="inline-note">Можно надиктовать ответ голосом</span>
+          </div>
           <div class="text-actions">
             <button id="skipTextBtn" class="btn btn-ghost hidden" type="button">Пропустить</button>
             <button id="textNextBtn" class="btn btn-primary">Продолжить</button>
           </div>
         </div>
+
         <div id="multiActions" class="multi-actions hidden">
           <button id="doneMultiBtn" class="btn btn-primary">Готово</button>
         </div>
@@ -59,17 +61,20 @@
           <p class="eyebrow">Твой профиль</p>
           <h2 id="profileName"></h2>
           <p id="profileDesc"></p>
-          <p id="metroSummary" class="muted hidden"></p>
+          <p id="metroSummary" class="metro-summary hidden"></p>
+
           <div class="stats">
             <div><span>Доход (4 смены/нед)</span><strong id="incomeForecast"></strong></div>
             <div><span>Готовность к обучению</span><strong id="trainReadiness"></strong></div>
             <div><span>Уровень совпадения топ-роли</span><strong id="topScore"></strong></div>
           </div>
+
           <div class="result-actions">
             <button id="downloadBtn" class="btn btn-primary">Скачать мой профиль</button>
             <button id="editLocationBtn" class="btn btn-ghost">Изменить город и метро</button>
             <button id="restartBtn" class="btn btn-ghost">Пройти заново</button>
           </div>
+
           <div id="locationEditor" class="location-editor hidden">
             <div class="location-editor-grid">
               <div class="suggest-input">

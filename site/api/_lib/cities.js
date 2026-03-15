@@ -1,73 +1,12 @@
-const fs = require("fs");
+﻿const fs = require("fs");
 const path = require("path");
 
 const DEFAULT_CITIES = [
-  {
-    city_name_ru: "Москва",
-    city_name_en: "Moscow",
-    city_slug: "moscow",
-    location_id: 213,
-    enabled: true,
-    supports_metro: true,
-    aliases: ["Москва", "moscow", "msk"]
-  },
-  {
-    city_name_ru: "Санкт-Петербург",
-    city_name_en: "Saint Petersburg",
-    city_slug: "saint-petersburg",
-    location_id: 2,
-    enabled: true,
-    supports_metro: true,
-    aliases: ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "saint-petersburg", "saint petersburg"]
-  },
-  {
-    city_name_ru: "Астрахань",
-    city_name_en: "Astrakhan",
-    city_slug: "astrahan",
-    location_id: 37,
-    enabled: true,
-    supports_metro: false,
-    aliases: ["Астрахань", "astrakhan", "astrahan"]
-  },
-  {
-    city_name_ru: "Архангельск",
-    city_name_en: "Arkhangelsk",
-    city_slug: "arkhangelsk",
-    location_id: 20,
-    enabled: true,
-    supports_metro: false,
-    aliases: ["Архангельск", "arkhangelsk"]
-  }
+  { city_name_ru: "Москва", city_name_en: "Moscow", city_slug: "moscow", location_id: 213, enabled: true, supports_metro: true, aliases: ["Москва", "moscow", "msk"] },
+  { city_name_ru: "Санкт-Петербург", city_name_en: "Saint Petersburg", city_slug: "saint-petersburg", location_id: 2, enabled: true, supports_metro: true, aliases: ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "saint-petersburg", "saint petersburg"] },
+  { city_name_ru: "Астрахань", city_name_en: "Astrakhan", city_slug: "astrahan", location_id: 37, enabled: true, supports_metro: false, aliases: ["Астрахань", "astrakhan", "astrahan"] },
+  { city_name_ru: "Архангельск", city_name_en: "Arkhangelsk", city_slug: "arkhangelsk", location_id: 20, enabled: true, supports_metro: false, aliases: ["Архангельск", "arkhangelsk"] }
 ];
-
-function loadCitySupport() {
-  const items = loadCityItems();
-  const result = {};
-
-  items.forEach((item) => {
-    if (!item || !item.enabled) return;
-
-    const label = cleanText(item.city_name_ru || item.city_name_en || item.city_slug || "").trim();
-    const slug = String(item.city_slug || "").trim();
-    const id = Number(item.location_id);
-    const supportsMetro = Boolean(item.supports_metro);
-    const aliases = Array.isArray(item.aliases)
-      ? item.aliases
-      : [item.city_name_ru, item.city_name_en, item.city_slug];
-
-    if (!label || !slug || !id) return;
-
-    aliases
-      .filter(Boolean)
-      .map((value) => normalizeCity(value))
-      .filter(Boolean)
-      .forEach((alias) => {
-        result[alias] = { id, slug, label, supportsMetro };
-      });
-  });
-
-  return result;
-}
 
 function loadCityItems() {
   const jsonPath = path.join(process.cwd(), "site", "data", "cities.generated.json");
@@ -75,9 +14,7 @@ function loadCityItems() {
     try {
       const parsed = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
       if (Array.isArray(parsed) && parsed.length) return parsed.map(normalizeItem);
-    } catch {
-      // fall through to csv/defaults
-    }
+    } catch {}
   }
 
   const csvPath = path.join(process.cwd(), "Cities.csv");
@@ -90,9 +27,7 @@ function loadCityItems() {
         const rows = lines.slice(1).map((line) => parseCsvLine(line, headers)).map(normalizeItem);
         if (rows.length) return rows;
       }
-    } catch {
-      // fall back to defaults
-    }
+    } catch {}
   }
 
   return DEFAULT_CITIES.map(normalizeItem);
@@ -100,8 +35,8 @@ function loadCityItems() {
 
 function normalizeItem(item) {
   return {
-    city_name_ru: cleanText(item.city_name_ru || ""),
-    city_name_en: cleanText(item.city_name_en || ""),
+    city_name_ru: String(item.city_name_ru || "").trim(),
+    city_name_en: String(item.city_name_en || "").trim(),
     city_slug: String(item.city_slug || "").trim(),
     location_id: Number(item.location_id),
     enabled: isEnabled(item.enabled),
@@ -111,51 +46,48 @@ function normalizeItem(item) {
 }
 
 function normalizeAliases(item) {
-  const base = Array.isArray(item.aliases)
-    ? item.aliases
-    : [item.city_name_ru, item.city_name_en, item.city_slug];
+  const base = Array.isArray(item.aliases) ? item.aliases : [item.city_name_ru, item.city_name_en, item.city_slug];
+  return base.filter(Boolean).map((value) => String(value).trim()).filter(Boolean);
+}
 
-  return base
-    .filter(Boolean)
-    .map((value) => cleanText(String(value)).trim())
-    .filter(Boolean);
+function loadCitySupport() {
+  const support = {};
+  loadCityItems().forEach((item) => {
+    if (!item.enabled || !item.city_slug || !item.location_id) return;
+    const meta = { id: item.location_id, slug: item.city_slug, label: item.city_name_ru || item.city_name_en || item.city_slug, supportsMetro: Boolean(item.supports_metro) };
+    item.aliases.forEach((alias) => {
+      support[normalizeCity(alias)] = { ...meta, aliases: item.aliases };
+    });
+  });
+  return support;
 }
 
 function listCities() {
   const support = loadCitySupport();
   const unique = new Map();
-
-  Object.entries(support).forEach(([alias, meta]) => {
+  Object.values(support).forEach((meta) => {
     const key = `${meta.id}|${meta.slug}`;
-    if (!unique.has(key)) {
-      unique.set(key, {
-        label: meta.label,
-        id: meta.id,
-        slug: meta.slug,
-        supportsMetro: Boolean(meta.supportsMetro),
-        aliases: [alias]
-      });
-      return;
-    }
-    unique.get(key).aliases.push(alias);
+    if (!unique.has(key)) unique.set(key, { label: meta.label, id: meta.id, slug: meta.slug, supportsMetro: meta.supportsMetro, aliases: meta.aliases || [] });
   });
-
-  return Array.from(unique.values()).sort((a, b) => a.label.localeCompare(b.label, "ru"));
+  return [...unique.values()].sort((a, b) => a.label.localeCompare(b.label, "ru"));
 }
 
 function resolveCityMeta(input, support = loadCitySupport()) {
-  const normalized = normalizeCity(input);
-  if (!normalized) return null;
-  if (support[normalized]) return support[normalized];
+  const key = normalizeCity(input);
+  if (!key) return null;
+  if (support[key]) return support[key];
+  return Object.entries(support).find(([alias]) => alias.includes(key) || key.includes(alias))?.[1] || null;
+}
 
-  const compact = normalized.replace(/\s+/g, "");
-  const entries = Object.entries(support);
-  const fuzzy = entries.find(([alias]) => {
-    const compactAlias = alias.replace(/\s+/g, "");
-    return alias.includes(normalized) || normalized.includes(alias) || compactAlias === compact;
-  });
-
-  return fuzzy ? fuzzy[1] : null;
+function normalizeCity(city) {
+  return String(city || "")
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/^г\.\s*/g, "")
+    .replace(/^город\s+/g, "")
+    .replace(/[.,]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function parseCsvLine(line, headers) {
@@ -171,46 +103,4 @@ function isEnabled(value) {
   return [true, 1, "1", "true", "yes"].includes(value) || String(value || "").toLowerCase() === "true";
 }
 
-function cleanText(value) {
-  const text = String(value || "");
-  if (!/[ÐÑРСЃв]/.test(text)) return text;
-
-  try {
-    let best = text;
-    let current = text;
-
-    for (let i = 0; i < 3; i += 1) {
-      const decoded = Buffer.from(current, "cp1251").toString("utf8");
-      if (scoreCyrillic(decoded) > scoreCyrillic(best)) best = decoded;
-      if (decoded === current) break;
-      current = decoded;
-    }
-
-    return best;
-  } catch {
-    return text;
-  }
-}
-
-function scoreCyrillic(value) {
-  return (String(value || "").match(/[А-Яа-яЁё]/g) || []).length;
-}
-
-function normalizeCity(city) {
-  return cleanText(city)
-    .toLowerCase()
-    .replace(/ё/g, "е")
-    .replace(/^г\.\s*/g, "")
-    .replace(/^город\s+/g, "")
-    .replace(/[.,]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-module.exports = {
-  loadCitySupport,
-  listCities,
-  normalizeCity,
-  resolveCityMeta
-};
-
+module.exports = { loadCitySupport, listCities, normalizeCity, resolveCityMeta };
