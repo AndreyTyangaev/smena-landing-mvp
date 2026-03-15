@@ -2,7 +2,7 @@ let CITY_SUPPORT = {
   "москва": { id: 213, slug: "moscow", label: "Москва", supportsMetro: true },
   moscow: { id: 213, slug: "moscow", label: "Москва", supportsMetro: true }
 };
-let CITY_OPTIONS = ["Москва"];
+let CITY_OPTIONS = ["Москва", "Санкт-Петербург", "Астрахань", "Архангельск"];
 let ACTIVE_CITY_INPUT = null;
 
 const QUESTIONS = [
@@ -478,7 +478,7 @@ function renderMetroSummary() {
 }
 
 function normalizeCity(city) {
-  return String(city || "")
+  return decodeMojibake(String(city || ""))
     .toLowerCase()
     .replace(/ё/g, "е")
     .replace(/^г\.\s*/g, "")
@@ -486,6 +486,16 @@ function normalizeCity(city) {
     .replace(/[.,]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function decodeMojibake(value) {
+  const text = String(value || "");
+  if (!/[РрСс]/.test(text)) return text;
+  try {
+    return decodeURIComponent(escape(text));
+  } catch {
+    return text;
+  }
 }
 
 function getCityMeta(city) {
@@ -515,19 +525,18 @@ function matchesMetro(address, metroRaw) {
 
 async function loadCitiesConfig() {
   try {
-    const response = await fetch("/api/cities");
-    if (!response.ok) return;
-    const payload = await response.json();
+    const cities = await fetchCitiesPayload();
     const map = {};
     const labels = new Set();
-    (payload.cities || []).forEach((city) => {
-      if (city.label) labels.add(city.label);
+    cities.forEach((city) => {
+      const label = decodeMojibake(city.label || city.city_name_ru || city.city_name_en || city.city_slug || "");
+      if (label) labels.add(label);
       (city.aliases || []).forEach((alias) => {
         map[normalizeCity(alias)] = {
-          id: city.id,
-          slug: city.slug,
-          label: city.label,
-          supportsMetro: Boolean(city.supportsMetro)
+          id: city.id || city.location_id,
+          slug: city.slug || city.city_slug,
+          label,
+          supportsMetro: Boolean(city.supportsMetro ?? city.supports_metro)
         };
       });
     });
@@ -535,9 +544,20 @@ async function loadCitiesConfig() {
     if (labels.size) CITY_OPTIONS = Array.from(labels).sort((a, b) => a.localeCompare(b, "ru"));
     renderCitySuggestions();
   } catch {
-    // Fallback to bundled config
     renderCitySuggestions();
   }
+}
+
+async function fetchCitiesPayload() {
+  const apiResponse = await fetch("/api/cities");
+  if (apiResponse.ok) {
+    const payload = await apiResponse.json();
+    if ((payload.cities || []).length) return payload.cities;
+  }
+
+  const staticResponse = await fetch("/data/cities.generated.json");
+  if (!staticResponse.ok) throw new Error("City config unavailable");
+  return await staticResponse.json();
 }
 
 function renderCitySuggestions() {
