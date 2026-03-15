@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
       extendedRange = shifts.length > 0;
     }
 
-    return json(res, 200, { cityLabel: meta.label, source: "offers.smena.yandex.ru", extendedRange, shifts: dedupeShifts(shifts) });
+    return json(res, 200, { cityLabel: meta.label, source: "offers.smena.yandex.ru", extendedRange, checkedUrl: buildListUrl(meta, targetDates[0] || upcomingDates(1)[0]), shifts: dedupeShifts(shifts) });
   } catch (error) {
     return json(res, 500, { message: "Не удалось получить публичные смены с витрины.", error: error.message });
   }
@@ -29,7 +29,7 @@ module.exports = async (req, res) => {
 async function loadShiftsForDates(meta, dates) {
   const allShifts = [];
   for (const date of dates) {
-    const listUrl = `https://offers.smena.yandex.ru/location-${meta.id}-${meta.slug}/podrabotka?sort=start_time&startDate=${date}`;
+    const listUrl = buildListUrl(meta, date);
     const response = await fetch(listUrl, { headers: { "user-agent": "Mozilla/5.0 (compatible; SmenaProfiler/1.0; +https://vercel.app)" } });
     if (!response.ok) continue;
     const html = await response.text();
@@ -156,6 +156,17 @@ function buildExtendedDates(initialDates) {
   const set = new Set(initialDates.filter(Boolean));
   upcomingDates(7).forEach((date) => set.add(date));
   return Array.from(set).slice(0, 7);
+}
+function buildListUrl(meta, date) {
+  const base = meta.offersUrl || `https://offers.smena.yandex.ru/location-${meta.id}-${meta.slug}/podrabotka`;
+  try {
+    const url = new URL(base);
+    url.searchParams.set("sort", "start_time");
+    url.searchParams.set("startDate", date);
+    return url.toString();
+  } catch {
+    return `${base}?sort=start_time&startDate=${date}`;
+  }
 }
 function absolutizeUrl(href, sourceUrl) { try { return new URL(href, sourceUrl).toString(); } catch { return ""; } }
 function decodeEntities(value) { return String(value || "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">"); }

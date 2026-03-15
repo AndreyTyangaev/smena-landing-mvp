@@ -2,23 +2,15 @@
 const path = require("path");
 
 const DEFAULT_CITIES = [
-  { city_name_ru: "Москва", city_name_en: "Moscow", city_slug: "moscow", location_id: 213, enabled: true, supports_metro: true, aliases: ["Москва", "moscow", "msk"] },
+  { city_name_ru: "Москва", city_name_en: "Moscow", city_slug: "moscow", location_id: 213, offers_url: "https://offers.smena.yandex.ru/location-213-moscow/podrabotka", enabled: true, supports_metro: true, aliases: ["Москва", "moscow", "msk"] },
   { city_name_ru: "Санкт-Петербург", city_name_en: "Saint Petersburg", city_slug: "saint-petersburg", location_id: 2, enabled: true, supports_metro: true, aliases: ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "saint-petersburg", "saint petersburg"] },
   { city_name_ru: "Астрахань", city_name_en: "Astrakhan", city_slug: "astrahan", location_id: 37, enabled: true, supports_metro: false, aliases: ["Астрахань", "astrakhan", "astrahan"] },
   { city_name_ru: "Архангельск", city_name_en: "Arkhangelsk", city_slug: "arkhangelsk", location_id: 20, enabled: true, supports_metro: false, aliases: ["Архангельск", "arkhangelsk"] }
 ];
 
 function loadCityItems() {
-  const jsonPath = path.join(process.cwd(), "site", "data", "cities.generated.json");
-  if (fs.existsSync(jsonPath)) {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-      if (Array.isArray(parsed) && parsed.length) return parsed.map(normalizeItem);
-    } catch {}
-  }
-
-  const csvPath = path.join(process.cwd(), "Cities.csv");
-  if (fs.existsSync(csvPath)) {
+  const csvPath = findCsvPath();
+  if (csvPath && fs.existsSync(csvPath)) {
     try {
       const raw = fs.readFileSync(csvPath, "utf8").replace(/^\uFEFF/, "");
       const lines = raw.split(/\r?\n/).filter(Boolean);
@@ -30,15 +22,30 @@ function loadCityItems() {
     } catch {}
   }
 
+  const jsonPath = path.join(process.cwd(), "site", "data", "cities.generated.json");
+  if (fs.existsSync(jsonPath)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+      if (Array.isArray(parsed) && parsed.length) return parsed.map(normalizeItem);
+    } catch {}
+  }
+
   return DEFAULT_CITIES.map(normalizeItem);
 }
 
 function normalizeItem(item) {
+  const cityRu = decodeMaybeMojibake(String(item.city_name_ru || "").trim());
+  const cityEn = decodeMaybeMojibake(String(item.city_name_en || "").trim());
+  const citySlug = String(item.city_slug || "").trim();
+  const directOffersUrl = String(item.offers_url || item.offersUrl || "").trim();
+  const offersUrl = directOffersUrl || (looksLikeUrl(cityEn) ? cityEn : "");
+  const derivedRoute = extractRouteFromOffersUrl(offersUrl);
   return {
-    city_name_ru: String(item.city_name_ru || "").trim(),
-    city_name_en: String(item.city_name_en || "").trim(),
-    city_slug: String(item.city_slug || "").trim(),
-    location_id: Number(item.location_id),
+    city_name_ru: cityRu,
+    city_name_en: cityEn && !looksLikeUrl(cityEn) ? cityEn : "",
+    city_slug: citySlug || derivedRoute.slug,
+    offers_url: offersUrl,
+    location_id: Number(item.location_id) || derivedRoute.id,
     enabled: isEnabled(item.enabled),
     supports_metro: isEnabled(item.supports_metro),
     aliases: normalizeAliases(item)
@@ -46,15 +53,20 @@ function normalizeItem(item) {
 }
 
 function normalizeAliases(item) {
-  const base = Array.isArray(item.aliases) ? item.aliases : [item.city_name_ru, item.city_name_en, item.city_slug];
-  return base.filter(Boolean).map((value) => String(value).trim()).filter(Boolean);
+  const rawAliases = Array.isArray(item.aliases) ? item.aliases : [item.city_name_ru, item.city_name_en, item.city_slug];
+  const base = rawAliases
+    .filter(Boolean)
+    .map((value) => decodeMaybeMojibake(String(value).trim()))
+    .filter(Boolean)
+    .filter((value) => !looksLikeUrl(value));
+  return [...new Set(base)];
 }
 
 function loadCitySupport() {
   const support = {};
   loadCityItems().forEach((item) => {
     if (!item.enabled || !item.city_slug || !item.location_id) return;
-    const meta = { id: item.location_id, slug: item.city_slug, label: item.city_name_ru || item.city_name_en || item.city_slug, supportsMetro: Boolean(item.supports_metro) };
+    const meta = { id: item.location_id, slug: item.city_slug, label: item.city_name_ru || item.city_name_en || item.city_slug, supportsMetro: Boolean(item.supports_metro), offersUrl: item.offers_url || "" };
     item.aliases.forEach((alias) => {
       support[normalizeCity(alias)] = { ...meta, aliases: item.aliases };
     });
@@ -67,7 +79,7 @@ function listCities() {
   const unique = new Map();
   Object.values(support).forEach((meta) => {
     const key = `${meta.id}|${meta.slug}`;
-    if (!unique.has(key)) unique.set(key, { label: meta.label, id: meta.id, slug: meta.slug, supportsMetro: meta.supportsMetro, aliases: meta.aliases || [] });
+    if (!unique.has(key)) unique.set(key, { label: meta.label, id: meta.id, slug: meta.slug, supportsMetro: meta.supportsMetro, aliases: meta.aliases || [], offersUrl: meta.offersUrl || "" });
   });
   return [...unique.values()].sort((a, b) => a.label.localeCompare(b.label, "ru"));
 }
@@ -97,6 +109,41 @@ function parseCsvLine(line, headers) {
     row[header] = (cols[index] || "").trim();
   });
   return row;
+}
+
+function findCsvPath() {
+  const candidates = [
+    path.join(process.cwd(), "Cities.csv"),
+    path.join(process.cwd(), "cities.csv")
+  ];
+  return candidates.find((candidate) => fs.existsSync(candidate)) || "";
+}
+
+function looksLikeUrl(value) {
+  return /^https?:\/\//i.test(String(value || "").trim());
+}
+
+function extractRouteFromOffersUrl(url) {
+  const value = String(url || "").trim();
+  const match = value.match(/location-(\d+)(?:-([^/?#]+))?\/podrabotka/i);
+  return {
+    id: match ? Number(match[1]) : 0,
+    slug: match && match[2] ? match[2] : ""
+  };
+}
+
+function decodeMaybeMojibake(value) {
+  let text = String(value || "");
+  for (let i = 0; i < 2; i += 1) {
+    if (!/[РСЃ]/.test(text)) break;
+    try {
+      const decoded = Buffer.from(text, "latin1").toString("utf8");
+      if (decoded && decoded !== text) text = decoded;
+    } catch {
+      break;
+    }
+  }
+  return text;
 }
 
 function isEnabled(value) {
