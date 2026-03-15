@@ -1,0 +1,38 @@
+[
+  {
+    "city_name_ru": "Москва",
+    "city_name_en": "Moscow",
+    "city_slug": "moscow",
+    "location_id": 213,
+    "enabled": true,
+    "supports_metro": true,
+    "aliases": ["Москва", "moscow", "msk"]
+  },
+  {
+    "city_name_ru": "Санкт-Петербург",
+    "city_name_en": "Saint Petersburg",
+    "city_slug": "saint-petersburg",
+    "location_id": 2,
+    "enabled": true,
+    "supports_metro": true,
+    "aliases": ["Санкт-Петербург", "Петербург", "СПб", "saint-petersburg", "saint petersburg"]
+  },
+  {
+    "city_name_ru": "Астрахань",
+    "city_name_en": "Astrakhan",
+    "city_slug": "astrahan",
+    "location_id": 37,
+    "enabled": true,
+    "supports_metro": false,
+    "aliases": ["Астрахань", "astrakhan", "astrahan"]
+  },
+  {
+    "city_name_ru": "Архангельск",
+    "city_name_en": "Arkhangelsk",
+    "city_slug": "arkhangelsk",
+    "location_id": 20,
+    "enabled": true,
+    "supports_metro": false,
+    "aliases": ["Архангельск", "arkhangelsk"]
+  }
+]

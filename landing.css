@@ -104,6 +104,22 @@ h1 { margin: 14px 0 10px; font-size: clamp(30px, 5vw, 52px); line-height: 1.05; 
 .inline-note { color: var(--muted); font-size: 14px; }
 .shift-link { color: #0f766e; font-weight: 700; text-decoration: none; }
 .shift-link:hover { text-decoration: underline; }
+.shift-cta {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border: 1px solid #99f6e4;
+  border-radius: 10px;
+  background: #ecfeff;
+}
+.shift-pill-link {
+  display: inline-block;
+  text-decoration: none;
+}
+.shift-pill-link:hover {
+  text-decoration: none;
+  filter: brightness(0.97);
+}
 @media (max-width: 900px) {
   .grid-3 { grid-template-columns: 1fr; }
   .result-grid { grid-template-columns: 1fr; }

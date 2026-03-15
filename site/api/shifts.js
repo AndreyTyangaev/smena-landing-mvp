@@ -1,43 +1,37 @@
-const CITY_SUPPORT = {
-  "москва": { id: 213, slug: "moscow", label: "Москва" },
-  moscow: { id: 213, slug: "moscow", label: "Москва" },
-  msk: { id: 213, slug: "moscow", label: "Москва" }
-};
+const { loadCitySupport, normalizeCity } = require("./_lib/cities");
+
+const CITY_SUPPORT = loadCitySupport();
 
 module.exports = async (req, res) => {
   try {
     const city = normalizeCity(req.query.city || "");
-    const dates = String(req.query.dates || "").split(",").map((x) => x.trim()).filter(Boolean);
+    const dates = String(req.query.dates || "")
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean);
     const meta = CITY_SUPPORT[city];
 
     if (!meta) {
       return json(res, 400, {
-        message: "Пока парсинг публичных смен подключен для Москвы. Для других городов оставим профиль и каталог профессий."
+        message: "Для этого города пока не настроен публичный маршрут витрины. Профиль и каталог профессий по-прежнему работают."
       });
     }
 
-    const targetDates = dates.length ? dates : upcomingDates();
-    const allShifts = [];
+    const targetDates = dates.length ? dates : upcomingDates(2);
+    const allShifts = await loadShiftsForDates(meta, targetDates.slice(0, 2));
+    let extendedRange = false;
 
-    for (const date of targetDates.slice(0, 2)) {
-      const url = `https://offers.smena.yandex.ru/location-${meta.id}-${meta.slug}/podrabotka?sort=start_time&startDate=${date}`;
-      const response = await fetch(url, {
-        headers: {
-          "user-agent": "Mozilla/5.0 (compatible; SmenaProfiler/1.0; +https://vercel.app)"
-        }
-      });
-
-      if (!response.ok) continue;
-      const html = await response.text();
-      const parsed = parseOffersPage(html, url, date);
-      allShifts.push(...parsed);
+    if (!allShifts.length && !dates.length) {
+      const backupDates = upcomingDates(4).slice(2);
+      allShifts.push(...await loadShiftsForDates(meta, backupDates));
+      extendedRange = allShifts.length > 0;
     }
 
-    const unique = dedupeShifts(allShifts);
     return json(res, 200, {
       cityLabel: meta.label,
       source: "offers.smena.yandex.ru",
-      shifts: unique
+      extendedRange,
+      shifts: dedupeShifts(allShifts)
     });
   } catch (error) {
     return json(res, 500, {
@@ -46,6 +40,23 @@ module.exports = async (req, res) => {
     });
   }
 };
+
+async function loadShiftsForDates(meta, dates) {
+  const allShifts = [];
+  for (const date of dates) {
+    const url = `https://offers.smena.yandex.ru/location-${meta.id}-${meta.slug}/podrabotka?sort=start_time&startDate=${date}`;
+    const response = await fetch(url, {
+      headers: {
+        "user-agent": "Mozilla/5.0 (compatible; SmenaProfiler/1.0; +https://vercel.app)"
+      }
+    });
+
+    if (!response.ok) continue;
+    const html = await response.text();
+    allShifts.push(...parseOffersPage(html, url, date));
+  }
+  return allShifts;
+}
 
 function parseOffersPage(html, sourceUrl, fallbackDate) {
   const links = extractOfferLinks(html, sourceUrl);
@@ -60,9 +71,9 @@ function parseOffersPage(html, sourceUrl, fallbackDate) {
     .split("\n")
     .map((line) => line.replace(/\s+/g, " ").trim())
     .filter(Boolean)
-    .filter((line) => !/^Яндекс/i.test(line))
-    .filter((line) => !/^Поделиться/i.test(line))
-    .filter((line) => !/^Сортировка/i.test(line));
+    .filter((line) => !/^яндекс/i.test(line))
+    .filter((line) => !/^поделиться/i.test(line))
+    .filter((line) => !/^сортировка/i.test(line));
 
   const shifts = [];
 
@@ -78,7 +89,7 @@ function parseOffersPage(html, sourceUrl, fallbackDate) {
     const dateTime = lines[i];
     const timeMatch = dateTime.match(/(\d{2}:\d{2}\s*[-–]\s*\d{2}:\d{2})/);
     const dateLabel = dateTime.replace(/\s*•\s*\d{2}:\d{2}\s*[-–]\s*\d{2}:\d{2}.*/, "").trim() || fallbackDate;
-    const payAmount = parsePay(payText);
+    const directUrl = matchOfferUrl(title, links);
 
     shifts.push({
       title,
@@ -87,8 +98,10 @@ function parseOffersPage(html, sourceUrl, fallbackDate) {
       time: timeMatch ? timeMatch[1].replace(/\s+/g, "") : "",
       address,
       payText,
-      payAmount,
-      url: matchOfferUrl(title, links) || sourceUrl
+      payAmount: parsePay(payText),
+      url: directUrl || "",
+      listUrl: sourceUrl,
+      isDirectUrl: Boolean(directUrl)
     });
   }
 
@@ -106,12 +119,7 @@ function extractOfferLinks(html, sourceUrl) {
     if (!href || !text) continue;
     if (!/offers\.smena\.yandex\.ru|smena\.yandex\.ru/i.test(href)) continue;
     if (text.length < 4) continue;
-
-    links.push({
-      href,
-      text,
-      key: normalizeForMatch(text)
-    });
+    links.push({ href, key: normalizeForMatch(text) });
   }
 
   return dedupeLinks(links);
@@ -127,10 +135,8 @@ function matchOfferUrl(title, links) {
   const contains = links.find((item) => item.key.includes(key) || key.includes(item.key));
   if (contains) return contains.href;
 
-  const titleWords = key.split(" ").filter((x) => x.length > 3);
-  if (!titleWords.length) return "";
-
-  const fuzzy = links.find((item) => titleWords.some((word) => item.key.includes(word)));
+  const words = key.split(" ").filter((x) => x.length > 3);
+  const fuzzy = links.find((item) => words.some((word) => item.key.includes(word)));
   return fuzzy ? fuzzy.href : "";
 }
 
@@ -141,8 +147,7 @@ function looksLikeDateTime(value) {
 function findTitle(lines, index) {
   for (let i = index - 1; i >= Math.max(0, index - 3); i -= 1) {
     const line = lines[i];
-    if (!line) continue;
-    if (looksLikeDateTime(line)) continue;
+    if (!line || looksLikeDateTime(line)) continue;
     if (/подработка|вакансии|ежедневной оплат/i.test(line)) continue;
     if (/^\d/.test(line) && /₽/.test(line)) continue;
     if (line.length < 3) continue;
@@ -154,8 +159,7 @@ function findTitle(lines, index) {
 function findAddress(lines, start) {
   for (let i = start; i < Math.min(lines.length, start + 6); i += 1) {
     const line = lines[i];
-    if (!line) continue;
-    if (looksLikeDateTime(line)) continue;
+    if (!line || looksLikeDateTime(line)) continue;
     if (/₽/.test(line)) continue;
     if (/взять задание/i.test(line)) continue;
     if (/^\d/.test(line) && line.length < 12) continue;
@@ -166,8 +170,7 @@ function findAddress(lines, start) {
 
 function findPay(lines, start) {
   for (let i = start; i < Math.min(lines.length, start + 8); i += 1) {
-    const line = lines[i];
-    if (/₽|руб/i.test(line)) return line;
+    if (/₽|руб/i.test(lines[i])) return lines[i];
   }
   return "";
 }
@@ -197,10 +200,6 @@ function dedupeLinks(links) {
   });
 }
 
-function normalizeCity(city) {
-  return String(city || "").toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ").trim();
-}
-
 function normalizeForMatch(value) {
   return String(value || "")
     .toLowerCase()
@@ -210,10 +209,10 @@ function normalizeForMatch(value) {
     .trim();
 }
 
-function upcomingDates() {
+function upcomingDates(days = 2) {
   const now = new Date();
   const out = [];
-  for (let d = 1; d <= 2; d += 1) {
+  for (let d = 1; d <= days; d += 1) {
     const date = new Date(now);
     date.setDate(now.getDate() + d);
     out.push(date.toISOString().slice(0, 10));

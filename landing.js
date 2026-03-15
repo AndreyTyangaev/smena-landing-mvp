@@ -113,6 +113,13 @@ function resetState() {
     stability: 50,
     learning: 50
   };
+  if (UI.textAnswer) UI.textAnswer.value = "";
+  if (UI.resultCityInput) UI.resultCityInput.value = "";
+  if (UI.resultMetroInput) UI.resultMetroInput.value = "";
+  UI.inputWrap?.classList.add("hidden");
+  UI.multiActions?.classList.add("hidden");
+  UI.metroSummary?.classList.add("hidden");
+  if (UI.metroSummary) UI.metroSummary.textContent = "";
 }
 
 function render() {
@@ -290,16 +297,44 @@ function detectProfile() {
 function rankRoles() {
   const skills = new Set(STATE.answers.skills || []);
   const interests = new Set(STATE.answers.interests || []);
-  return ROLES.map((r) => {
-    let score = 26;
-    ["physical", "standing", "outdoor", "heavy_weight", "digital", "communication", "pay_model", "cleaning"].forEach((key) => { if ((r.fit[key] || []).includes(STATE.answers[key])) score += ({ physical: 11, standing: 9, outdoor: 8, heavy_weight: 8, digital: 10, communication: 10, pay_model: 8, cleaning: 8 })[key]; });
-    r.skills.forEach((s) => { if (skills.has(s)) score += 7; if (interests.has(s)) score += 5; });
-    if (STATE.answers.pay_priority === "Максимум заработка" && r.pay >= 5000) score += 8;
-    if (STATE.answers.pay_priority === "Стабильный прогнозируемый доход" && r.pay <= 5000) score += 6;
-    if (STATE.answers.work_goal === "Основной доход" && r.pay >= 4700) score += 4;
-    if (STATE.answers.work_goal === "Подработка" && r.pay >= 4300) score += 3;
-    return { ...r, score: Math.min(100, Math.max(1, Math.round(score))) };
-  }).sort((a, b) => b.score - a.score);
+  const weighted = ROLES.map((r) => {
+    let rawScore = 22;
+    ["physical", "standing", "outdoor", "heavy_weight", "digital", "communication", "pay_model", "cleaning"].forEach((key) => {
+      const answer = STATE.answers[key];
+      const matches = (r.fit[key] || []).includes(answer);
+      rawScore += matches ? ({ physical: 14, standing: 10, outdoor: 10, heavy_weight: 10, digital: 12, communication: 12, pay_model: 9, cleaning: 9 })[key] : 0;
+    });
+    r.skills.forEach((s) => {
+      if (skills.has(s)) rawScore += 10;
+      if (interests.has(s)) rawScore += 8;
+    });
+    if (STATE.answers.pay_priority === "Максимум заработка" && r.pay >= 5000) rawScore += 10;
+    if (STATE.answers.pay_priority === "Стабильный прогнозируемый доход" && r.pay <= 5000) rawScore += 8;
+    if (STATE.answers.work_goal === "Основной доход" && r.pay >= 4700) rawScore += 6;
+    if (STATE.answers.work_goal === "Подработка" && r.pay >= 4300) rawScore += 4;
+    if (STATE.answers.cleaning === "Лучше без уборки" && r.code.startsWith("cleaner")) rawScore -= 22;
+    if (STATE.answers.outdoor === "Предпочитаю в помещении" && ["courier", "cleaner_outdoor"].includes(r.code)) rawScore -= 18;
+    if (STATE.answers.standing === "Нужна сидячая" && ["courier", "cleaner_outdoor", "warehouse", "collector"].includes(r.code)) rawScore -= 16;
+    if (STATE.answers.communication === "Люблю общаться" && ["cleaner_indoor", "warehouse"].includes(r.code)) rawScore -= 6;
+    return { ...r, rawScore };
+  });
+
+  const rawValues = weighted.map((x) => x.rawScore);
+  const minRaw = Math.min(...rawValues);
+  const maxRaw = Math.max(...rawValues);
+
+  return weighted
+    .map((r) => ({
+      ...r,
+      score: normalizeRoleScore(r.rawScore, minRaw, maxRaw)
+    }))
+    .sort((a, b) => b.score - a.score);
+}
+
+function normalizeRoleScore(value, min, max) {
+  if (max <= min) return 74;
+  const ratio = (value - min) / (max - min);
+  return Math.max(28, Math.min(98, Math.round(28 + Math.pow(ratio, 1.18) * 68)));
 }
 
 function normalizeCleaning(list) {
@@ -316,7 +351,13 @@ function normalizeCleaning(list) {
 function renderFamilies(ranked) {
   const familyMap = {};
   ranked.forEach((x) => { familyMap[x.family] ||= []; familyMap[x.family].push(x.score); });
-  const rows = Object.entries(familyMap).map(([family, scores]) => ({ family, fit: Math.round(scores.reduce((s, x) => s + x, 0) / scores.length) })).sort((a, b) => b.fit - a.fit);
+  const rows = Object.entries(familyMap)
+    .map(([family, scores]) => {
+      const avg = scores.reduce((s, x) => s + x, 0) / scores.length;
+      const max = Math.max(...scores);
+      return { family, fit: Math.round(avg * 0.7 + max * 0.3) };
+    })
+    .sort((a, b) => b.fit - a.fit);
   UI.familyFit.innerHTML = `<h3>Каталог профессий Смены: твой уровень совпадения</h3>${rows.map((x) => `<div class="rec-card"><p><strong>${x.family}</strong> - ${x.fit}%</p><div class="progress"><span style="width:${x.fit}%"></span></div></div>`).join("")}`;
 }
 
@@ -340,7 +381,10 @@ async function renderRealShifts(topRoles) {
       return;
     }
     const ranked = rankPublicShifts(data.shifts, topRoles).slice(0, 3);
-    UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">Публичная витрина Смены на ${data.cityLabel || city}. Ниже 2-3 самые близкие по профилю смены.</p>${ranked.map((x) => `<div class="rec-card"><h4>${escapeHtml(x.title)} - fit ${x.match}%</h4>${renderShiftLinkBadge(x)}<p><strong>Когда:</strong> ${escapeHtml(x.dateLabel || x.date)}${x.time ? `, ${escapeHtml(x.time)}` : ""}</p><p><strong>Где:</strong> ${escapeHtml(x.address || "Адрес уточняется")}</p><p><strong>Оплата:</strong> ${escapeHtml(x.payText || "Ставка на витрине")}</p><p class="inline-note">${escapeHtml(x.why)}</p>${renderShiftLink(x)}</div>`).join("")}`;
+    const rangeNote = data.extendedRange
+      ? `Публичная витрина Смены на ${data.cityLabel || city}. На завтра и послезавтра подходящих смен не нашлось, поэтому я расширил поиск еще на несколько ближайших дней.`
+      : `Публичная витрина Смены на ${data.cityLabel || city}. Ниже 2-3 самые близкие по профилю смены.`;
+    UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">${rangeNote}</p>${ranked.map((x) => `<div class="rec-card"><h4>${escapeHtml(x.title)} - fit ${x.match}%</h4>${renderShiftLinkBadge(x)}<p><strong>Когда:</strong> ${escapeHtml(x.dateLabel || x.date)}${x.time ? `, ${escapeHtml(x.time)}` : ""}</p><p><strong>Где:</strong> ${escapeHtml(x.address || "Адрес уточняется")}</p><p><strong>Оплата:</strong> ${escapeHtml(x.payText || "Ставка на витрине")}</p><p class="inline-note">${escapeHtml(x.why)}</p>${renderShiftLink(x)}</div>`).join("")}`;
   } catch {
     UI.realShifts.innerHTML = `<h3>Реальные смены в твоем городе</h3><p class="inline-note">Профиль уже готов. Блок с реальными сменами недоступен локально или не ответил вовремя.</p>`;
   }
@@ -457,10 +501,10 @@ async function loadCitiesConfig() {
 
 function renderShiftLink(shift) {
   if (shift.isDirectUrl && shift.url) {
-    return `<a class="shift-link" href="${shift.url}" target="_blank" rel="noreferrer">Открыть смену</a>`;
+    return `<a class="shift-link shift-cta" href="${shift.url}" target="_blank" rel="noreferrer">Открыть смену</a>`;
   }
   if (shift.listUrl) {
-    return `<a class="shift-link" href="${shift.listUrl}" target="_blank" rel="noreferrer">Открыть список смен на эту дату</a>`;
+    return `<a class="shift-link shift-cta" href="${shift.listUrl}" target="_blank" rel="noreferrer">Открыть список смен на эту дату</a>`;
   }
   return "";
 }
@@ -468,5 +512,9 @@ function renderShiftLink(shift) {
 function renderShiftLinkBadge(shift) {
   const label = shift.isDirectUrl ? "Прямая ссылка" : "Ссылка на список смен";
   const cls = shift.isDirectUrl ? "tag tag-direct" : "tag tag-list";
+  const href = shift.isDirectUrl ? shift.url : shift.listUrl;
+  if (href) {
+    return `<div><a class="${cls} shift-pill-link" href="${href}" target="_blank" rel="noreferrer">${label}</a></div>`;
+  }
   return `<div><span class="${cls}">${label}</span></div>`;
 }
