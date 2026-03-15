@@ -2,6 +2,7 @@ let CITY_SUPPORT = {
   "москва": { id: 213, slug: "moscow", label: "Москва", supportsMetro: true },
   moscow: { id: 213, slug: "moscow", label: "Москва", supportsMetro: true }
 };
+let CITY_OPTIONS = ["Москва"];
 
 const QUESTIONS = [
   ["work_goal", "Для чего ты сейчас ищешь смены?", "Определи главный мотив", "single", ["Подработка", "Основной доход", "Временная работа", "Изучаю варианты"]],
@@ -47,6 +48,7 @@ const UI = {
   inputWrap: document.getElementById("inputWrap"),
   textAnswer: document.getElementById("textAnswer"),
   textNextBtn: document.getElementById("textNextBtn"),
+  citySuggestions: document.getElementById("citySuggestions"),
   badges: document.getElementById("badges"),
   progressText: document.getElementById("progressText"),
   progressBar: document.getElementById("progressBar"),
@@ -137,6 +139,7 @@ function render() {
   if (type === "multi") { options.forEach((o) => UI.options.appendChild(makeOption(o, () => toggleMulti(o)))); UI.multiActions.classList.remove("hidden"); }
   if (type === "text" || type === "text_optional") {
     UI.inputWrap.classList.remove("hidden");
+    UI.textAnswer.setAttribute("list", id === "city" ? "citySuggestions" : "");
     UI.textAnswer.placeholder = id === "city" ? "Введите город" : "Например: Белорусская, Савеловская";
     UI.textAnswer.value = STATE.answers[id] || "";
     setTimeout(() => UI.textAnswer.focus(), 50);
@@ -177,8 +180,7 @@ function submitText() {
   if (!value && type !== "text_optional") return;
   STATE.answers[id] = value;
   if (id === "city") {
-    const norm = normalizeCity(value);
-    addBadge(`Город: ${CITY_SUPPORT[norm]?.label || value}`);
+    addBadge(`Город: ${getCityMeta(value)?.label || value}`);
   }
   if (id === "metro" && value) addBadge("Есть ориентир по метро");
   next();
@@ -202,7 +204,7 @@ function next() {
 
 function shouldSkipQuestion(id) {
   if (id !== "metro") return false;
-  const cityMeta = CITY_SUPPORT[normalizeCity(STATE.answers.city || "")];
+  const cityMeta = getCityMeta(STATE.answers.city || "");
   return !cityMeta?.supportsMetro;
 }
 
@@ -263,7 +265,7 @@ function syncLocationEditorFields() {
 
 function syncLocationEditorState() {
   if (!UI.resultCityInput || !UI.resultMetroInput || !UI.resultMetroHint) return;
-  const cityMeta = CITY_SUPPORT[normalizeCity(UI.resultCityInput.value || "")];
+  const cityMeta = getCityMeta(UI.resultCityInput.value || "");
   const supportsMetro = Boolean(cityMeta?.supportsMetro);
   UI.resultMetroInput.disabled = !supportsMetro;
   UI.resultMetroInput.placeholder = supportsMetro
@@ -278,7 +280,7 @@ function syncLocationEditorState() {
 async function applyLocationChanges() {
   const city = (UI.resultCityInput?.value || "").trim();
   if (!city) return;
-  const cityMeta = CITY_SUPPORT[normalizeCity(city)];
+  const cityMeta = getCityMeta(city);
   const metro = cityMeta?.supportsMetro ? (UI.resultMetroInput?.value || "").trim() : "";
   STATE.answers.city = city;
   STATE.answers.metro = metro;
@@ -463,7 +465,29 @@ function renderMetroSummary() {
   UI.metroSummary.textContent = `Ищем смены рядом с метро: ${metro}`;
 }
 
-function normalizeCity(city) { return city.toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ").trim(); }
+function normalizeCity(city) {
+  return String(city || "")
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/^г\.\s*/g, "")
+    .replace(/^город\s+/g, "")
+    .replace(/[.,]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getCityMeta(city) {
+  const normalized = normalizeCity(city);
+  if (!normalized) return null;
+  if (CITY_SUPPORT[normalized]) return CITY_SUPPORT[normalized];
+
+  const compact = normalized.replace(/\s+/g, "");
+  const foundAlias = Object.keys(CITY_SUPPORT).find((alias) => {
+    const compactAlias = alias.replace(/\s+/g, "");
+    return alias.includes(normalized) || normalized.includes(alias) || compactAlias === compact;
+  });
+  return foundAlias ? CITY_SUPPORT[foundAlias] : null;
+}
 function upcomingDates() { const n = new Date(), out = []; for (let d = 1; d <= 2; d += 1) { const x = new Date(n); x.setDate(n.getDate() + d); out.push(x.toISOString().slice(0, 10)); } return out; }
 function escapeHtml(x) { return String(x || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;"); }
 
@@ -483,7 +507,9 @@ async function loadCitiesConfig() {
     if (!response.ok) return;
     const payload = await response.json();
     const map = {};
+    const labels = new Set();
     (payload.cities || []).forEach((city) => {
+      if (city.label) labels.add(city.label);
       (city.aliases || []).forEach((alias) => {
         map[normalizeCity(alias)] = {
           id: city.id,
@@ -494,9 +520,19 @@ async function loadCitiesConfig() {
       });
     });
     if (Object.keys(map).length) CITY_SUPPORT = map;
+    if (labels.size) CITY_OPTIONS = Array.from(labels).sort((a, b) => a.localeCompare(b, "ru"));
+    renderCitySuggestions();
   } catch {
     // Fallback to bundled config
+    renderCitySuggestions();
   }
+}
+
+function renderCitySuggestions() {
+  if (!UI.citySuggestions) return;
+  UI.citySuggestions.innerHTML = CITY_OPTIONS
+    .map((label) => `<option value="${escapeHtml(label)}"></option>`)
+    .join("");
 }
 
 function renderShiftLink(shift) {
