@@ -48,6 +48,7 @@ module.exports = async (req, res) => {
 };
 
 function parseOffersPage(html, sourceUrl, fallbackDate) {
+  const links = extractOfferLinks(html, sourceUrl);
   const text = decodeEntities(
     html
       .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -87,11 +88,50 @@ function parseOffersPage(html, sourceUrl, fallbackDate) {
       address,
       payText,
       payAmount,
-      url: sourceUrl
+      url: matchOfferUrl(title, links) || sourceUrl
     });
   }
 
   return shifts;
+}
+
+function extractOfferLinks(html, sourceUrl) {
+  const links = [];
+  const re = /<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+  let match;
+
+  while ((match = re.exec(html))) {
+    const href = absolutizeUrl(match[1], sourceUrl);
+    const text = decodeEntities(match[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+    if (!href || !text) continue;
+    if (!/offers\.smena\.yandex\.ru|smena\.yandex\.ru/i.test(href)) continue;
+    if (text.length < 4) continue;
+
+    links.push({
+      href,
+      text,
+      key: normalizeForMatch(text)
+    });
+  }
+
+  return dedupeLinks(links);
+}
+
+function matchOfferUrl(title, links) {
+  const key = normalizeForMatch(title);
+  if (!key) return "";
+
+  const exact = links.find((item) => item.key === key);
+  if (exact) return exact.href;
+
+  const contains = links.find((item) => item.key.includes(key) || key.includes(item.key));
+  if (contains) return contains.href;
+
+  const titleWords = key.split(" ").filter((x) => x.length > 3);
+  if (!titleWords.length) return "";
+
+  const fuzzy = links.find((item) => titleWords.some((word) => item.key.includes(word)));
+  return fuzzy ? fuzzy.href : "";
 }
 
 function looksLikeDateTime(value) {
@@ -147,8 +187,27 @@ function dedupeShifts(shifts) {
   });
 }
 
+function dedupeLinks(links) {
+  const seen = new Set();
+  return links.filter((item) => {
+    const key = `${item.href}|${item.key}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function normalizeCity(city) {
   return String(city || "").toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ").trim();
+}
+
+function normalizeForMatch(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/[^a-zа-я0-9\s-]/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function upcomingDates() {
@@ -170,6 +229,14 @@ function decodeEntities(value) {
     .replace(/&#39;/g, "'")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">");
+}
+
+function absolutizeUrl(href, base) {
+  try {
+    return new URL(href, base).toString();
+  } catch {
+    return "";
+  }
 }
 
 function json(res, status, payload) {
