@@ -9,6 +9,14 @@ const DEFAULT_CITIES = [
 ];
 
 function loadCityItems() {
+  const jsonPath = findJsonPath();
+  if (jsonPath && fs.existsSync(jsonPath)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+      if (Array.isArray(parsed) && parsed.length) return parsed.map(normalizeItem);
+    } catch {}
+  }
+
   const csvPath = findCsvPath();
   if (csvPath && fs.existsSync(csvPath)) {
     try {
@@ -19,14 +27,6 @@ function loadCityItems() {
         const rows = lines.slice(1).map((line) => parseCsvLine(line, headers)).map(normalizeItem);
         if (rows.length) return rows;
       }
-    } catch {}
-  }
-
-  const jsonPath = findJsonPath();
-  if (jsonPath && fs.existsSync(jsonPath)) {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-      if (Array.isArray(parsed) && parsed.length) return parsed.map(normalizeItem);
     } catch {}
   }
 
@@ -78,7 +78,7 @@ function listCities() {
   const support = loadCitySupport();
   const unique = new Map();
   Object.values(support).forEach((meta) => {
-    const key = `${meta.id}|${meta.slug}`;
+    const key = `${meta.id}|${meta.slug}|${meta.label}`;
     if (!unique.has(key)) unique.set(key, { label: meta.label, id: meta.id, slug: meta.slug, supportsMetro: meta.supportsMetro, aliases: meta.aliases || [], offersUrl: meta.offersUrl || "" });
   });
   return [...unique.values()].sort((a, b) => a.label.localeCompare(b.label, "ru"));
@@ -145,21 +145,13 @@ function extractRouteFromOffersUrl(url) {
 }
 
 function decodeMaybeMojibake(value) {
-  let text = String(value || "");
-  for (let i = 0; i < 2; i += 1) {
-    if (!/[РСЃ]/.test(text)) break;
-    try {
-      const decoded = Buffer.from(text, "latin1").toString("utf8");
-      if (decoded && decoded !== text) text = decoded;
-    } catch {
-      break;
-    }
-  }
-  return text;
+  return String(value || "");
 }
+
 
 function isEnabled(value) {
   return [true, 1, "1", "true", "yes"].includes(value) || String(value || "").toLowerCase() === "true";
 }
 
 module.exports = { loadCitySupport, listCities, normalizeCity, resolveCityMeta };
+
