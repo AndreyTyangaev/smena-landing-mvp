@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Debug Cities</title>
+  <style>
+    :root {
+      --bg: #f7f5ee;
+      --surface: #ffffff;
+      --ink: #1f2333;
+      --muted: #667085;
+      --line: #e8e3d8;
+      --accent: #ffd54f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      background:
+        radial-gradient(circle at 92% 8%, #ffe6bf 0%, transparent 26%),
+        radial-gradient(circle at 6% 22%, #d9f5ea 0%, transparent 30%),
+        radial-gradient(circle at 18% 0%, #97d6f3 0%, transparent 22%),
+        var(--bg);
+      color: var(--ink);
+    }
+    .container {
+      width: min(980px, 92vw);
+      margin: 0 auto;
+      padding: 40px 0 56px;
+    }
+    .card {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #fff;
+      border-radius: 24px;
+      box-shadow: 0 14px 36px rgba(31, 35, 51, 0.08);
+      padding: 24px;
+      margin-top: 16px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1;
+    }
+    .muted { color: var(--muted); }
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #fff7cf;
+      border: 1px solid #ffd84d;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .row:last-child { border-bottom: none; }
+    code, pre {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+    }
+    pre {
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #18253b;
+      color: #f8fafc;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 0;
+    }
+    .error {
+      color: #b42318;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Диагностика городов</h1>
+    <p class="muted">Страница показывает, какие города реально отдает продовый <code>/api/cities</code>.</p>
+
+    <div class="card">
+      <div id="status" class="pill">Загружаем...</div>
+      <div id="meta" class="muted" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Города</h2>
+      <div id="cities"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Сырой JSON</h2>
+      <pre id="raw"></pre>
+    </div>
+  </div>
+
+  <script>
+    const statusNode = document.getElementById("status");
+    const metaNode = document.getElementById("meta");
+    const citiesNode = document.getElementById("cities");
+    const rawNode = document.getElementById("raw");
+
+    async function main() {
+      try {
+        const response = await fetch("/api/cities");
+        const data = await response.json();
+        rawNode.textContent = JSON.stringify(data, null, 2);
+
+        if (!response.ok) {
+          statusNode.textContent = "Ошибка API";
+          statusNode.className = "pill error";
+          metaNode.textContent = "Сервер вернул неуспешный статус.";
+          return;
+        }
+
+        const cities = Array.isArray(data.cities) ? data.cities : [];
+        statusNode.textContent = "Ок";
+        metaNode.textContent = `Найдено городов: ${cities.length}`;
+
+        if (!cities.length) {
+          citiesNode.innerHTML = '<p class="muted">Список городов пуст.</p>';
+          return;
+        }
+
+        citiesNode.innerHTML = cities.map((city) => {
+          const aliases = Array.isArray(city.aliases) && city.aliases.length ? city.aliases.join(", ") : "—";
+          const metro = city.supportsMetro ? "есть метро" : "без метро";
+          const route = city.offersUrl || "не задан";
+          return `
+            <div class="row">
+              <div>
+                <strong>${escapeHtml(city.label || "Без названия")}</strong>
+                <div class="muted" style="margin-top:6px;">aliases: ${escapeHtml(aliases)}</div>
+                <div class="muted">offersUrl: ${escapeHtml(route)}</div>
+              </div>
+              <div class="pill">${metro}</div>
+            </div>
+          `;
+        }).join("");
+      } catch (error) {
+        statusNode.textContent = "Ошибка загрузки";
+        statusNode.className = "pill error";
+        metaNode.textContent = error && error.message ? error.message : "Не удалось загрузить /api/cities";
+        rawNode.textContent = String(error);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;");
+    }
+
+    main();
+  </script>
+</body>
+</html>

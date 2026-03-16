@@ -29,6 +29,15 @@ git commit -m "Update cities config"
 git push origin main
 ```
 
+## Как проверить, что сайт видит правильные города
+
+- Откройте `cities-debug.html` локально или `/cities-debug.html` на проде
+- Страница запросит `/api/cities` и покажет:
+  - фактический список городов
+  - алиасы
+  - `offersUrl`
+  - сырой JSON-ответ API
+
 ## Что обновлено под матрицу профессий
 
 - Добавлены семейства ролей: `collector`, `rtz`, `cleaner`, `cashier`, `kitchen`, `barista`, `courier`, `promoter`.
