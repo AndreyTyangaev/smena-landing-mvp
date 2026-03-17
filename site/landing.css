@@ -717,6 +717,11 @@ h1 {
   gap: 12px;
 }
 
+.options.options-tiled {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .option,
 .text-answer {
   width: 100%;
@@ -745,6 +750,14 @@ h1 {
   border-color: var(--brand-orange);
   background: #fff5dd;
   box-shadow: inset 0 0 0 1px rgba(240, 107, 0, 0.1);
+}
+
+.options.options-tiled .option {
+  min-height: 92px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  line-height: 1.25;
 }
 
 .input-wrap {
@@ -1326,6 +1339,10 @@ h1 {
   .quiz-card,
   .tile {
     border-radius: 24px;
+  }
+
+  .options.options-tiled {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .bubble-left {
