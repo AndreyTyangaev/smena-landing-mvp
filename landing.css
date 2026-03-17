@@ -642,6 +642,12 @@ h1 {
 
 .hidden { display: none; }
 .muted { color: var(--muted); }
+.input-wrap.hidden,
+.voice-controls.hidden,
+.multi-actions.hidden,
+.autocomplete.hidden {
+  display: none;
+}
 
 .btn {
   border: none;
@@ -754,6 +760,13 @@ h1 {
   padding: 16px 18px;
   color: var(--ink);
   background: #fff;
+  resize: none;
+  overflow: hidden;
+}
+
+.text-area-answer {
+  min-height: 58px;
+  line-height: 1.45;
 }
 
 .text-answer:focus {
