@@ -82,7 +82,7 @@ body::before {
 
 .hero-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
+  grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.88fr);
   gap: 20px;
   align-items: stretch;
 }
@@ -159,6 +159,7 @@ h1 {
 
 .hero-pills {
   margin-top: 18px;
+  flex-wrap: nowrap;
 }
 
 .hero-pills span,
@@ -209,6 +210,7 @@ h1 {
   display: flex;
   gap: 12px;
   margin-top: 20px;
+  justify-content: center;
 }
 
 .hero-scene {
@@ -717,6 +719,11 @@ h1 {
   gap: 12px;
 }
 
+.options.options-tiled {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .option,
 .text-answer {
   width: 100%;
@@ -745,6 +752,14 @@ h1 {
   border-color: var(--brand-orange);
   background: #fff5dd;
   box-shadow: inset 0 0 0 1px rgba(240, 107, 0, 0.1);
+}
+
+.options.options-tiled .option {
+  min-height: 92px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  line-height: 1.25;
 }
 
 .input-wrap {
@@ -900,6 +915,10 @@ h1 {
   margin-bottom: 14px;
 }
 
+.result-section-block .section-head {
+  margin-bottom: 8px;
+}
+
 .section-head-copy {
   max-width: 760px;
 }
@@ -997,6 +1016,11 @@ h1 {
 .family-list {
   display: grid;
   gap: 10px;
+}
+
+.family-columns {
+  column-count: 3;
+  column-gap: 12px;
 }
 
 .role-card {
@@ -1138,9 +1162,19 @@ h1 {
   padding: 16px 18px;
 }
 
+.compact-family-card {
+  break-inside: avoid;
+  margin: 0 0 12px;
+  padding: 12px 14px;
+}
+
 .family-copy {
   color: var(--muted);
   font-size: 14px;
+}
+
+.compact-family-progress {
+  margin-top: 8px;
 }
 
 .family-progress {
@@ -1189,6 +1223,15 @@ h1 {
 
 .city-link-card .shift-cta {
   margin-top: 14px;
+}
+
+.compact-city-link-card {
+  padding: 12px 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(246,250,255,0.98) 100%);
+}
+
+.compact-city-link-card .shift-cta {
+  margin-top: 0;
 }
 
 .fallback {
@@ -1278,6 +1321,10 @@ h1 {
     align-items: flex-start;
   }
 
+  .family-columns {
+    column-count: 2;
+  }
+
   .scene-worker,
   .scene-pet,
   .scene-bubble {
@@ -1303,6 +1350,10 @@ h1 {
     font-size: 46px;
   }
 
+  .family-columns {
+    column-count: 1;
+  }
+
   .subtitle {
     font-size: 18px;
   }
@@ -1326,6 +1377,10 @@ h1 {
   .quiz-card,
   .tile {
     border-radius: 24px;
+  }
+
+  .options.options-tiled {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .bubble-left {
