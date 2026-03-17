@@ -1,0 +1,11 @@
+[
+  {
+    "city_name_ru": "Москва",
+    "city_name_en": "Moscow",
+    "city_slug": "moscow",
+    "location_id": 213,
+    "enabled": true,
+    "supports_metro": true,
+    "notes": "основной город"
+  }
+]
