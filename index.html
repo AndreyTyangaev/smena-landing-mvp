@@ -9,15 +9,85 @@
 <body>
   <header class="hero">
     <div class="container">
-      <h1>Найди свою идеальную смену за 5-7 минут</h1>
-      <p class="subtitle">Интерактивный ИИ-интервьюер-квест: определяет твой профиль, показывает подходящие роли, доходный потенциал и план роста.</p>
-      <div class="hero-actions">
-        <button id="startBtn" class="btn btn-primary">Начать квест</button>
+      <div class="brandbar">
+        <div class="brandmark">Яндекс Смена</div>
+        <div class="brandtag">Профайлер ролей</div>
+      </div>
+
+      <div class="hero-shell">
+        <div class="hero-copy">
+          <p class="hero-kicker">Подработка без собеседований и лишних кликов</p>
+          <h1>Найди свою идеальную смену за 5-7 минут</h1>
+          <p class="subtitle">Интерактивный квест поможет понять, какие задания в Смене подойдут именно тебе по темпу, нагрузке и формату работы.</p>
+
+          <div class="hero-pills">
+            <span>Простые задания без опыта</span>
+            <span>Гибкое расписание</span>
+            <span>Известные бренды и точки</span>
+          </div>
+
+          <div class="hero-stats">
+            <div>
+              <strong>3 минуты</strong>
+              <span>на быстрый профайл</span>
+            </div>
+            <div>
+              <strong>Топ-3 роли</strong>
+              <span>сразу после квеста</span>
+            </div>
+            <div>
+              <strong>1 ссылка</strong>
+              <span>на смены твоего города</span>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <button id="startBtn" class="btn btn-primary">Начать квест</button>
+          </div>
+
+          <div class="hero-note">
+            <div class="hero-note-badge">Новый сценарий</div>
+            <div class="hero-note-copy">
+              <strong>Покажем твою роль на платформе</strong>
+              <span>После квеста ты получишь профиль, семейства профессий и прямую ссылку на смены своего города.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-scene" aria-hidden="true">
+          <div class="scene-sky-glow"></div>
+          <div class="scene-stadium"></div>
+          <div class="scene-roof roof-left"></div>
+          <div class="scene-roof roof-right"></div>
+          <div class="scene-ground"></div>
+          <div class="scene-path"></div>
+          <div class="scene-tree tree-left"></div>
+          <div class="scene-tree tree-right"></div>
+          <div class="scene-card scene-card-main">
+            <div class="scene-check">✓</div>
+            <div>
+              <strong>Смена рядом</strong>
+              <span>Поймем твой профиль и откроем витрину нужного города</span>
+            </div>
+          </div>
+          <div class="scene-card scene-card-side">
+            <strong>16 000+</strong>
+            <span>заданий каждый день</span>
+          </div>
+          <div class="scene-bubble bubble-left">✓</div>
+          <div class="scene-bubble bubble-right">✓</div>
+          <div class="scene-bubble bubble-center">✓</div>
+          <div class="scene-worker worker-left"></div>
+          <div class="scene-worker worker-right"></div>
+          <div class="scene-pet"></div>
+          <div class="scene-spark spark-left"></div>
+          <div class="scene-spark spark-right"></div>
+        </div>
       </div>
     </div>
   </header>
 
-  <main class="container">
+  <main class="container main-shell">
     <section class="section hidden" id="quizSection">
       <div class="quiz-card">
         <div class="quiz-head">
@@ -26,7 +96,7 @@
             <p id="questionHint" class="muted">Выбери один вариант</p>
           </div>
           <div class="progress-block">
-            <span id="progressText">1/17</span>
+            <span id="progressText">1/16</span>
             <div class="progress"><span id="progressBar"></span></div>
           </div>
         </div>
@@ -57,11 +127,10 @@
 
     <section class="section hidden" id="resultSection">
       <div class="result-grid">
-        <article class="tile large">
+        <article class="tile large tile-profile">
           <p class="eyebrow">Твой профиль</p>
           <h2 id="profileName"></h2>
           <p id="profileDesc"></p>
-          
 
           <div class="stats">
             <div><span>Доход (4 смены/нед)</span><strong id="incomeForecast"></strong></div>
@@ -81,9 +150,7 @@
                 <input id="resultCityInput" class="text-answer" type="text" autocomplete="address-level2" placeholder="Город" />
                 <div id="resultCityAutocomplete" class="autocomplete hidden"></div>
               </div>
-              
             </div>
-            
             <div class="location-editor-actions">
               <button id="saveLocationBtn" class="btn btn-primary">Обновить ссылку на смены</button>
               <button id="cancelLocationBtn" class="btn btn-ghost">Отмена</button>
@@ -91,20 +158,20 @@
           </div>
         </article>
 
-        <article class="tile">
+        <article class="tile tile-radar">
           <h3>Кружок самопознания</h3>
+          <p class="muted">Пять осей твоего профиля: нагрузка, общение, цифра, стабильность и готовность учиться.</p>
           <canvas id="radar" width="320" height="260"></canvas>
         </article>
       </div>
 
-      <div class="tile large" id="recommendations"></div>
-      <div class="tile large" id="realShifts"></div>
-      <div class="tile large" id="familyFit"></div>
-      <div class="tile large hidden" id="fallbackBox"></div>
+      <div class="tile large result-section-block" id="recommendations"></div>
+      <div class="tile large result-section-block" id="realShifts"></div>
+      <div class="tile large result-section-block" id="familyFit"></div>
+      <div class="tile large hidden fallback" id="fallbackBox"></div>
     </section>
   </main>
 
   <script src="./landing.js"></script>
 </body>
 </html>
-
