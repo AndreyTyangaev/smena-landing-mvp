@@ -366,9 +366,9 @@ h1 {
   font-size: 30px;
 }
 
-.bubble-left { left: 164px; top: 206px; }
-.bubble-right { right: 142px; top: 264px; }
-.bubble-center { left: 50%; top: 126px; transform: translateX(-50%); width: 74px; height: 74px; }
+.bubble-left { left: 164px; top: 178px; }
+.bubble-right { right: 142px; top: 234px; }
+.bubble-center { left: 50%; top: 102px; transform: translateX(-50%); width: 74px; height: 74px; }
 
 .scene-worker {
   position: absolute;
@@ -383,6 +383,40 @@ h1 {
 
 .worker-right {
   right: 52px;
+}
+
+.worker-female .worker-head {
+  transform: rotate(2deg);
+}
+
+.worker-female .worker-hair {
+  top: 18px;
+  left: 46px;
+  width: 60px;
+  height: 48px;
+  border-radius: 26px 24px 18px 18px;
+  background: linear-gradient(180deg, #6b3a1b 0%, #4d2712 100%);
+}
+
+.worker-female .worker-hair::before,
+.worker-female .worker-hair::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  width: 14px;
+  height: 34px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #6b3a1b 0%, #4d2712 100%);
+}
+
+.worker-female .worker-hair::before {
+  left: -2px;
+  transform: rotate(8deg);
+}
+
+.worker-female .worker-hair::after {
+  right: -4px;
+  transform: rotate(-8deg);
 }
 
 .worker-left {
@@ -445,6 +479,15 @@ h1 {
 
 .worker-right .worker-cap {
   background: linear-gradient(180deg, #ff9d3e 0%, #ef6e08 100%);
+}
+
+.worker-female .worker-cap {
+  top: 8px;
+  left: 42px;
+  width: 76px;
+  height: 24px;
+  border-radius: 999px;
+  box-shadow: 0 8px 0 rgba(210, 98, 8, 0.16);
 }
 
 .worker-body {
@@ -543,6 +586,10 @@ h1 {
 .worker-right .face-mouth {
   width: 18px;
   left: 8px;
+}
+
+.worker-female .face-mouth {
+  border-bottom-color: #cb6a58;
 }
 
 .worker-neck {
@@ -655,6 +702,14 @@ h1 {
   top: 192px;
 }
 
+.worker-female .arm-left {
+  transform: rotate(5deg);
+}
+
+.worker-female .arm-right {
+  transform: rotate(-10deg);
+}
+
 .worker-shoe {
   top: 280px;
   width: 34px;
@@ -690,6 +745,13 @@ h1 {
   border-radius: 20px 20px 0 0;
 }
 
+.worker-female .worker-apron {
+  top: 114px;
+  left: 30px;
+  width: 96px;
+  border-radius: 22px 22px 26px 26px;
+}
+
 .scene-pet {
   position: absolute;
   left: 226px;
@@ -697,6 +759,14 @@ h1 {
   width: 92px;
   height: 96px;
   transform: rotate(-2deg);
+}
+
+.scene-stadium {
+  top: 104px;
+}
+
+.scene-roof {
+  top: 60px;
 }
 
 .scene-spark {
@@ -709,8 +779,8 @@ h1 {
   box-shadow: 0 0 18px rgba(255, 176, 47, 0.42);
 }
 
-.spark-left { top: 72px; right: 132px; }
-.spark-right { bottom: 142px; left: 96px; }
+.spark-left { top: 54px; right: 132px; }
+.spark-right { bottom: 170px; left: 96px; }
 
 .pet-head {
   left: 18px;
@@ -1549,6 +1619,11 @@ h1 {
     width: 84px;
     height: 110px;
   }
+
+  .worker-female .worker-hair {
+    width: 56px;
+    height: 44px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1596,16 +1671,16 @@ h1 {
 
   .bubble-left {
     left: 132px;
-    top: 194px;
+    top: 172px;
   }
 
   .bubble-right {
     right: 96px;
-    top: 238px;
+    top: 214px;
   }
 
   .bubble-center {
-    top: 118px;
+    top: 94px;
   }
 
   .worker-left {
@@ -1618,6 +1693,14 @@ h1 {
 
   .scene-pet {
     left: 150px;
+  }
+
+  .scene-stadium {
+    top: 96px;
+  }
+
+  .scene-roof {
+    top: 52px;
   }
 
   .worker-scarf {
@@ -1637,6 +1720,12 @@ h1 {
     left: 36px;
     width: 78px;
     height: 98px;
+  }
+
+  .worker-female .worker-hair {
+    width: 54px;
+    height: 42px;
+    left: 50px;
   }
 
   .worker-shoe {
