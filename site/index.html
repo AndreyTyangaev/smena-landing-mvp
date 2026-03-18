@@ -45,79 +45,152 @@
           </div>
         </div>
 
-        <div class="hero-scene" aria-hidden="true">
-          <div class="scene-sky-glow"></div>
-          <div class="scene-stadium"></div>
-          <div class="scene-roof roof-left"></div>
-          <div class="scene-roof roof-right"></div>
-          <div class="scene-ground"></div>
-          <div class="scene-path"></div>
-          <div class="scene-tree tree-left"></div>
-          <div class="scene-tree tree-right"></div>
-          <div class="scene-bubble bubble-left">✓</div>
-          <div class="scene-bubble bubble-right">✓</div>
-          <div class="scene-bubble bubble-center">✓</div>
-          <div class="scene-worker worker-left">
-            <span class="worker-cap"></span>
-            <span class="worker-head"></span>
-            <span class="worker-hair"></span>
-            <span class="worker-face">
-              <span class="face-eye eye-left"></span>
-              <span class="face-eye eye-right"></span>
-              <span class="face-nose"></span>
-              <span class="face-mouth"></span>
-            </span>
-            <span class="worker-neck"></span>
-            <span class="worker-scarf"></span>
-            <span class="worker-body"></span>
-            <span class="worker-arm arm-left"></span>
-            <span class="worker-arm arm-right"></span>
-            <span class="worker-hand hand-left"></span>
-            <span class="worker-hand hand-right"></span>
-            <span class="worker-leg leg-left"></span>
-            <span class="worker-leg leg-right"></span>
-            <span class="worker-shoe shoe-left"></span>
-            <span class="worker-shoe shoe-right"></span>
-          </div>
-          <div class="scene-worker worker-right worker-female">
-            <span class="worker-cap"></span>
-            <span class="worker-head"></span>
-            <span class="worker-hair"></span>
-            <span class="worker-face">
-              <span class="face-eye eye-left"></span>
-              <span class="face-eye eye-right"></span>
-              <span class="face-nose"></span>
-              <span class="face-mouth"></span>
-            </span>
-            <span class="worker-neck"></span>
-            <span class="worker-body"></span>
-            <span class="worker-arm arm-left"></span>
-            <span class="worker-arm arm-right"></span>
-            <span class="worker-hand hand-left"></span>
-            <span class="worker-hand hand-right"></span>
-            <span class="worker-leg leg-left"></span>
-            <span class="worker-leg leg-right"></span>
-            <span class="worker-apron"></span>
-            <span class="worker-shoe shoe-left"></span>
-            <span class="worker-shoe shoe-right"></span>
-          </div>
-          <div class="scene-pet">
-            <span class="pet-head"></span>
-            <span class="pet-ear ear-left"></span>
-            <span class="pet-ear ear-right"></span>
-            <span class="pet-face">
-              <span class="pet-eye eye-left"></span>
-              <span class="pet-eye eye-right"></span>
-              <span class="pet-nose"></span>
-            </span>
-            <span class="pet-scarf"></span>
-            <span class="pet-body"></span>
-            <span class="pet-leg leg-front"></span>
-            <span class="pet-leg leg-back"></span>
-            <span class="pet-tail"></span>
-          </div>
-          <div class="scene-spark spark-left"></div>
-          <div class="scene-spark spark-right"></div>
+                <div class="hero-scene" aria-hidden="true">
+          <svg class="hero-illustration" viewBox="0 0 640 520" role="presentation" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#bcdcff"/>
+                <stop offset="55%" stop-color="#dcebff"/>
+                <stop offset="100%" stop-color="#f7fbff"/>
+              </linearGradient>
+              <radialGradient id="sunGlow" cx="50%" cy="10%" r="42%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+                <stop offset="55%" stop-color="#ffffff" stop-opacity="0.28"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="stadiumGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f8fdff"/>
+                <stop offset="30%" stop-color="#cfe3fb"/>
+                <stop offset="72%" stop-color="#89b1e5"/>
+                <stop offset="100%" stop-color="#6e96d1"/>
+              </linearGradient>
+              <linearGradient id="pathGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.84"/>
+                <stop offset="100%" stop-color="#ddeaf9" stop-opacity="0.94"/>
+              </linearGradient>
+              <linearGradient id="coatBlue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2c58c8"/>
+                <stop offset="100%" stop-color="#213f85"/>
+              </linearGradient>
+              <linearGradient id="coatOrange" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ff9636"/>
+                <stop offset="100%" stop-color="#ec6f07"/>
+              </linearGradient>
+              <linearGradient id="skinGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffd9af"/>
+                <stop offset="100%" stop-color="#f2bf84"/>
+              </linearGradient>
+              <linearGradient id="hairBrown" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#6f4122"/>
+                <stop offset="100%" stop-color="#4d2712"/>
+              </linearGradient>
+              <linearGradient id="dogBrown" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#9d622e"/>
+                <stop offset="100%" stop-color="#7a4a23"/>
+              </linearGradient>
+              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#5a84bc" flood-opacity="0.18"/>
+              </filter>
+            </defs>
+            <rect width="640" height="520" fill="url(#skyGrad)"/>
+            <ellipse cx="320" cy="92" rx="170" ry="78" fill="url(#sunGlow)"/>
+            <ellipse cx="320" cy="418" rx="268" ry="98" fill="#f8fbff" opacity="0.95"/>
+            <path d="M222 372C272 312 370 310 420 372V520H222Z" fill="url(#pathGrad)" opacity="0.98"/>
+            <g opacity="0.94" filter="url(#softShadow)">
+              <ellipse cx="320" cy="218" rx="214" ry="88" fill="url(#stadiumGrad)"/>
+              <ellipse cx="320" cy="196" rx="188" ry="42" fill="#edf6ff"/>
+              <rect x="150" y="214" width="340" height="76" rx="34" fill="#8eb5e7"/>
+              <rect x="160" y="224" width="320" height="52" rx="24" fill="#7aa5dd" opacity="0.72"/>
+              <path d="M205 170L172 106" stroke="#5b87d8" stroke-width="11" stroke-linecap="round"/>
+              <path d="M435 170L468 106" stroke="#5b87d8" stroke-width="11" stroke-linecap="round"/>
+              <path d="M266 160L248 108" stroke="#5b87d8" stroke-width="10" stroke-linecap="round"/>
+              <path d="M374 160L392 108" stroke="#5b87d8" stroke-width="10" stroke-linecap="round"/>
+            </g>
+            <g opacity="0.95">
+              <g transform="translate(62 334)">
+                <rect x="0" y="0" width="24" height="72" rx="12" fill="#9bc0ef"/>
+                <ellipse cx="12" cy="-6" rx="22" ry="28" fill="#9bc0ef"/>
+              </g>
+              <g transform="translate(554 334)">
+                <rect x="0" y="0" width="24" height="72" rx="12" fill="#9bc0ef"/>
+                <ellipse cx="12" cy="-6" rx="22" ry="28" fill="#9bc0ef"/>
+              </g>
+            </g>
+            <g filter="url(#softShadow)">
+              <g transform="translate(112 232)">
+                <ellipse cx="66" cy="196" rx="56" ry="12" fill="#b7d1f0"/>
+                <rect x="34" y="40" width="64" height="114" rx="28" fill="url(#coatBlue)"/>
+                <rect x="24" y="40" width="16" height="86" rx="10" fill="url(#coatBlue)" transform="rotate(8 32 83)"/>
+                <rect x="96" y="48" width="16" height="80" rx="10" fill="url(#coatBlue)" transform="rotate(-10 104 88)"/>
+                <rect x="44" y="152" width="18" height="54" rx="10" fill="#294697"/>
+                <rect x="72" y="152" width="18" height="54" rx="10" fill="#294697"/>
+                <rect x="40" y="200" width="28" height="14" rx="7" fill="#1d2a45"/>
+                <rect x="68" y="200" width="28" height="14" rx="7" fill="#1d2a45"/>
+                <rect x="42" y="30" width="50" height="16" rx="8" fill="#277fd4"/>
+                <rect x="76" y="40" width="12" height="40" rx="8" fill="#277fd4" transform="rotate(10 82 60)"/>
+                <ellipse cx="66" cy="8" rx="28" ry="32" fill="url(#skinGrad)"/>
+                <path d="M40 0C44 -16 56 -24 70 -24C84 -24 95 -16 92 0Z" fill="url(#hairBrown)"/>
+                <path d="M28 -10C38 -26 52 -34 70 -34C87 -34 100 -28 108 -12L104 -2H32Z" fill="#3558b7"/>
+                <circle cx="58" cy="6" r="2.8" fill="#1f3452"/>
+                <circle cx="74" cy="6" r="2.8" fill="#1f3452"/>
+                <path d="M61 20Q66 24 71 20" stroke="#c66d49" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <rect x="52" y="114" width="10" height="16" rx="5" fill="url(#skinGrad)"/>
+                <rect x="94" y="114" width="10" height="16" rx="5" fill="url(#skinGrad)"/>
+                <rect x="46" y="74" width="10" height="10" rx="3" fill="#f4ca59"/>
+              </g>
+              <g transform="translate(360 222)">
+                <ellipse cx="72" cy="206" rx="58" ry="12" fill="#b7d1f0"/>
+                <rect x="40" y="54" width="64" height="104" rx="28" fill="url(#coatOrange)"/>
+                <rect x="28" y="56" width="16" height="82" rx="10" fill="url(#coatOrange)" transform="rotate(5 36 97)"/>
+                <rect x="100" y="62" width="16" height="74" rx="10" fill="url(#coatOrange)" transform="rotate(-8 108 99)"/>
+                <rect x="36" y="164" width="18" height="52" rx="10" fill="#ec7b16"/>
+                <rect x="76" y="164" width="18" height="52" rx="10" fill="#ec7b16"/>
+                <rect x="30" y="208" width="30" height="14" rx="7" fill="#1d2a45"/>
+                <rect x="74" y="208" width="30" height="14" rx="7" fill="#1d2a45"/>
+                <ellipse cx="72" cy="16" rx="28" ry="32" fill="url(#skinGrad)"/>
+                <path d="M43 4C43 -18 56 -32 74 -32C92 -32 102 -18 102 6V34H94C90 22 84 14 72 14C60 14 54 22 50 34H43Z" fill="url(#hairBrown)"/>
+                <rect x="48" y="-10" width="52" height="18" rx="9" fill="#ff8518"/>
+                <rect x="28" y="74" width="88" height="122" rx="20" fill="#203457"/>
+                <path d="M62 72Q72 56 82 72" stroke="#203457" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <circle cx="64" cy="16" r="2.8" fill="#1f3452"/>
+                <circle cx="80" cy="16" r="2.8" fill="#1f3452"/>
+                <path d="M66 30Q72 34 79 30" stroke="#ca7057" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <rect x="28" y="122" width="10" height="16" rx="5" fill="url(#skinGrad)"/>
+                <rect x="104" y="120" width="10" height="16" rx="5" fill="url(#skinGrad)"/>
+              </g>
+              <g transform="translate(292 372)">
+                <ellipse cx="34" cy="52" rx="34" ry="10" fill="#bfd6f1"/>
+                <rect x="10" y="16" width="46" height="34" rx="16" fill="url(#dogBrown)"/>
+                <circle cx="32" cy="14" r="16" fill="url(#dogBrown)"/>
+                <path d="M20 4L12 12L18 18Z" fill="#7c4a21"/>
+                <path d="M44 4L52 10L46 18Z" fill="#7c4a21"/>
+                <rect x="12" y="18" width="38" height="10" rx="5" fill="#347fe1"/>
+                <rect x="36" y="24" width="8" height="18" rx="4" fill="#347fe1" transform="rotate(10 40 33)"/>
+                <circle cx="26" cy="12" r="2.2" fill="#23170e"/>
+                <circle cx="38" cy="12" r="2.2" fill="#23170e"/>
+                <circle cx="32" cy="18" r="3" fill="#23170e"/>
+                <rect x="18" y="48" width="7" height="14" rx="4" fill="#74441e"/>
+                <rect x="41" y="48" width="7" height="14" rx="4" fill="#74441e"/>
+                <rect x="52" y="28" width="18" height="8" rx="4" fill="#7c4a21" transform="rotate(26 61 32)"/>
+              </g>
+            </g>
+            <g>
+              <g transform="translate(190 164)">
+                <circle r="34" fill="#ffffff" opacity="0.96"/>
+                <path d="M-10 2L-1 12L12 -10" fill="none" stroke="#27b36a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+              <g transform="translate(430 244)">
+                <circle r="34" fill="#ffffff" opacity="0.96"/>
+                <path d="M-10 2L-1 12L12 -10" fill="none" stroke="#27b36a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+              <g transform="translate(320 122)">
+                <circle r="38" fill="#ffffff" opacity="0.98"/>
+                <path d="M-12 2L-2 14L14 -12" fill="none" stroke="#27b36a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+            </g>
+            <rect x="472" y="78" width="18" height="18" rx="4" fill="#ffbf47" transform="rotate(45 481 87)"/>
+            <rect x="162" y="86" width="14" height="14" rx="3" fill="#4d87e8" transform="rotate(32 169 93)"/>
+          </svg>
         </div>
       </div>
     </div>
@@ -210,3 +283,4 @@
   <script src="./landing.js"></script>
 </body>
 </html>
+
