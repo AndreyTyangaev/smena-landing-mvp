@@ -1,54 +1,1485 @@
-﻿let CITY_SUPPORT={};
-let CITY_OPTIONS=[];let CITY_MATCHERS=[];let CITIES_LOADED=false;let ACTIVE_CITY_INPUT=null;let speechRecognition=null;let speechActive=false;let speechKeepAlive=false;let speechCommittedText="";
-const QUESTIONS=[["work_goal","\u0414\u043b\u044f \u0447\u0435\u0433\u043e \u0442\u044b \u0441\u0435\u0439\u0447\u0430\u0441 \u0438\u0449\u0435\u0448\u044c \u0441\u043c\u0435\u043d\u044b?","\u041e\u043f\u0440\u0435\u0434\u0435\u043b\u0438 \u0433\u043b\u0430\u0432\u043d\u044b\u0439 \u043c\u043e\u0442\u0438\u0432","single",["\u041f\u043e\u0434\u0440\u0430\u0431\u043e\u0442\u043a\u0430","\u041e\u0441\u043d\u043e\u0432\u043d\u043e\u0439 \u0434\u043e\u0445\u043e\u0434","\u0412\u0440\u0435\u043c\u0435\u043d\u043d\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430","\u0418\u0437\u0443\u0447\u0430\u044e \u0432\u0430\u0440\u0438\u0430\u043d\u0442\u044b"]],["city","\u0418\u0437 \u043a\u0430\u043a\u043e\u0433\u043e \u0442\u044b \u0433\u043e\u0440\u043e\u0434\u0430?","\u041d\u0430\u0447\u043d\u0438 \u0432\u0432\u043e\u0434\u0438\u0442\u044c \u0433\u043e\u0440\u043e\u0434 \u0438 \u0432\u044b\u0431\u0435\u0440\u0438 \u0435\u0433\u043e \u0438\u0437 \u0441\u043f\u0438\u0441\u043a\u0430","text"],["shifts_week","\u0421\u043a\u043e\u043b\u044c\u043a\u043e \u0441\u043c\u0435\u043d \u0432 \u043d\u0435\u0434\u0435\u043b\u044e \u043a\u043e\u043c\u0444\u043e\u0440\u0442\u043d\u043e?","\u0412\u044b\u0431\u0435\u0440\u0438 \u0440\u0438\u0442\u043c \u0431\u0435\u0437 \u043f\u0435\u0440\u0435\u0433\u0440\u0443\u0437\u0430","single",["1-2","3-4","5+"]],["age_group","\u0422\u0432\u043e\u0439 \u0432\u043e\u0437\u0440\u0430\u0441\u0442\u043d\u043e\u0439 \u0434\u0438\u0430\u043f\u0430\u0437\u043e\u043d?","\u042d\u0442\u043e \u043f\u043e\u043c\u043e\u0433\u0430\u0435\u0442 \u0442\u043e\u0447\u043d\u0435\u0435 \u043f\u043e\u0434\u043e\u0431\u0440\u0430\u0442\u044c \u0444\u043e\u0440\u043c\u0430\u0442 \u0432\u0445\u043e\u0434\u0430 \u0438 \u0441\u043b\u043e\u0436\u043d\u043e\u0441\u0442\u044c \u0441\u0442\u0430\u0440\u0442\u0430","single",["18-24","25-34","35-44","45-54","55+"]],["physical","\u041a\u0430\u043a\u0430\u044f \u0444\u0438\u0437\u043d\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u043a\u043e\u043c\u0444\u043e\u0440\u0442\u043d\u0430?","\u041e\u0442 \u043b\u0435\u0433\u043a\u0438\u0445 \u0440\u043e\u043b\u0435\u0439 \u0434\u043e \u0431\u043e\u043b\u0435\u0435 \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445 \u0441\u043c\u0435\u043d","single",["\u041b\u0435\u0433\u043a\u0430\u044f","\u0421\u0440\u0435\u0434\u043d\u044f\u044f","\u0422\u044f\u0436\u0435\u043b\u0430\u044f"]],["standing","\u041a\u0430\u043a \u043e\u0442\u043d\u043e\u0441\u0438\u0448\u044c\u0441\u044f \u043a \u0440\u0430\u0431\u043e\u0442\u0435 \u043d\u0430 \u043d\u043e\u0433\u0430\u0445?","\u0415\u0441\u0442\u044c \u0440\u043e\u043b\u0438 \u043d\u0430 \u0432\u0435\u0441\u044c \u0434\u0435\u043d\u044c \u043d\u0430 \u043d\u043e\u0433\u0430\u0445, \u0430 \u0435\u0441\u0442\u044c \u0431\u043e\u043b\u0435\u0435 \u0441\u043f\u043e\u043a\u043e\u0439\u043d\u044b\u0435 \u0444\u043e\u0440\u043c\u0430\u0442\u044b","single",["\u0412\u0441\u044e \u0441\u043c\u0435\u043d\u0443 \u043e\u043a","\u0422\u043e\u043b\u044c\u043a\u043e \u0447\u0430\u0441\u0442\u044c \u0441\u043c\u0435\u043d\u044b","\u041d\u0443\u0436\u043d\u0430 \u0441\u0438\u0434\u044f\u0447\u0430\u044f"]],["outdoor","\u0413\u043e\u0442\u043e\u0432(\u0430) \u0440\u0430\u0431\u043e\u0442\u0430\u0442\u044c \u043d\u0430 \u0443\u043b\u0438\u0446\u0435?","\u042d\u0442\u043e \u0432\u0430\u0436\u043d\u043e \u0434\u043b\u044f \u043a\u0443\u0440\u044c\u0435\u0440\u0441\u043a\u0438\u0445 \u0438 \u0443\u043b\u0438\u0447\u043d\u044b\u0445 \u0437\u0430\u0434\u0430\u0447","single",["\u0414\u0430, \u0432 \u043b\u044e\u0431\u0443\u044e \u043f\u043e\u0433\u043e\u0434\u0443","\u0422\u043e\u043b\u044c\u043a\u043e \u0432 \u0442\u0435\u043f\u043b\u044b\u0439 \u0441\u0435\u0437\u043e\u043d","\u041f\u0440\u0435\u0434\u043f\u043e\u0447\u0438\u0442\u0430\u044e \u0432 \u043f\u043e\u043c\u0435\u0449\u0435\u043d\u0438\u0438"]],["heavy_weight","\u041a\u043e\u043c\u0444\u043e\u0440\u0442\u043d\u043e \u0440\u0435\u0433\u0443\u043b\u044f\u0440\u043d\u043e \u043f\u0435\u0440\u0435\u043d\u043e\u0441\u0438\u0442\u044c 15-20 \u043a\u0433?","\u0421\u043a\u043b\u0430\u0434 \u0438 \u0447\u0430\u0441\u0442\u044c \u0441\u0431\u043e\u0440\u043a\u0438 \u0431\u044b\u0432\u0430\u044e\u0442 \u0444\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0438 \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u043c\u0438","single",["\u0414\u0430, \u043e\u043a","\u0422\u043e\u043b\u044c\u043a\u043e \u0438\u043d\u043e\u0433\u0434\u0430","\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u0442\u044f\u0436\u0435\u043b\u043e\u0433\u043e \u0432\u0435\u0441\u0430"]],["digital","\u041a\u0430\u043a \u0442\u0435\u0431\u0435 \u0440\u0430\u0431\u043e\u0442\u0430 \u0441 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f\u043c\u0438 \u0438 \u0442\u0435\u0440\u043c\u0438\u043d\u0430\u043b\u043e\u043c?","\u042d\u0442\u043e \u0432\u043b\u0438\u044f\u0435\u0442 \u043d\u0430 \u0441\u0431\u043e\u0440\u043a\u0443, \u043a\u0430\u0441\u0441\u0443 \u0438 \u0447\u0430\u0441\u0442\u044c \u0441\u043a\u043b\u0430\u0434\u0441\u043a\u0438\u0445 \u0440\u043e\u043b\u0435\u0439","single",["\u0423\u0432\u0435\u0440\u0435\u043d\u043d\u043e","\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e","\u041b\u0443\u0447\u0448\u0435 \u043f\u043e\u043f\u0440\u043e\u0449\u0435"]],["communication","\u041d\u0430\u0441\u043a\u043e\u043b\u044c\u043a\u043e \u043a\u043e\u043c\u0444\u043e\u0440\u0442\u043d\u043e \u043e\u0431\u0449\u0430\u0442\u044c\u0441\u044f \u0441 \u043a\u043b\u0438\u0435\u043d\u0442\u0430\u043c\u0438?","\u0420\u0430\u0437\u0434\u0435\u043b\u0438\u043c \u0440\u043e\u043b\u0438 \u043d\u0430 \u0444\u0440\u043e\u043d\u0442 \u0438 \u0431\u044d\u043a","single",["\u041b\u044e\u0431\u043b\u044e \u043e\u0431\u0449\u0430\u0442\u044c\u0441\u044f","\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e","\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u043e\u0431\u0449\u0435\u043d\u0438\u044f"]],["pay_model","\u041a\u0430\u043a \u0442\u0435\u0431\u0435 \u0441\u0434\u0435\u043b\u044c\u043d\u0430\u044f \u043e\u043f\u043b\u0430\u0442\u0430?","\u0412 \u043d\u0435\u043a\u043e\u0442\u043e\u0440\u044b\u0445 \u0440\u043e\u043b\u044f\u0445 \u0434\u043e\u0445\u043e\u0434 \u0441\u0438\u043b\u044c\u043d\u0435\u0435 \u0437\u0430\u0432\u0438\u0441\u0438\u0442 \u043e\u0442 \u0442\u0435\u043c\u043f\u0430 \u0438 \u043e\u0431\u044a\u0435\u043c\u0430 \u0437\u0430\u0434\u0430\u0447","single",["\u041b\u044e\u0431\u043b\u044e \u0441\u0434\u0435\u043b\u044c\u043d\u0443\u044e","\u041e\u043a, \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u043c\u0438\u043d\u0438\u043c\u0443\u043c","\u0422\u043e\u043b\u044c\u043a\u043e \u0444\u0438\u043a\u0441 \u0437\u0430 \u0441\u043c\u0435\u043d\u0443"]],["pay_priority","\u0427\u0442\u043e \u0441\u0435\u0439\u0447\u0430\u0441 \u0432\u0430\u0436\u043d\u0435\u0435 \u0432\u0441\u0435\u0433\u043e?","\u0412\u044b\u0431\u0435\u0440\u0438 \u043c\u0435\u0436\u0434\u0443 \u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u043e\u0441\u0442\u044c\u044e, \u0434\u043e\u0445\u043e\u0434\u043e\u043c \u0438 \u043a\u043e\u043c\u0444\u043e\u0440\u0442\u043e\u043c","single",["\u0421\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439 \u043f\u0440\u043e\u0433\u043d\u043e\u0437\u0438\u0440\u0443\u0435\u043c\u044b\u0439 \u0434\u043e\u0445\u043e\u0434","\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c \u0437\u0430\u0440\u0430\u0431\u043e\u0442\u043a\u0430","\u041a\u043e\u043c\u0444\u043e\u0440\u0442 \u0438 \u043c\u0435\u043d\u044c\u0448\u0435 \u0441\u0442\u0440\u0435\u0441\u0441\u0430"]],["skills","\u0413\u0434\u0435 \u0443\u0436\u0435 \u0435\u0441\u0442\u044c \u043e\u043f\u044b\u0442?","\u0412\u044b\u0431\u0435\u0440\u0438 \u0434\u043e 4 \u043d\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0439","multi",["\u0421\u0431\u043e\u0440\u043a\u0430 \u0437\u0430\u043a\u0430\u0437\u043e\u0432","\u0412\u044b\u043a\u043b\u0430\u0434\u043a\u0430 \u0442\u043e\u0432\u0430\u0440\u043e\u0432","\u041a\u0430\u0441\u0441\u0430","\u041a\u0443\u0445\u043d\u044f","\u0411\u0430\u0440\u0438\u0441\u0442\u0430","\u041a\u0443\u0440\u044c\u0435\u0440","\u041a\u043b\u0430\u0434\u043e\u0432\u0449\u0438\u043a","\u041c\u0435\u0440\u0447\u0435\u043d\u0434\u0430\u0439\u0437\u0435\u0440","\u041f\u0440\u043e\u043c\u043e\u0443\u0442\u0435\u0440","\u0423\u0431\u043e\u0440\u043a\u0430 \u043f\u043e\u043c\u0435\u0449\u0435\u043d\u0438\u0439","\u0423\u0431\u043e\u0440\u043a\u0430 \u0442\u0435\u0440\u0440\u0438\u0442\u043e\u0440\u0438\u0438","\u0410\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/\u0445\u043e\u0441\u0442\u0435\u0441"]],["experience_details","\u0420\u0430\u0441\u0441\u043a\u0430\u0436\u0438\u0442\u0435 \u043f\u043e\u0434\u0440\u043e\u0431\u043d\u0435\u0435 \u043e \u0441\u0432\u043e\u0435\u043c \u0440\u0435\u043b\u0435\u0432\u0430\u043d\u0442\u043d\u043e\u043c \u043e\u043f\u044b\u0442\u0435","\u0417\u0434\u0435\u0441\u044c \u043c\u043e\u0436\u043d\u043e \u043e\u0442\u0432\u0435\u0442\u0438\u0442\u044c \u0442\u0435\u043a\u0441\u0442\u043e\u043c \u0438\u043b\u0438 \u0433\u043e\u043b\u043e\u0441\u043e\u043c: \u0433\u0434\u0435 \u0440\u0430\u0431\u043e\u0442\u0430\u043b(\u0430), \u0447\u0442\u043e \u0434\u0435\u043b\u0430\u043b(\u0430), \u0441 \u0447\u0435\u043c \u0447\u0443\u0432\u0441\u0442\u0432\u0443\u0435\u0448\u044c \u0441\u0435\u0431\u044f \u0443\u0432\u0435\u0440\u0435\u043d\u043d\u043e","text_voice_optional"],["interests","\u041a\u0430\u043a\u0438\u0435 \u043d\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f \u0445\u043e\u0447\u0435\u0448\u044c \u043f\u043e\u043f\u0440\u043e\u0431\u043e\u0432\u0430\u0442\u044c?","\u041c\u043e\u0436\u043d\u043e \u0434\u043e 4 \u0432\u0430\u0440\u0438\u0430\u043d\u0442\u043e\u0432","multi",["\u0421\u0431\u043e\u0440\u043a\u0430 \u0437\u0430\u043a\u0430\u0437\u043e\u0432","\u0412\u044b\u043a\u043b\u0430\u0434\u043a\u0430 \u0442\u043e\u0432\u0430\u0440\u043e\u0432","\u041a\u0430\u0441\u0441\u0430","\u041a\u0443\u0445\u043d\u044f","\u0411\u0430\u0440\u0438\u0441\u0442\u0430","\u041a\u0443\u0440\u044c\u0435\u0440","\u041a\u043b\u0430\u0434\u043e\u0432\u0449\u0438\u043a","\u041c\u0435\u0440\u0447\u0435\u043d\u0434\u0430\u0439\u0437\u0435\u0440","\u041f\u0440\u043e\u043c\u043e\u0443\u0442\u0435\u0440","\u0423\u0431\u043e\u0440\u043a\u0430 \u043f\u043e\u043c\u0435\u0449\u0435\u043d\u0438\u0439","\u0423\u0431\u043e\u0440\u043a\u0430 \u0442\u0435\u0440\u0440\u0438\u0442\u043e\u0440\u0438\u0438","\u0410\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/\u0445\u043e\u0441\u0442\u0435\u0441"]],["training_ready","\u0413\u043e\u0442\u043e\u0432(\u0430) \u043f\u0440\u043e\u0439\u0442\u0438 \u043a\u043e\u0440\u043e\u0442\u043a\u043e\u0435 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u0435 1-2 \u0447\u0430\u0441\u0430?","\u042d\u0442\u043e \u043e\u0442\u043a\u0440\u044b\u0432\u0430\u0435\u0442 \u0431\u043e\u043b\u044c\u0448\u0435 \u0440\u043e\u043b\u0435\u0439 \u0438 \u0438\u043d\u043e\u0433\u0434\u0430 \u043f\u043e\u0434\u043d\u0438\u043c\u0430\u0435\u0442 \u0441\u0442\u0430\u0432\u043a\u0443","single",["\u0414\u0430, \u0435\u0441\u043b\u0438 \u044d\u0442\u043e \u0434\u0430\u0441\u0442 \u0431\u043e\u043b\u044c\u0448\u0435 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0435\u0439","\u0422\u043e\u043b\u044c\u043a\u043e \u0435\u0441\u043b\u0438 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043e\u0442\u043a\u043e\u0435","\u041f\u0440\u0435\u0434\u043f\u043e\u0447\u0438\u0442\u0430\u044e \u0431\u0435\u0437 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u044f"]]];
-const ROLES=[{code:"kitchen",role:"\u041a\u0443\u0445\u043e\u043d\u043d\u044b\u0439 \u0440\u0430\u0431\u043e\u0442\u043d\u0438\u043a/\u043f\u043e\u0432\u0430\u0440",family:"\u041a\u0443\u0445\u043d\u044f",pay:5000,tags:["\u041f\u0440\u043e\u0444\u043d\u0430\u0432\u044b\u043a","\u041a\u043e\u043c\u0430\u043d\u0434\u0430","\u0420\u043e\u0441\u0442"],boosts:{skills:["\u041a\u0443\u0445\u043d\u044f"],interests:["\u041a\u0443\u0445\u043d\u044f"]},fit:{physical:["\u041b\u0435\u0433\u043a\u0430\u044f","\u0421\u0440\u0435\u0434\u043d\u044f\u044f"],communication:["\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e","\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u043e\u0431\u0449\u0435\u043d\u0438\u044f"],digital:["\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e","\u041b\u0443\u0447\u0448\u0435 \u043f\u043e\u043f\u0440\u043e\u0449\u0435"],pay_model:["\u0422\u043e\u043b\u044c\u043a\u043e \u0444\u0438\u043a\u0441 \u0437\u0430 \u0441\u043c\u0435\u043d\u0443","\u041e\u043a, \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u043c\u0438\u043d\u0438\u043c\u0443\u043c"]}},{code:"cashier",role:"\u041a\u0430\u0441\u0441\u0438\u0440",family:"\u0420\u0438\u0442\u0435\u0439\u043b",pay:4400,tags:["\u041a\u043b\u0438\u0435\u043d\u0442\u044b","\u0422\u0435\u0440\u043c\u0438\u043d\u0430\u043b","\u0421\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u043e\u0441\u0442\u044c"],boosts:{skills:["\u041a\u0430\u0441\u0441\u0430"],interests:["\u041a\u0430\u0441\u0441\u0430"]},fit:{physical:["\u041b\u0435\u0433\u043a\u0430\u044f","\u0421\u0440\u0435\u0434\u043d\u044f\u044f"],communication:["\u041b\u044e\u0431\u043b\u044e \u043e\u0431\u0449\u0430\u0442\u044c\u0441\u044f","\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e"],digital:["\u0423\u0432\u0435\u0440\u0435\u043d\u043d\u043e","\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e"],pay_model:["\u0422\u043e\u043b\u044c\u043a\u043e \u0444\u0438\u043a\u0441 \u0437\u0430 \u0441\u043c\u0435\u043d\u0443","\u041e\u043a, \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u043c\u0438\u043d\u0438\u043c\u0443\u043c"]}},{code:"collector",role:"\u0421\u0431\u043e\u0440\u0449\u0438\u043a \u0437\u0430\u043a\u0430\u0437\u043e\u0432",family:"\u0421\u0431\u043e\u0440\u043a\u0430 \u0438 \u0434\u0430\u0440\u043a\u0441\u0442\u043e\u0440",pay:4700,tags:["\u0422\u043e\u0447\u043d\u043e\u0441\u0442\u044c","\u0422\u0435\u0440\u043c\u0438\u043d\u0430\u043b","\u0422\u0435\u043c\u043f"],boosts:{skills:["\u0421\u0431\u043e\u0440\u043a\u0430 \u0437\u0430\u043a\u0430\u0437\u043e\u0432"],interests:["\u0421\u0431\u043e\u0440\u043a\u0430 \u0437\u0430\u043a\u0430\u0437\u043e\u0432"]},fit:{physical:["\u0421\u0440\u0435\u0434\u043d\u044f\u044f","\u0422\u044f\u0436\u0435\u043b\u0430\u044f"],communication:["\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u043e\u0431\u0449\u0435\u043d\u0438\u044f","\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e"],digital:["\u0423\u0432\u0435\u0440\u0435\u043d\u043d\u043e","\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e"],pay_model:["\u041e\u043a, \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u043c\u0438\u043d\u0438\u043c\u0443\u043c","\u041b\u044e\u0431\u043b\u044e \u0441\u0434\u0435\u043b\u044c\u043d\u0443\u044e"]}},{code:"retail_floor",role:"\u0420\u0430\u0431\u043e\u0442\u043d\u0438\u043a \u0442\u043e\u0440\u0433\u043e\u0432\u043e\u0433\u043e \u0437\u0430\u043b\u0430",family:"\u0422\u043e\u0440\u0433\u043e\u0432\u044b\u0439 \u0437\u0430\u043b",pay:4100,tags:["\u041f\u043e\u0440\u044f\u0434\u043e\u043a","\u041f\u043b\u0430\u043d\u043e\u0433\u0440\u0430\u043c\u043c\u0430","\u041c\u0430\u0433\u0430\u0437\u0438\u043d"],boosts:{skills:["\u0412\u044b\u043a\u043b\u0430\u0434\u043a\u0430 \u0442\u043e\u0432\u0430\u0440\u043e\u0432","\u041c\u0435\u0440\u0447\u0435\u043d\u0434\u0430\u0439\u0437\u0435\u0440"],interests:["\u0412\u044b\u043a\u043b\u0430\u0434\u043a\u0430 \u0442\u043e\u0432\u0430\u0440\u043e\u0432","\u041c\u0435\u0440\u0447\u0435\u043d\u0434\u0430\u0439\u0437\u0435\u0440"]},fit:{physical:["\u041b\u0435\u0433\u043a\u0430\u044f","\u0421\u0440\u0435\u0434\u043d\u044f\u044f"],communication:["\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e","\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u043e\u0431\u0449\u0435\u043d\u0438\u044f"],digital:["\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e","\u041b\u0443\u0447\u0448\u0435 \u043f\u043e\u043f\u0440\u043e\u0449\u0435"],pay_model:["\u0422\u043e\u043b\u044c\u043a\u043e \u0444\u0438\u043a\u0441 \u0437\u0430 \u0441\u043c\u0435\u043d\u0443"]}},{code:"barista",role:"\u0411\u0430\u0440\u0438\u0441\u0442\u0430",family:"\u041a\u043e\u0444\u0435 \u0438 \u0441\u0435\u0440\u0432\u0438\u0441",pay:4800,tags:["\u0421\u0435\u0440\u0432\u0438\u0441","\u041a\u043e\u043c\u0430\u043d\u0434\u0430","\u041e\u0431\u0443\u0447\u0435\u043d\u0438\u0435"],boosts:{skills:["\u0411\u0430\u0440\u0438\u0441\u0442\u0430"],interests:["\u0411\u0430\u0440\u0438\u0441\u0442\u0430"]},fit:{physical:["\u041b\u0435\u0433\u043a\u0430\u044f","\u0421\u0440\u0435\u0434\u043d\u044f\u044f"],communication:["\u041b\u044e\u0431\u043b\u044e \u043e\u0431\u0449\u0430\u0442\u044c\u0441\u044f","\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e"],digital:["\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e","\u0423\u0432\u0435\u0440\u0435\u043d\u043d\u043e"],pay_model:["\u0422\u043e\u043b\u044c\u043a\u043e \u0444\u0438\u043a\u0441 \u0437\u0430 \u0441\u043c\u0435\u043d\u0443","\u041e\u043a, \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u043c\u0438\u043d\u0438\u043c\u0443\u043c"]}},{code:"courier",role:"\u041a\u0443\u0440\u044c\u0435\u0440",family:"\u0414\u043e\u0441\u0442\u0430\u0432\u043a\u0430",pay:5600,tags:["\u0414\u0432\u0438\u0436\u0435\u043d\u0438\u0435","\u0421\u0434\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c","\u0423\u043b\u0438\u0446\u0430"],boosts:{skills:["\u041a\u0443\u0440\u044c\u0435\u0440"],interests:["\u041a\u0443\u0440\u044c\u0435\u0440"]},fit:{physical:["\u0421\u0440\u0435\u0434\u043d\u044f\u044f","\u0422\u044f\u0436\u0435\u043b\u0430\u044f"],outdoor:["\u0414\u0430, \u0432 \u043b\u044e\u0431\u0443\u044e \u043f\u043e\u0433\u043e\u0434\u0443","\u0422\u043e\u043b\u044c\u043a\u043e \u0432 \u0442\u0435\u043f\u043b\u044b\u0439 \u0441\u0435\u0437\u043e\u043d"],communication:["\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e","\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u043e\u0431\u0449\u0435\u043d\u0438\u044f"],pay_model:["\u041b\u044e\u0431\u043b\u044e \u0441\u0434\u0435\u043b\u044c\u043d\u0443\u044e","\u041e\u043a, \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u043c\u0438\u043d\u0438\u043c\u0443\u043c"]}},{code:"warehouse",role:"\u041a\u043b\u0430\u0434\u043e\u0432\u0449\u0438\u043a",family:"\u0421\u043a\u043b\u0430\u0434",pay:4900,tags:["\u0421\u043a\u043b\u0430\u0434","\u0422\u0435\u043c\u043f","\u041c\u043e\u0449\u043d\u043e\u0441\u0442\u044c"],boosts:{skills:["\u041a\u043b\u0430\u0434\u043e\u0432\u0449\u0438\u043a","\u0421\u0431\u043e\u0440\u043a\u0430 \u0437\u0430\u043a\u0430\u0437\u043e\u0432"],interests:["\u041a\u043b\u0430\u0434\u043e\u0432\u0449\u0438\u043a","\u0421\u0431\u043e\u0440\u043a\u0430 \u0437\u0430\u043a\u0430\u0437\u043e\u0432"]},fit:{physical:["\u0421\u0440\u0435\u0434\u043d\u044f\u044f","\u0422\u044f\u0436\u0435\u043b\u0430\u044f"],communication:["\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u043e\u0431\u0449\u0435\u043d\u0438\u044f"],digital:["\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e","\u0423\u0432\u0435\u0440\u0435\u043d\u043d\u043e"],pay_model:["\u0422\u043e\u043b\u044c\u043a\u043e \u0444\u0438\u043a\u0441 \u0437\u0430 \u0441\u043c\u0435\u043d\u0443","\u041e\u043a, \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u043c\u0438\u043d\u0438\u043c\u0443\u043c"]}},{code:"promoter",role:"\u041f\u0440\u043e\u043c\u043e\u0443\u0442\u0435\u0440",family:"\u041f\u0440\u043e\u043c\u043e \u0438 \u0441\u043e\u0431\u044b\u0442\u0438\u044f",pay:3900,tags:["\u041a\u043e\u043c\u043c\u0443\u043d\u0438\u043a\u0430\u0446\u0438\u044f","\u041b\u0435\u0433\u043a\u0438\u0439 \u0432\u0445\u043e\u0434","\u0413\u0438\u0431\u043a\u043e\u0441\u0442\u044c"],boosts:{skills:["\u041f\u0440\u043e\u043c\u043e\u0443\u0442\u0435\u0440","\u0410\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/\u0445\u043e\u0441\u0442\u0435\u0441"],interests:["\u041f\u0440\u043e\u043c\u043e\u0443\u0442\u0435\u0440","\u0410\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/\u0445\u043e\u0441\u0442\u0435\u0441"]},fit:{physical:["\u041b\u0435\u0433\u043a\u0430\u044f","\u0421\u0440\u0435\u0434\u043d\u044f\u044f"],communication:["\u041b\u044e\u0431\u043b\u044e \u043e\u0431\u0449\u0430\u0442\u044c\u0441\u044f"],digital:["\u041b\u0443\u0447\u0448\u0435 \u043f\u043e\u043f\u0440\u043e\u0449\u0435","\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e"],pay_model:["\u0422\u043e\u043b\u044c\u043a\u043e \u0444\u0438\u043a\u0441 \u0437\u0430 \u0441\u043c\u0435\u043d\u0443","\u041e\u043a, \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u043c\u0438\u043d\u0438\u043c\u0443\u043c"]}},{code:"cleaner_indoor",role:"\u0423\u0431\u043e\u0440\u043a\u0430 \u043f\u043e\u043c\u0435\u0449\u0435\u043d\u0438\u0439",family:"\u041a\u043b\u0438\u043d\u0438\u043d\u0433",pay:3900,tags:["cleaner","\u041f\u0440\u043e\u0441\u0442\u043e\u0439 \u0432\u0445\u043e\u0434","\u0411\u0435\u0437 \u0446\u0438\u0444\u0440\u044b"],boosts:{skills:["\u0423\u0431\u043e\u0440\u043a\u0430 \u043f\u043e\u043c\u0435\u0449\u0435\u043d\u0438\u0439"],interests:["\u0423\u0431\u043e\u0440\u043a\u0430 \u043f\u043e\u043c\u0435\u0449\u0435\u043d\u0438\u0439"]},fit:{physical:["\u041b\u0435\u0433\u043a\u0430\u044f","\u0421\u0440\u0435\u0434\u043d\u044f\u044f"],communication:["\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u043e\u0431\u0449\u0435\u043d\u0438\u044f"],digital:["\u041b\u0443\u0447\u0448\u0435 \u043f\u043e\u043f\u0440\u043e\u0449\u0435"],pay_model:["\u0422\u043e\u043b\u044c\u043a\u043e \u0444\u0438\u043a\u0441 \u0437\u0430 \u0441\u043c\u0435\u043d\u0443"]}},{code:"cleaner_outdoor",role:"\u0423\u0431\u043e\u0440\u043a\u0430 \u0442\u0435\u0440\u0440\u0438\u0442\u043e\u0440\u0438\u0438",family:"\u041a\u043b\u0438\u043d\u0438\u043d\u0433",pay:4700,tags:["cleaner","cold_conditions","heavy_weight"],boosts:{skills:["\u0423\u0431\u043e\u0440\u043a\u0430 \u0442\u0435\u0440\u0440\u0438\u0442\u043e\u0440\u0438\u0438"],interests:["\u0423\u0431\u043e\u0440\u043a\u0430 \u0442\u0435\u0440\u0440\u0438\u0442\u043e\u0440\u0438\u0438"]},fit:{physical:["\u0421\u0440\u0435\u0434\u043d\u044f\u044f","\u0422\u044f\u0436\u0435\u043b\u0430\u044f"],outdoor:["\u0414\u0430, \u0432 \u043b\u044e\u0431\u0443\u044e \u043f\u043e\u0433\u043e\u0434\u0443","\u0422\u043e\u043b\u044c\u043a\u043e \u0432 \u0442\u0435\u043f\u043b\u044b\u0439 \u0441\u0435\u0437\u043e\u043d"],communication:["\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u043e\u0431\u0449\u0435\u043d\u0438\u044f"],pay_model:["\u0422\u043e\u043b\u044c\u043a\u043e \u0444\u0438\u043a\u0441 \u0437\u0430 \u0441\u043c\u0435\u043d\u0443"]}}];
-const STATE={i:0,answers:{},selected:[],badges:[],citySource:null,lastRecommendations:[],score:{physical:50,communication:50,digital:50,stability:50,learning:50}};
-const UI={hero:document.querySelector(".hero"),startBtn:document.getElementById("startBtn"),quiz:document.getElementById("quizSection"),result:document.getElementById("resultSection"),title:document.getElementById("questionTitle"),hint:document.getElementById("questionHint"),options:document.getElementById("options"),inputWrap:document.getElementById("inputWrap"),textAnswer:document.getElementById("textAnswer"),textNextBtn:document.getElementById("textNextBtn"),skipTextBtn:document.getElementById("skipTextBtn"),voiceControls:document.getElementById("voiceControls"),voiceBtn:document.getElementById("voiceBtn"),voiceStatus:document.getElementById("voiceStatus"),cityAutocomplete:document.getElementById("cityAutocomplete"),badges:document.getElementById("badges"),progressText:document.getElementById("progressText"),progressBar:document.getElementById("progressBar"),multiActions:document.getElementById("multiActions"),doneMultiBtn:document.getElementById("doneMultiBtn"),profileName:document.getElementById("profileName"),profileDesc:document.getElementById("profileDesc"),incomeForecast:document.getElementById("incomeForecast"),trainReadiness:document.getElementById("trainReadiness"),topScore:document.getElementById("topScore"),recommendations:document.getElementById("recommendations"),realShifts:document.getElementById("realShifts"),familyFit:document.getElementById("familyFit"),fallbackBox:document.getElementById("fallbackBox"),editLocationBtn:document.getElementById("editLocationBtn"),locationEditor:document.getElementById("locationEditor"),resultCityInput:document.getElementById("resultCityInput"),resultCityAutocomplete:document.getElementById("resultCityAutocomplete"),saveLocationBtn:document.getElementById("saveLocationBtn"),cancelLocationBtn:document.getElementById("cancelLocationBtn"),restartBtn:document.getElementById("restartBtn"),downloadBtn:document.getElementById("downloadBtn"),radar:document.getElementById("radar")};
-UI.startBtn.addEventListener("click",startQuiz);UI.doneMultiBtn.addEventListener("click",submitMulti);UI.textNextBtn.addEventListener("click",submitText);UI.skipTextBtn.addEventListener("click",skipTextQuestion);UI.textAnswer.addEventListener("keydown",e=>{const question=QUESTIONS[STATE.i];const type=question?.[3];if(e.key==="Enter"&&!e.shiftKey&&type!=="text_voice_optional"){e.preventDefault();submitText();}});UI.textAnswer.addEventListener("input",()=>{autoResizeTextAnswer();handleCityInput(UI.textAnswer,UI.cityAutocomplete);});UI.textAnswer.addEventListener("focus",()=>handleCityInput(UI.textAnswer,UI.cityAutocomplete));UI.voiceBtn.addEventListener("click",toggleVoiceInput);UI.editLocationBtn.addEventListener("click",openLocationEditor);UI.saveLocationBtn.addEventListener("click",applyLocationChanges);UI.cancelLocationBtn.addEventListener("click",closeLocationEditor);UI.resultCityInput.addEventListener("input",syncLocationEditorState);UI.resultCityInput.addEventListener("input",()=>handleCityInput(UI.resultCityInput,UI.resultCityAutocomplete));UI.resultCityInput.addEventListener("focus",()=>handleCityInput(UI.resultCityInput,UI.resultCityAutocomplete));UI.restartBtn.addEventListener("click",startQuiz);if(UI.downloadBtn)UI.downloadBtn.addEventListener("click",downloadProfile);document.addEventListener("click",handleOutsideAutocompleteClick);loadCitiesConfig();
-function startQuiz(){resetState();if(UI.hero)UI.hero.classList.add("hidden");UI.result.classList.add("hidden");UI.recommendations.innerHTML="";UI.realShifts.innerHTML="";UI.familyFit.innerHTML="";UI.fallbackBox.innerHTML="";UI.fallbackBox.classList.add("hidden");UI.quiz.classList.remove("hidden");closeLocationEditor();UI.quiz.scrollIntoView({behavior:"smooth",block:"start"});render();}
-function resetState(){STATE.i=0;STATE.answers={};STATE.selected=[];STATE.badges=[];STATE.citySource=null;STATE.lastRecommendations=[];STATE.score={physical:50,communication:50,digital:50,stability:50,learning:50};UI.textAnswer.value="";autoResizeTextAnswer();UI.resultCityInput.value="";hideAutocomplete(UI.cityAutocomplete);hideAutocomplete(UI.resultCityAutocomplete);UI.inputWrap.classList.add("hidden");UI.multiActions.classList.add("hidden");UI.voiceControls.classList.add("hidden");UI.skipTextBtn.classList.add("hidden");stopVoiceInput();}
-function render(){const[id,text,hint,type,options]=QUESTIONS[STATE.i];STATE.selected=Array.isArray(STATE.answers[id])?[...STATE.answers[id]]:[];const tiledMulti=id==="skills"||id==="interests";UI.title.textContent=text;UI.hint.textContent=tiledMulti?"Можно выбрать любое количество направлений":hint;UI.progressText.textContent=`${STATE.i+1}/${QUESTIONS.length}`;UI.progressBar.style.width=`${((STATE.i+1)/QUESTIONS.length)*100}%`;UI.badges.innerHTML=STATE.badges.map(x=>`<span class="badge">${escapeHtml(x)}</span>`).join("");UI.options.innerHTML="";UI.options.classList.toggle("options-tiled",tiledMulti);UI.inputWrap.classList.add("hidden");UI.multiActions.classList.add("hidden");UI.voiceControls.classList.add("hidden");UI.skipTextBtn.classList.add("hidden");UI.textAnswer.value="";autoResizeTextAnswer();hideAutocomplete(UI.cityAutocomplete);ACTIVE_CITY_INPUT=null;if(type==="single"){options.forEach(o=>UI.options.appendChild(makeOption(o,()=>answerSingle(id,o))));return;}if(type==="multi"){options.forEach(o=>{const button=makeOption(o,()=>toggleMulti(o));if(STATE.selected.includes(o))button.classList.add("selected");UI.options.appendChild(button);});UI.multiActions.classList.remove("hidden");return;}UI.inputWrap.classList.remove("hidden");UI.textAnswer.placeholder=getTextPlaceholder(id);UI.textAnswer.value=STATE.answers[id]||"";autoResizeTextAnswer();if(id==="city")ACTIVE_CITY_INPUT=UI.textAnswer;if(type==="text_optional"||type==="text_voice_optional")UI.skipTextBtn.classList.remove("hidden");configureVoiceControls(id);handleCityInput(UI.textAnswer,UI.cityAutocomplete);setTimeout(()=>UI.textAnswer.focus(),30);}
-function makeOption(text,handler){const button=document.createElement("button");button.type="button";button.className="option";button.textContent=text;button.addEventListener("click",handler);return button;}
-function toggleMulti(option){const isSelected=STATE.selected.includes(option);if(isSelected)STATE.selected=STATE.selected.filter(item=>item!==option);else STATE.selected.push(option);[...UI.options.querySelectorAll(".option")].forEach(node=>node.classList.toggle("selected",STATE.selected.includes(node.textContent)));}
-function answerSingle(id,answer){STATE.answers[id]=answer;adaptScore(id,answer);grantBadge(id,answer);next();}
-function submitMulti(){const[id]=QUESTIONS[STATE.i];STATE.answers[id]=[...STATE.selected];adaptScore(id,STATE.selected);grantBadge(id,STATE.selected);next();}
-function submitText(){const[id,,,type]=QUESTIONS[STATE.i];const value=UI.textAnswer.value.trim();if(!value&&type==="text")return;if(id==="city"){const meta=resolveCityMeta(value);if(!meta){handleCityInput(UI.textAnswer,UI.cityAutocomplete,true);return;}STATE.answers.city=meta.label;STATE.citySource=meta;}else{STATE.answers[id]=value;}if(id==="experience_details"){adaptScore(id,value);grantBadge(id,value);}next();}
-function skipTextQuestion(){const[id]=QUESTIONS[STATE.i];STATE.answers[id]="";next();}
-function next(){STATE.i+=1;if(STATE.i>=QUESTIONS.length){finishQuiz();return;}render();}
-function finishQuiz(){UI.quiz.classList.add("hidden");UI.result.classList.remove("hidden");const recommendations=computeRecommendations();STATE.lastRecommendations=recommendations;renderProfile(recommendations);renderRecommendations(recommendations.slice(0,3));renderFamilyFit(recommendations);renderCityOffersLink();drawRadar();UI.result.scrollIntoView({behavior:"smooth",block:"start"});}
-function computeRecommendations(){const scored=ROLES.map(role=>({...role,score:scoreRole(role)})).sort((a,b)=>b.score-a.score);enforceCleaningRule(scored);return scored;}
-function scoreRole(role){let score=52;const addMatch=(answerKey,goodAnswers,points,missPenalty=0)=>{const answer=STATE.answers[answerKey];if(!answer)return;if(Array.isArray(answer)){const matches=answer.filter(item=>goodAnswers.includes(item)).length;score+=matches*points;if(!matches)score-=missPenalty;return;}if(goodAnswers.includes(answer))score+=points;else score-=missPenalty;};addMatch("physical",role.fit.physical||[],10,8);addMatch("communication",role.fit.communication||[],11,9);addMatch("digital",role.fit.digital||[],9,7);addMatch("pay_model",role.fit.pay_model||[],8,6);addMatch("outdoor",role.fit.outdoor||[],8,8);addMatch("skills",role.boosts.skills||[],12,0);addMatch("interests",role.boosts.interests||[],10,0);if(STATE.answers.heavy_weight==="\u041b\u0443\u0447\u0448\u0435 \u0431\u0435\u0437 \u0442\u044f\u0436\u0435\u043b\u043e\u0433\u043e \u0432\u0435\u0441\u0430"&&["warehouse","cleaner_outdoor","courier","collector"].includes(role.code))score-=12;if(STATE.answers.standing==="\u041d\u0443\u0436\u043d\u0430 \u0441\u0438\u0434\u044f\u0447\u0430\u044f"&&["cashier","retail_floor","barista","courier","collector"].includes(role.code))score-=12;if(STATE.answers.pay_priority==="\u0421\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439 \u043f\u0440\u043e\u0433\u043d\u043e\u0437\u0438\u0440\u0443\u0435\u043c\u044b\u0439 \u0434\u043e\u0445\u043e\u0434"&&["cashier","retail_floor","kitchen"].includes(role.code))score+=8;if(STATE.answers.pay_priority==="\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c \u0437\u0430\u0440\u0430\u0431\u043e\u0442\u043a\u0430"&&["courier","warehouse","collector"].includes(role.code))score+=8;if(STATE.answers.pay_priority==="\u041a\u043e\u043c\u0444\u043e\u0440\u0442 \u0438 \u043c\u0435\u043d\u044c\u0448\u0435 \u0441\u0442\u0440\u0435\u0441\u0441\u0430"&&["retail_floor","cleaner_indoor","promoter"].includes(role.code))score+=6;if(STATE.answers.training_ready==="\u0414\u0430, \u0435\u0441\u043b\u0438 \u044d\u0442\u043e \u0434\u0430\u0441\u0442 \u0431\u043e\u043b\u044c\u0448\u0435 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0435\u0439"&&["barista","cashier","kitchen"].includes(role.code))score+=5;if((STATE.answers.experience_details||"").trim().length>40)score+=["kitchen","cashier","barista"].includes(role.code)?4:2;if(STATE.answers.age_group==="55+"&&["promoter","courier","cleaner_outdoor"].includes(role.code))score-=4;if(role.code.startsWith("cleaner"))score-=8;return clamp(Math.round(score),18,100);}
-function enforceCleaningRule(items){items.sort((a,b)=>{const aCleaning=a.tags.includes("cleaner");const bCleaning=b.tags.includes("cleaner");if(aCleaning!==bCleaning)return aCleaning?1:-1;return b.score-a.score;});const top1=items.find(item=>!item.tags.includes("cleaner"));if(!top1)return;items.forEach(item=>{if(item.tags.includes("cleaner"))item.score=Math.min(item.score,Math.max(25,top1.score-1));});items.sort((a,b)=>b.score-a.score);}
-function renderProfile(recommendations){const top=recommendations[0];UI.profileName.textContent=buildProfileName(top);UI.profileDesc.textContent=buildProfileDescription(top);UI.incomeForecast.textContent=`${formatMoney(top.pay*4)} \u20bd`;UI.trainReadiness.textContent=mapTrainingReadiness();UI.topScore.textContent=`${top.score}%`;}
-function buildProfileName(top){if(top.code==="kitchen")return"\u0422\u044b - \u043c\u0430\u0441\u0442\u0435\u0440 \u0441\u043f\u043e\u043a\u043e\u0439\u043d\u043e\u0433\u043e \u0442\u0435\u043c\u043f\u0430";if(top.code==="courier")return"\u0422\u044b - \u043e\u0445\u043e\u0442\u043d\u0438\u043a \u0437\u0430 \u0434\u0432\u0438\u0436\u0435\u043d\u0438\u0435\u043c \u0438 \u0434\u043e\u0445\u043e\u0434\u043e\u043c";if(top.code==="cashier")return"\u0422\u044b - \u0443\u0432\u0435\u0440\u0435\u043d\u043d\u044b\u0439 \u0444\u0440\u043e\u043d\u0442-\u043b\u0438\u043d\u0435\u0439\u043d\u044b\u0439 \u043f\u0440\u043e\u0444\u0438";if(top.code==="collector")return"\u0422\u044b - \u0441\u0438\u0441\u0442\u0435\u043c\u043d\u044b\u0439 \u0441\u0431\u043e\u0440\u0449\u0438\u043a \u0441 \u0447\u0443\u0432\u0441\u0442\u0432\u043e\u043c \u0440\u0438\u0442\u043c\u0430";return`\u0422\u044b - ${top.family.toLowerCase()}-\u043f\u0440\u043e\u0444\u0438\u043b\u044c \u0441 \u0445\u043e\u0440\u043e\u0448\u0438\u043c \u043f\u043e\u0442\u0435\u043d\u0446\u0438\u0430\u043b\u043e\u043c`;}
-function buildProfileDescription(top){return`\u0421\u0443\u0434\u044f \u043f\u043e \u043e\u0442\u0432\u0435\u0442\u0430\u043c, \u0442\u0435\u0431\u0435 \u043f\u043e\u0434\u0445\u043e\u0434\u044f\u0442 \u0440\u043e\u043b\u0438 \u0441\u0435\u043c\u0435\u0439\u0441\u0442\u0432\u0430 \u00ab${top.family}\u00bb: \u043f\u043e \u0443\u0440\u043e\u0432\u043d\u044e \u043d\u0430\u0433\u0440\u0443\u0437\u043a\u0438, \u0444\u043e\u0440\u043c\u0430\u0442\u0443 \u043e\u043f\u043b\u0430\u0442\u044b \u0438 \u0442\u0435\u043c\u043f\u0443 \u0432\u0445\u043e\u0434\u0430.`;}
-function mapTrainingReadiness(){const answer=STATE.answers.training_ready;if(answer==="\u0414\u0430, \u0435\u0441\u043b\u0438 \u044d\u0442\u043e \u0434\u0430\u0441\u0442 \u0431\u043e\u043b\u044c\u0448\u0435 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0435\u0439")return"\u0412\u044b\u0441\u043e\u043a\u0430\u044f";if(answer==="\u0422\u043e\u043b\u044c\u043a\u043e \u0435\u0441\u043b\u0438 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043e\u0442\u043a\u043e\u0435")return"\u0421\u0440\u0435\u0434\u043d\u044f\u044f";return"\u041d\u0438\u0437\u043a\u0430\u044f";}
-function renderRecommendations(recommendations){UI.recommendations.innerHTML=`<div class="section-head"><div class="section-head-copy"><p class="section-overline">Твоя карта ролей</p><h3>Топ-3 профессии для тебя</h3><p class="muted">Это роли, которые лучше всего совпали с твоим профилем и форматом работы на платформе.</p></div></div><div class="role-list">${recommendations.map(renderRoleCard).join("")}</div>`;}function renderRoleCard(role){return`<article class="rec-card role-card"><div class="role-card-top"><span class="role-family-pill">${escapeHtml(role.family)}</span><span class="role-score">${role.score}%</span></div><h4>${escapeHtml(role.role)}</h4><p class="role-lead">${escapeHtml(describeRoleLead(role))}</p><div class="role-meta"><div class="role-stat"><span>Формат</span><strong>${escapeHtml(role.family)}</strong></div><div class="role-stat"><span>Ориентир по ставке</span><strong>${formatMoney(role.pay)} ₽ / смена</strong></div></div><div class="role-tags">${role.tags.map(tag=>`<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div></article>`;}function describeRoleLead(role){if(role.code==="kitchen")return"Подойдет, если тебе ближе понятный процесс, команда и стабильный темп.";if(role.code==="cashier")return"Хороший вход для тех, кому ок общение, понятные правила и фиксированный ритм.";if(role.code==="collector")return"Сильный вариант для тех, кто любит темп, точность и работу без лишнего шума.";if(role.code==="retail_floor")return"Подходит, если комфортен магазинный формат, порядок и умеренная нагрузка.";if(role.code==="barista")return"Роль для людей с сервисным настроем, вниманием к деталям и вкусом к динамике.";if(role.code==="courier")return"Сильный матч для тех, кто любит движение, гибкость и быстрый результат за смену.";if(role.code==="warehouse")return"Подойдет, если ок складской ритм, физическая активность и четкие задачи.";if(role.code==="promoter")return"Хороший старт для тех, кто любит контакт с людьми и легкий вход в работу.";if(role.code==="cleaner_indoor")return"Спокойный формат для тех, кому важны понятные задачи и невысокий цифровой порог.";if(role.code==="cleaner_outdoor")return"Вариант для тех, кто готов к уличному формату и более активной нагрузке.";return"Подходит по сочетанию темпа, условий и формата входа на платформе.";}function renderFamilyFit(recommendations){const families=new Map();recommendations.forEach(role=>{if(!families.has(role.family))families.set(role.family,[]);families.get(role.family).push(role.score);});const rows=Array.from(families.entries()).map(([family,values])=>{const avg=values.reduce((sum,value)=>sum+value,0)/values.length;const max=Math.max(...values);const score=clamp(Math.round(avg*0.65+max*0.35),18,100);return{family,score};}).sort((a,b)=>b.score-a.score);UI.familyFit.innerHTML=`<div class="section-head"><div class="section-head-copy"><p class="section-overline">Семейства профессий</p><h3>Каталог профессий Смены</h3><p class="muted">Слева самые подходящие направления, дальше семейства идут по убыванию совпадения.</p></div></div><div class="family-columns">${rows.map(item=>`<div class="rec-card family-card compact-family-card"><div class="family-row"><strong>${escapeHtml(item.family)}</strong><span class="score-chip">${item.score}%</span></div><div class="family-progress compact-family-progress"><span style="width:${item.score}%"></span></div></div>`).join("")}</div>`;}async function renderCityOffersLink(){const cityMeta=STATE.citySource||resolveCityMeta(STATE.answers.city||"");const cityLabel=cityMeta?.label||STATE.answers.city||"";const offersUrl=cityMeta?.offersUrl||"";if(!cityLabel){UI.realShifts.innerHTML=`<div class="section-head"><div class="section-head-copy"><p class="section-overline">Следующий шаг</p><h3>Смены в твоем городе</h3></div></div>`;return;}if(!offersUrl){UI.realShifts.innerHTML=`<div class="section-head"><div class="section-head-copy"><p class="section-overline">Следующий шаг</p><h3>Смены в твоем городе</h3></div></div><div class="rec-card city-link-card compact-city-link-card"><a class="shift-link shift-cta" href="#" onclick="return false;">Витрина для ${escapeHtml(cityLabel)} появится позже</a></div>`;return;}UI.realShifts.innerHTML=`<div class="section-head"><div class="section-head-copy"><p class="section-overline">Следующий шаг</p><h3>Смены в твоем городе</h3></div></div><div class="rec-card city-link-card compact-city-link-card"><a class="shift-link shift-cta" href="${escapeHtmlAttr(offersUrl)}" target="_blank" rel="noopener noreferrer">Открыть смены в ${escapeHtml(cityLabel)}</a></div>`;}function buildShiftLocationText(shift){return[shift.address||"",shift.station||"",shift.landmark||""].join(" ").trim();}function scoreShift(shift,topRoles,metro){const title=normalize(shift.title);const location=normalize(buildShiftLocationText(shift));let score=50;topRoles.forEach((role,index)=>{const weight=12-index*3;if(title.includes(normalize(role.family))||title.includes(normalize(role.role)))score+=weight;if((role.boosts.skills||[]).some(item=>title.includes(normalize(item))))score+=weight+2;});if(metro){metro.split(",").map(item=>normalize(item)).filter(Boolean).forEach(item=>{if(location.includes(item))score+=8;});}return clamp(Math.round(score),30,100);}
-function renderShiftCard(shift){const linkLabel=shift.isDirectUrl?"\u041f\u0440\u044f\u043c\u0430\u044f \u0441\u0441\u044b\u043b\u043a\u0430":"\u0421\u0441\u044b\u043b\u043a\u0430 \u043d\u0430 \u0441\u043f\u0438\u0441\u043e\u043a \u0441\u043c\u0435\u043d";const ctaLabel=shift.isDirectUrl?"\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0441\u043c\u0435\u043d\u0443":"\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0441\u043f\u0438\u0441\u043e\u043a \u0441\u043c\u0435\u043d \u043d\u0430 \u044d\u0442\u0443 \u0434\u0430\u0442\u0443";const href=shift.isDirectUrl?shift.url:shift.listUrl;const reason=explainShiftFit(shift);const whereLine=shift.address||shift.landmark||"\u0410\u0434\u0440\u0435\u0441 \u0443\u0442\u043e\u0447\u043d\u044f\u0435\u0442\u0441\u044f";const stationLine=shift.station?`<p><strong>\u041c\u0435\u0442\u0440\u043e:</strong> ${escapeHtml(shift.station)}</p>`:"";const landmarkLine=shift.landmark&&shift.landmark!==whereLine?`<p><strong>\u041e\u0440\u0438\u0435\u043d\u0442\u0438\u0440:</strong> ${escapeHtml(shift.landmark)}</p>`:"";return`<div class="rec-card"><h4>${escapeHtml(shift.title)} - fit ${shift.fitScore}%</h4><a class="shift-pill-link" href="${escapeHtmlAttr(href)}" target="_blank" rel="noopener noreferrer"><span class="tag ${shift.isDirectUrl?"tag-direct":"tag-list"}">${linkLabel}</span></a><p><strong>\u041a\u043e\u0433\u0434\u0430:</strong> ${escapeHtml(shift.dateLabel||shift.date||"")}${shift.time?`, ${escapeHtml(shift.time)}`:""}</p><p><strong>\u0413\u0434\u0435:</strong> ${escapeHtml(whereLine)}</p>${stationLine}${landmarkLine}<p><strong>\u041e\u043f\u043b\u0430\u0442\u0430:</strong> ${escapeHtml(shift.payText||"\u0421\u0442\u0430\u0432\u043a\u0430 \u0443\u0442\u043e\u0447\u043d\u044f\u0435\u0442\u0441\u044f")}</p><p class="muted">${escapeHtml(reason)}</p><a class="shift-link shift-cta" href="${escapeHtmlAttr(href)}" target="_blank" rel="noopener noreferrer">${ctaLabel}</a></div>`;}
-function explainShiftFit(shift){const reasons=[];const title=normalize(shift.title);if(title.includes("\u043a\u0443\u0445"))reasons.push("\u043f\u043e\u0434\u0445\u043e\u0434\u0438\u0442 \u043f\u043e \u043a\u0443\u0445\u043d\u0435");if(title.includes("\u043a\u0430\u0441\u0441"))reasons.push("\u043f\u043e\u0434\u0445\u043e\u0434\u0438\u0442 \u043f\u043e \u0444\u043e\u0440\u043c\u0430\u0442\u0443 \u043e\u0431\u0449\u0435\u043d\u0438\u044f");if(title.includes("\u0441\u0431\u043e\u0440")||title.includes("\u0434\u0430\u0440\u043a\u0441\u0442"))reasons.push("\u043f\u043e\u0434\u0445\u043e\u0434\u0438\u0442 \u043f\u043e \u0442\u0435\u043c\u043f\u0443 \u0438 \u0441\u0431\u043e\u0440\u043a\u0435");if(title.includes("\u043a\u0443\u0440\u044c\u0435\u0440"))reasons.push("\u043f\u043e\u0434\u0445\u043e\u0434\u0438\u0442 \u043f\u043e \u0444\u043e\u0440\u043c\u0430\u0442\u0443 \u043e\u043f\u043b\u0430\u0442\u044b \u0438 \u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044e");if(!reasons.length)reasons.push("\u0441\u043e\u0432\u043f\u0430\u0434\u0430\u0435\u0442 \u043f\u043e \u043e\u0431\u0449\u0435\u043c\u0443 \u043f\u0440\u043e\u0444\u0438\u043b\u044e");return`\u041f\u043e\u0447\u0435\u043c\u0443 \u044d\u0442\u043e \u0442\u0435\u0431\u0435 \u043f\u043e\u0434\u0445\u043e\u0434\u0438\u0442: ${reasons.join(", ")}.`;}
-function downloadProfile(){const recommendations=STATE.lastRecommendations.length?STATE.lastRecommendations:computeRecommendations();const payload={generatedAt:new Date().toISOString(),city:STATE.answers.city||"",answers:STATE.answers,experience:{details:String(STATE.answers.experience_details||"").trim(),hasDetails:Boolean(String(STATE.answers.experience_details||"").trim())},recommendations:recommendations.slice(0,5).map(item=>({code:item.code,role:item.role,family:item.family,score:item.score,pay:item.pay}))};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json;charset=utf-8"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="smena-profile.json";link.click();URL.revokeObjectURL(url);}
-async function loadCitiesConfig(){try{const response=await fetch(`/api/cities?ts=${Date.now()}`,{cache:"no-store"});const data=await response.json();if(response.ok&&Array.isArray(data.cities)&&data.cities.length){const support={};const matchers=[];CITY_OPTIONS=data.cities.map(item=>String(item.label||"")).filter(Boolean);data.cities.forEach(item=>{const label=String(item.label||"");const aliases=(Array.isArray(item.aliases)&&item.aliases.length?item.aliases:[item.label]).map(alias=>String(alias||"")).filter(Boolean);aliases.forEach(alias=>{support[normalize(alias)]={id:item.id,slug:item.slug,label,supportsMetro:Boolean(item.supportsMetro),aliases,offersUrl:String(item.offersUrl||"")};});matchers.push({label,aliases});});CITY_SUPPORT=support;CITY_MATCHERS=matchers;CITIES_LOADED=true;return;}}catch{}CITY_OPTIONS=[];CITY_MATCHERS=[];CITY_SUPPORT={};CITIES_LOADED=false;}
-function handleCityInput(input,container,forceOpen=false){if(!container||(input!==ACTIVE_CITY_INPUT&&input!==UI.resultCityInput))return;const value=input.value.trim();const options=getCityMatches(value);if(!value&&!forceOpen){hideAutocomplete(container);return;}if(!CITIES_LOADED){container.innerHTML=`<div class="autocomplete-empty">\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043c \u0441\u043f\u0438\u0441\u043e\u043a \u0433\u043e\u0440\u043e\u0434\u043e\u0432...</div>`;container.classList.remove("hidden");return;}if(!options.length){container.innerHTML=`<div class="autocomplete-empty">\u0413\u043e\u0440\u043e\u0434 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d \u0432 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e\u043c \u0441\u043f\u0438\u0441\u043a\u0435</div>`;container.classList.remove("hidden");return;}container.innerHTML=options.map(label=>`<button type="button" class="autocomplete-item">${escapeHtml(label)}</button>`).join("");container.classList.remove("hidden");[...container.querySelectorAll(".autocomplete-item")].forEach(node=>{node.addEventListener("click",()=>{input.value=node.textContent;if(input===UI.textAnswer){STATE.answers.city=node.textContent;STATE.citySource=resolveCityMeta(node.textContent);}if(input===UI.resultCityInput)syncLocationEditorState();hideAutocomplete(container);});});}
-function getCityMatches(value){const normalized=normalize(value);const seen=new Set();const pushLabel=label=>{const key=normalize(label);if(!key||seen.has(key))return false;seen.add(key);return true;};if(!normalized)return CITY_OPTIONS.filter(label=>pushLabel(label)).slice(0,8);const matchedLabels=[];CITY_MATCHERS.forEach(item=>{const matchesLabel=normalize(item.label).includes(normalized);const matchesAlias=(item.aliases||[]).some(alias=>normalize(alias).includes(normalized));if(matchesLabel||matchesAlias){if(pushLabel(item.label))matchedLabels.push(item.label);}});if(matchedLabels.length)return matchedLabels.slice(0,8);return CITY_OPTIONS.filter(city=>normalize(city).includes(normalized)).filter(label=>pushLabel(label)).slice(0,8);}function hideAutocomplete(node){node.classList.add("hidden");node.innerHTML="";}function handleOutsideAutocompleteClick(event){if(!event.target.closest(".suggest-input")){hideAutocomplete(UI.cityAutocomplete);hideAutocomplete(UI.resultCityAutocomplete);}}
-function resolveCityMeta(input){const key=normalize(input);if(!key)return null;return CITY_SUPPORT[key]||Object.entries(CITY_SUPPORT).find(([alias])=>alias.includes(key)||key.includes(alias))?.[1]||null;}function decodeClientText(value){return String(value||"");}
-function normalize(value){return String(value||"").toLowerCase().replace(/\u0451/g,"\u0435").replace(/^\u0433\.\s*/g,"").replace(/^\u0433\u043e\u0440\u043e\u0434\s+/g,"").replace(/[.,]/g," ").replace(/\s+/g," ").trim();}
-function adaptScore(id,answer){const add=(key,delta)=>STATE.score[key]=clamp(STATE.score[key]+delta,10,100);if(id==="physical")add("physical",answer==="\u0422\u044f\u0436\u0435\u043b\u0430\u044f"?20:answer==="\u0421\u0440\u0435\u0434\u043d\u044f\u044f"?8:-8);if(id==="communication")add("communication",answer==="\u041b\u044e\u0431\u043b\u044e \u043e\u0431\u0449\u0430\u0442\u044c\u0441\u044f"?20:answer==="\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e"?5:-14);if(id==="digital")add("digital",answer==="\u0423\u0432\u0435\u0440\u0435\u043d\u043d\u043e"?20:answer==="\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u043e"?6:-14);if(id==="pay_priority")add("stability",answer==="\u0421\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439 \u043f\u0440\u043e\u0433\u043d\u043e\u0437\u0438\u0440\u0443\u0435\u043c\u044b\u0439 \u0434\u043e\u0445\u043e\u0434"?18:answer==="\u041a\u043e\u043c\u0444\u043e\u0440\u0442 \u0438 \u043c\u0435\u043d\u044c\u0448\u0435 \u0441\u0442\u0440\u0435\u0441\u0441\u0430"?8:-8);if(id==="training_ready")add("learning",answer==="\u0414\u0430, \u0435\u0441\u043b\u0438 \u044d\u0442\u043e \u0434\u0430\u0441\u0442 \u0431\u043e\u043b\u044c\u0448\u0435 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0435\u0439"?20:answer==="\u0422\u043e\u043b\u044c\u043a\u043e \u0435\u0441\u043b\u0438 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u0435 \u043a\u043e\u0440\u043e\u0442\u043a\u043e\u0435"?8:-10);}
-function grantBadge(id,answer){const add=text=>{if(!STATE.badges.includes(text))STATE.badges.push(text);};if(id==="communication"&&answer==="\u041b\u044e\u0431\u043b\u044e \u043e\u0431\u0449\u0430\u0442\u044c\u0441\u044f")add("\u041b\u044e\u0431\u0438\u0442 \u043e\u0431\u0449\u0435\u043d\u0438\u0435");if(id==="digital"&&answer==="\u0423\u0432\u0435\u0440\u0435\u043d\u043d\u043e")add("\u0426\u0438\u0444\u0440\u043e\u0432\u043e\u0439 \u043f\u0440\u043e\u0444\u0438");if(id==="physical"&&answer==="\u0422\u044f\u0436\u0435\u043b\u0430\u044f")add("\u0413\u043e\u0442\u043e\u0432 \u043a \u0432\u044b\u0441\u043e\u043a\u043e\u0439 \u043d\u0430\u0433\u0440\u0443\u0437\u043a\u0435");if(id==="pay_priority"&&answer==="\u0421\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u044b\u0439 \u043f\u0440\u043e\u0433\u043d\u043e\u0437\u0438\u0440\u0443\u0435\u043c\u044b\u0439 \u0434\u043e\u0445\u043e\u0434")add("\u0426\u0435\u043d\u0438\u0442 \u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u043e\u0441\u0442\u044c");if(id==="experience_details"&&String(answer||"").trim())add("\u0415\u0441\u0442\u044c \u0440\u0430\u0441\u0441\u043a\u0430\u0437 \u043e \u0440\u0435\u043b\u0435\u0432\u0430\u043d\u0442\u043d\u043e\u043c \u043e\u043f\u044b\u0442\u0435");}
-function getTextPlaceholder(id){if(id==="city")return"\u041d\u0430\u043f\u0440\u0438\u043c\u0435\u0440: \u041c\u043e\u0441\u043a\u0432\u0430";if(id==="experience_details")return"\u041a\u043e\u0440\u043e\u0442\u043a\u043e \u0440\u0430\u0441\u0441\u043a\u0430\u0436\u0438\u0442\u0435, \u0433\u0434\u0435 \u0440\u0430\u0431\u043e\u0442\u0430\u043b\u0438 \u0438 \u0447\u0442\u043e \u0443\u043c\u0435\u0435\u0442\u0435";return"\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043e\u0442\u0432\u0435\u0442";}
-function configureVoiceControls(questionId){if(questionId!=="experience_details"){UI.voiceControls.classList.add("hidden");stopVoiceInput();return;}const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SpeechRecognition){UI.voiceControls.classList.add("hidden");return;}UI.voiceControls.classList.remove("hidden");}
-function toggleVoiceInput(){const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SpeechRecognition)return;if(speechActive||speechKeepAlive){stopVoiceInput();return;}speechKeepAlive=true;speechCommittedText=String(UI.textAnswer.value||"").trim();startVoiceRecognition();}
-function startVoiceRecognition(){const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SpeechRecognition||!speechKeepAlive)return;speechRecognition=new SpeechRecognition();speechRecognition.lang="ru-RU";speechRecognition.interimResults=true;speechRecognition.continuous=true;speechRecognition.onstart=()=>{speechActive=true;UI.voiceControls.classList.add("is-recording");UI.voiceStatus.textContent="\u0421\u043b\u0443\u0448\u0430\u044e, \u043c\u043e\u0436\u043d\u043e \u0434\u0435\u043b\u0430\u0442\u044c \u043f\u0430\u0443\u0437\u044b...";UI.voiceBtn.textContent="\u041e\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c \u0437\u0430\u043f\u0438\u0441\u044c";};speechRecognition.onresult=event=>{let interimText="";let finalText=speechCommittedText;for(let i=event.resultIndex;i<event.results.length;i+=1){const chunk=(event.results[i][0]?.transcript||"").trim();if(!chunk)continue;if(event.results[i].isFinal){finalText=[finalText,chunk].filter(Boolean).join(" ").replace(/\s+/g," ").trim();}else{interimText=[interimText,chunk].filter(Boolean).join(" ").replace(/\s+/g," ").trim();}}speechCommittedText=finalText;UI.textAnswer.value=[speechCommittedText,interimText].filter(Boolean).join(" ").replace(/\s+/g," ").trim();autoResizeTextAnswer();};speechRecognition.onerror=event=>{if(event?.error==="no-speech"){UI.voiceStatus.textContent="\u041f\u0430\u0443\u0437\u0430 \u043e\u043a, \u043f\u0440\u043e\u0434\u043e\u043b\u0436\u0430\u044e \u0441\u043b\u0443\u0448\u0430\u0442\u044c...";return;}UI.voiceStatus.textContent="\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0440\u0430\u0441\u043f\u043e\u0437\u043d\u0430\u0442\u044c \u0433\u043e\u043b\u043e\u0441. \u041c\u043e\u0436\u043d\u043e \u043f\u043e\u043f\u0440\u043e\u0431\u043e\u0432\u0430\u0442\u044c \u0435\u0449\u0435 \u0440\u0430\u0437.";speechKeepAlive=false;stopVoiceInput(true);};speechRecognition.onend=()=>{speechActive=false;if(!speechKeepAlive){UI.voiceControls.classList.remove("is-recording");UI.voiceStatus.textContent="\u041c\u043e\u0436\u043d\u043e \u043d\u0430\u0434\u0438\u043a\u0442\u043e\u0432\u0430\u0442\u044c \u043e\u0442\u0432\u0435\u0442 \u0433\u043e\u043b\u043e\u0441\u043e\u043c";UI.voiceBtn.textContent="\u0413\u043e\u043b\u043e\u0441\u043e\u0432\u043e\u0439 \u043e\u0442\u0432\u0435\u0442";return;}setTimeout(()=>{if(speechKeepAlive&&!speechActive)startVoiceRecognition();},180);};try{speechRecognition.start();}catch{speechKeepAlive=false;stopVoiceInput(true);}}
-function stopVoiceInput(keepText=true){speechKeepAlive=false;if(speechRecognition){try{speechRecognition.onend=null;speechRecognition.stop();}catch{}}speechActive=false;if(keepText)speechCommittedText=String(UI.textAnswer.value||"").trim();else speechCommittedText="";UI.voiceControls.classList.remove("is-recording");UI.voiceStatus.textContent="\u041c\u043e\u0436\u043d\u043e \u043d\u0430\u0434\u0438\u043a\u0442\u043e\u0432\u0430\u0442\u044c \u043e\u0442\u0432\u0435\u0442 \u0433\u043e\u043b\u043e\u0441\u043e\u043c";UI.voiceBtn.textContent="\u0413\u043e\u043b\u043e\u0441\u043e\u0432\u043e\u0439 \u043e\u0442\u0432\u0435\u0442";}function autoResizeTextAnswer(){if(!UI.textAnswer)return;UI.textAnswer.style.height="auto";UI.textAnswer.style.height=`${Math.max(UI.textAnswer.scrollHeight,58)}px`;}
-function openLocationEditor(){UI.locationEditor.classList.remove("hidden");UI.resultCityInput.value=STATE.answers.city||"";}function closeLocationEditor(){UI.locationEditor.classList.add("hidden");hideAutocomplete(UI.resultCityAutocomplete);}function syncLocationEditorState(){}
-function applyLocationChanges(){const meta=resolveCityMeta(UI.resultCityInput.value);if(!meta)return;STATE.answers.city=meta.label;STATE.citySource=meta;closeLocationEditor();renderProfile(STATE.lastRecommendations);renderCityOffersLink();}
-function drawRadar(){const canvas=UI.radar;const ctx=canvas.getContext("2d");const width=canvas.width;const height=canvas.height;ctx.clearRect(0,0,width,height);const labels=[["\u0424\u0438\u0437\u043d\u0430\u0433\u0440\u0443\u0437\u043a\u0430",STATE.score.physical],["\u041e\u0431\u0449\u0435\u043d\u0438\u0435",STATE.score.communication],["\u0426\u0438\u0444\u0440\u0430",STATE.score.digital],["\u0421\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u043e\u0441\u0442\u044c",STATE.score.stability],["\u041e\u0431\u0443\u0447\u0435\u043d\u0438\u0435",STATE.score.learning]];const cx=width/2;const cy=height/2;const radius=82;const angleStep=(Math.PI*2)/labels.length;ctx.strokeStyle="#dbe4ee";for(let ring=1;ring<=4;ring+=1){ctx.beginPath();labels.forEach((_,index)=>{const angle=-Math.PI/2+index*angleStep;const r=(radius/4)*ring;const x=cx+Math.cos(angle)*r;const y=cy+Math.sin(angle)*r;if(!index)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.stroke();}ctx.strokeStyle="#94a3b8";labels.forEach((label,index)=>{const angle=-Math.PI/2+index*angleStep;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius);ctx.stroke();const lx=cx+Math.cos(angle)*(radius+20);const ly=cy+Math.sin(angle)*(radius+20);ctx.fillStyle="#14213d";ctx.font="12px Segoe UI";ctx.textAlign="center";ctx.fillText(label[0],lx,ly);});ctx.beginPath();labels.forEach((label,index)=>{const angle=-Math.PI/2+index*angleStep;const r=radius*(label[1]/100);const x=cx+Math.cos(angle)*r;const y=cy+Math.sin(angle)*r;if(!index)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle="rgba(15, 118, 110, 0.24)";ctx.strokeStyle="#0f766e";ctx.lineWidth=2;ctx.fill();ctx.stroke();}
-function upcomingDates(days){const out=[];const today=new Date();for(let i=1;i<=days;i+=1){const date=new Date(today);date.setDate(today.getDate()+i);out.push(date.toISOString().slice(0,10));}return out;}function clamp(value,min,max){return Math.max(min,Math.min(max,value));}function formatMoney(value){return new Intl.NumberFormat("ru-RU").format(value);}function escapeHtml(value){return String(value||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");}function escapeHtmlAttr(value){return escapeHtml(value).replace(/'/g,"&#39;");}
-function decodeClientText(value){return String(value||"");}
+﻿let CITY_OPTIONS = [];
+let CITY_MATCHERS = [];
+let CITIES_LOADED = false;
+let ACTIVE_CITY_INPUT = null;
+let speechRecognition = null;
+let speechActive = false;
+let speechKeepAlive = false;
+let speechCommittedText = "";
+let speechInterimText = "";
 
+const DIGITAL_CATEGORIES = [
+  { key: "computer", label: "Компьютерные программы" },
+  { key: "cashbox", label: "Кассовые аппараты" },
+  { key: "tsd", label: "Терминалы сбора данных" },
+  { key: "apps", label: "Мобильные приложения" }
+];
 
+const DIGITAL_LEVELS = [
+  "Лучше если без них",
+  "Нормально, вопрос привычки",
+  "Поначалу вызывает, но я быстро учусь",
+  "Никаких трудностей не вызывает"
+];
 
+const SKILL_OPTIONS = [
+  "Терминалы сбора данных",
+  "Работа в пункте выдачи заказов",
+  "Сборка заказов на время",
+  "Комплектовка товаров",
+  "Мерчендайзинг",
+  "Бариста",
+  "Работа в копировальном центре",
+  "Погрузка с устройствами (рохля, дебаркадер)",
+  "Работа с планограммой",
+  "Консультации покупателей",
+  "Товароведение",
+  "Сложная уборка с бытовой химией",
+  "Администратор/ хостес",
+  "Приготовление пищи",
+  "Обслуживание гостей в общепите",
+  "Работа в отделе гастрономия",
+  "Складские услуги",
+  "Обслуживание в магазинах одежды или косметики",
+  "Консультант в магазинах техники",
+  "Работа с кассой (нал и безнал расчеты)",
+  "Техобслуживание автомобилей",
+  "Мойка автомобилей",
+  "Заправка автомобилей",
+  "Хелпер на ивентах",
+  "Раннер или официант",
+  "Приготовление фастфуда",
+  "Работа на линии, конвейере",
+  "Строительство",
+  "Ремонт и отделка квартир",
+  "Бытовой ремонт",
+  "Монтаж (конструкции, мебель, оборудование)",
+  "СТО, шиномонтаж",
+  "Промоутеры",
+  "Call-центр",
+  "Домашний персонал",
+  "Аниматоры, ведущие",
+  "Салоны красоты",
+  "Электровелосипед",
+  "Водительские права категории B",
+  "Приложения или программы для работы со складом/ ПВЗ",
+  "Логистика",
+  "Медицинская книжка для ритейла",
+  "Медицинская книжка для общепита",
+  "Управление погрузчиком / штабелёром / электрокаром",
+  "Текстильная промышленность",
+  "Пищевое производство",
+  "Массовые мероприятия",
+  "Текстильное производство",
+  "Пошив одежды"
+];
 
+const QUESTIONS = [
+  {
+    id: "interest_primary",
+    text: "Что вас интересует?",
+    hint: "Выберите вариант, который лучше всего описывает вашу ситуацию",
+    type: "single",
+    options: [
+      "У меня уже есть основной доход, ищу доп заработок",
+      "Хочу получать основной доход от заданий в Смене",
+      "Я в поиске основной работы, но пока ищу - хочу зарабатывать",
+      "Хочу попробовать новую сферу",
+      "Другое"
+    ]
+  },
+  {
+    id: "interest_primary_details",
+    text: "Расскажите, что именно вас сейчас интересует",
+    hint: "Можно написать или надиктовать свой вариант",
+    type: "text_voice_optional",
+    placeholder: "Напишите или расскажите, что вы хотите получить от Смены",
+    showIf: (answers) => answers.interest_primary === "Другое"
+  },
+  {
+    id: "hours_week",
+    text: "Сколько часов в неделю вы готовы уделять сменам?",
+    hint: "Оцените комфортный для себя объем времени",
+    type: "single",
+    options: ["до 5", "до 10", "до 20", "до 40", "более 40"]
+  },
+  {
+    id: "hours_week_details",
+    text: "Какой формат по времени был бы вам удобен?",
+    hint: "Можно написать про выходные, лето, учебу, ночные смены или любой другой режим",
+    type: "text_voice_optional",
+    placeholder: "Напишите или расскажите, какой формат вам удобен"
+  },
+  {
+    id: "priority_now",
+    text: "Что сейчас для вас наиболее важно?",
+    hint: "Это поможет понять, как лучше ранжировать подходящие форматы",
+    type: "single",
+    options: [
+      "Стабильный прогнозируемый доход",
+      "Максимум заработка",
+      "Баланс работы с личными делами и графиком",
+      "Что-то еще"
+    ]
+  },
+  {
+    id: "priority_now_details",
+    text: "Расскажите, что еще для вас важно",
+    hint: "Можно коротко описать свой критерий или ожидание от смен",
+    type: "text_voice_optional",
+    placeholder: "Напишите или расскажите, что для вас сейчас в приоритете",
+    showIf: (answers) => answers.priority_now === "Что-то еще"
+  },
+  {
+    id: "section_transition",
+    text: "Спасибо, что поделились своими целями.",
+    hint: "Давайте теперь посмотрим, какие задания вам нравятся.",
+    type: "message",
+    countInProgress: false,
+    ctaLabel: "Продолжить"
+  },
+  {
+    id: "physical_load",
+    text: "Какая физическая нагрузка вам подходит?",
+    hint: "Выберите самый комфортный для вас вариант",
+    type: "single",
+    options: [
+      "Очень легкая (выполнять задания сидя)",
+      "Легкая (без тяжестей и долгих перемещений)",
+      "Средняя (активные перемещения и задания на скорость)",
+      "Тяжелая (интенсивно, как в спортзале, тяжести больше 15 кг)"
+    ]
+  },
+  {
+    id: "physical_load_limits",
+    text: "Какие виды нагрузки вам не подходят?",
+    hint: "Можно указать тяжести, долгую ходьбу, скорость или любые другие ограничения",
+    type: "text_voice_optional",
+    placeholder: "Напишите или расскажите, какие виды нагрузки лучше исключить"
+  },
+  {
+    id: "standing_format",
+    text: "Как относитесь к работе на ногах?",
+    hint: "Это поможет отделить более подвижные роли от спокойных форматов",
+    type: "single",
+    options: [
+      "Люблю гулять, поэтому положительно",
+      "В целом подходят такие задания",
+      "Могу только с перерывами",
+      "Мне подходит только сидячая работа"
+    ]
+  },
+  {
+    id: "outdoor_format",
+    text: "Вам комфортно работать на улице?",
+    hint: "Это важно для части городских, выездных и событийных задач",
+    type: "single",
+    options: [
+      "Да, в любую погоду",
+      "Только в теплый сезон",
+      "Можно изредка попробовать",
+      "Не комфортно, могу только в помещении"
+    ]
+  },
+  {
+    id: "movement_preference",
+    text: "Любите работу, на которой нужно постоянно быть в движении - пешком или на транспорте?",
+    hint: "Покажем этот вопрос только если вам в целом подходят подвижные и уличные форматы",
+    type: "single",
+    options: [
+      "Да, люблю быть за рулем, ездить на дальние расстояния",
+      "Да, люблю гулять и ездить на общественном транспорте",
+      "Предпочитаю перемещаться немного"
+    ],
+    showIf: (answers) => isPositiveMovementBase(answers)
+  },
+  {
+    id: "digital_matrix",
+    text: "Вызывает ли у вас трудности работа с компьютерными программами, терминалами сбора данных, кассовыми аппаратами и мобильными приложениями?",
+    hint: "Под каждой категорией выберите свой уровень комфорта: чем правее ползунок, тем увереннее вы себя чувствуете",
+    type: "digital_matrix"
+  },
+  {
+    id: "customer_contact",
+    text: "Вам нравится общаться с клиентами, покупателями?",
+    hint: "Так мы разделим более сервисные роли и более спокойные форматы",
+    type: "single",
+    options: [
+      "Люблю общаться, меня это заряжает",
+      "Если надо - пообщаемся",
+      "Если только не целый день, я устаю",
+      "Стараюсь избегать такую работу, где нужно много общаться"
+    ]
+  },
+  {
+    id: "team_contact",
+    text: "А с коллегами нравится общаться?",
+    hint: "Посмотрим, комфортнее ли вам большая команда, маленькая группа или самостоятельный формат",
+    type: "single",
+    options: [
+      "Да, люблю большие коллективы, есть шансы расширить круг общения и найти друзей",
+      "Если нужно, я готов подстроиться",
+      "Не люблю большие компании, предпочитаю небольшие команды (2-3 человека)",
+      "Я люблю быть сам по себе: работать без начальника и коллег",
+      "Мне все равно, какие коллеги, я могу работать с любыми"
+    ]
+  },
+  {
+    id: "pay_format",
+    text: "Какой формат оплаты предпочитаете?",
+    hint: "Выберите тот вариант, с которым вам спокойнее и понятнее работать",
+    type: "single_cards",
+    options: [
+      "Люблю сдельную оплату - можно получать повышенный доход за высокую производительность",
+      "Сдельная оплата подходит, но если есть гарантированный минимум",
+      "Нравится оплата за результат без ограничений, сколько его делать",
+      "Мне подходит только почасовая оплата"
+    ]
+  },
+  {
+    id: "shift_duration",
+    text: "Выберите оптимальную длительность заданий для вас",
+    hint: "Передвиньте ползунок: так мы поймем, какой формат смены вам комфортнее",
+    type: "range",
+    min: 1,
+    max: 12
+  },
+  {
+    id: "skills_multi",
+    text: "Отметьте все навыки, которые у вас есть",
+    hint: "Можно выбрать любое количество навыков",
+    type: "multi_tiles",
+    options: SKILL_OPTIONS
+  },
+  {
+    id: "experience_details",
+    text: "Напишите или расскажите о своем опыте, в какой сфере, что умеете, любите, на что учились",
+    hint: "Если хочется ответить подробно - мы только за. Это поможет учесть весь ваш опыт, знания и навыки для поиска заданий.",
+    type: "text_voice_optional",
+    placeholder: "Расскажите, где вы работали, что умеете и в чем чувствуете себя уверенно"
+  },
+  {
+    id: "new_jobs_city",
+    text: "Какие задания вы бы добавили в своем городе?",
+    hint: "Можно написать или надиктовать идею новых смен и направлений",
+    type: "text_voice_optional",
+    placeholder: "Напишите или расскажите, каких заданий вам не хватает в вашем городе"
+  },
+  {
+    id: "age_text",
+    text: "И последнее: сколько вам лет?",
+    hint: "Можно указать возраст числом",
+    type: "text_optional",
+    placeholder: "Например: 27"
+  },
+  {
+    id: "city",
+    text: "Из какого вы города?",
+    hint: "Начните вводить город и выберите его из списка",
+    type: "text",
+    placeholder: "Например: Санкт-Петербург"
+  },
+  {
+    id: "results_prep",
+    text: "Спасибо! Уже готовим результаты :)",
+    hint: "Остался один клик, и покажем ваш профиль и подходящие направления.",
+    type: "message",
+    countInProgress: false,
+    ctaLabel: "Показать результаты"
+  }
+];
 
+const ROLE_FAMILIES = {
+  kitchen: "Кухня",
+  retail: "Ритейл",
+  collector: "Сборка и даркстор",
+  service: "Кофе и сервис",
+  delivery: "Доставка",
+  warehouse: "Склад",
+  promo: "Промо и события",
+  cleaning: "Клининг"
+};
 
+const ROLES = [
+  {
+    code: "kitchen",
+    role: "Кухонный работник / повар",
+    family: ROLE_FAMILIES.kitchen,
+    pay: 5000,
+    lead: "Подходит тем, кто любит процессы, понятный ритм и аккуратную работу руками.",
+    tags: ["Кухня", "Команда", "Стабильность"],
+    skillMatches: ["Приготовление пищи", "Обслуживание гостей в общепите", "Работа в отделе гастрономия", "Приготовление фастфуда", "Медицинская книжка для общепита"]
+  },
+  {
+    code: "cashier",
+    role: "Кассир",
+    family: ROLE_FAMILIES.retail,
+    pay: 4400,
+    lead: "Хороший вариант, если вам важны стабильный доход, понятные процессы и контакт с людьми.",
+    tags: ["Касса", "Покупатели", "Почасовая оплата"],
+    skillMatches: ["Работа с кассой (нал и безнал расчеты)", "Консультации покупателей", "Обслуживание в магазинах одежды или косметики", "Консультант в магазинах техники"]
+  },
+  {
+    code: "collector",
+    role: "Сборщик заказов",
+    family: ROLE_FAMILIES.collector,
+    pay: 4700,
+    lead: "Подходит тем, кто любит темп, точность и не боится цифровых инструментов.",
+    tags: ["Темп", "Точность", "ТСД"],
+    skillMatches: ["Терминалы сбора данных", "Сборка заказов на время", "Комплектовка товаров", "Работа в пункте выдачи заказов", "Приложения или программы для работы со складом/ ПВЗ"]
+  },
+  {
+    code: "retail_floor",
+    role: "Работник торгового зала",
+    family: ROLE_FAMILIES.retail,
+    pay: 4100,
+    lead: "Подходит, если вам нравится порядок, понятная структура задач и спокойный вход в работу.",
+    tags: ["Полки", "Планограмма", "Магазин"],
+    skillMatches: ["Мерчендайзинг", "Работа с планограммой", "Товароведение", "Консультации покупателей", "Медицинская книжка для ритейла"]
+  },
+  {
+    code: "barista",
+    role: "Бариста",
+    family: ROLE_FAMILIES.service,
+    pay: 4800,
+    lead: "Идеально для тех, кто любит сервис, динамику и общение в небольших командах.",
+    tags: ["Кофе", "Сервис", "Обучение"],
+    skillMatches: ["Бариста", "Обслуживание гостей в общепите", "Раннер или официант"]
+  },
+  {
+    code: "courier",
+    role: "Курьер",
+    family: ROLE_FAMILIES.delivery,
+    pay: 5600,
+    lead: "Подходит, если вам нравится движение, свобода графика и оплата за результат.",
+    tags: ["Движение", "Гибкость", "Сдельность"],
+    skillMatches: ["Электровелосипед", "Водительские права категории B", "Логистика"]
+  },
+  {
+    code: "warehouse",
+    role: "Кладовщик",
+    family: ROLE_FAMILIES.warehouse,
+    pay: 4900,
+    lead: "Подходит тем, кто спокойно чувствует себя в операционной среде и любит четкий процесс.",
+    tags: ["Склад", "Процессы", "Физнагрузка"],
+    skillMatches: ["Складские услуги", "Погрузка с устройствами (рохля, дебаркадер)", "Управление погрузчиком / штабелёром / электрокаром", "Логистика", "Терминалы сбора данных"]
+  },
+  {
+    code: "promoter",
+    role: "Промоутер / хелпер на ивентах",
+    family: ROLE_FAMILIES.promo,
+    pay: 3900,
+    lead: "Хороший вход, если вам нравится движение, новые люди и гибкие короткие задания.",
+    tags: ["Люди", "События", "Гибкий график"],
+    skillMatches: ["Промоутеры", "Хелпер на ивентах", "Массовые мероприятия", "Аниматоры, ведущие", "Администратор/ хостес"]
+  },
+  {
+    code: "cleaner_indoor",
+    role: "Уборка помещений",
+    family: ROLE_FAMILIES.cleaning,
+    pay: 3900,
+    lead: "Подходит тем, кто хочет понятные задачи и спокойный, предсказуемый формат работы.",
+    tags: ["Спокойный ритм", "Почасовая оплата", "Простой вход"],
+    skillMatches: ["Сложная уборка с бытовой химией", "Домашний персонал"]
+  },
+  {
+    code: "cleaner_outdoor",
+    role: "Уборка территории",
+    family: ROLE_FAMILIES.cleaning,
+    pay: 4700,
+    lead: "Подходит, если вам нормально на улице, в движении и в более физическом формате.",
+    tags: ["Улица", "Движение", "Физнагрузка"],
+    skillMatches: ["Мойка автомобилей", "Заправка автомобилей", "Техобслуживание автомобилей"]
+  }
+];
 
+const UI = {
+  hero: document.querySelector(".hero"),
+  startBtn: document.getElementById("startBtn"),
+  quiz: document.getElementById("quizSection"),
+  result: document.getElementById("resultSection"),
+  title: document.getElementById("questionTitle"),
+  hint: document.getElementById("questionHint"),
+  options: document.getElementById("options"),
+  inputWrap: document.getElementById("inputWrap"),
+  textAnswer: document.getElementById("textAnswer"),
+  textNextBtn: document.getElementById("textNextBtn"),
+  skipTextBtn: document.getElementById("skipTextBtn"),
+  voiceControls: document.getElementById("voiceControls"),
+  voiceBtn: document.getElementById("voiceBtn"),
+  voiceStatus: document.getElementById("voiceStatus"),
+  cityAutocomplete: document.getElementById("cityAutocomplete"),
+  badges: document.getElementById("badges"),
+  progressText: document.getElementById("progressText"),
+  progressBar: document.getElementById("progressBar"),
+  multiActions: document.getElementById("multiActions"),
+  doneMultiBtn: document.getElementById("doneMultiBtn"),
+  profileName: document.getElementById("profileName"),
+  profileDesc: document.getElementById("profileDesc"),
+  incomeForecast: document.getElementById("incomeForecast"),
+  trainReadiness: document.getElementById("trainReadiness"),
+  topScore: document.getElementById("topScore"),
+  recommendations: document.getElementById("recommendations"),
+  realShifts: document.getElementById("realShifts"),
+  familyFit: document.getElementById("familyFit"),
+  fallbackBox: document.getElementById("fallbackBox"),
+  editLocationBtn: document.getElementById("editLocationBtn"),
+  locationEditor: document.getElementById("locationEditor"),
+  resultCityInput: document.getElementById("resultCityInput"),
+  resultCityAutocomplete: document.getElementById("resultCityAutocomplete"),
+  saveLocationBtn: document.getElementById("saveLocationBtn"),
+  cancelLocationBtn: document.getElementById("cancelLocationBtn"),
+  restartBtn: document.getElementById("restartBtn"),
+  radar: document.getElementById("radar")
+};
 
+const STATE = {
+  index: 0,
+  answers: {},
+  lastRecommendations: [],
+  citySource: null,
+  score: {
+    physical: 50,
+    communication: 50,
+    digital: 50,
+    stability: 50,
+    learning: 50
+  }
+};
+
+bindEvents();
+loadCitiesConfig();
+startQuizPreview();
+function bindEvents() {
+  UI.startBtn.addEventListener("click", startQuiz);
+  UI.doneMultiBtn.addEventListener("click", submitDynamicScreen);
+  UI.textNextBtn.addEventListener("click", submitText);
+  UI.skipTextBtn.addEventListener("click", skipTextQuestion);
+  UI.voiceBtn.addEventListener("click", toggleVoiceInput);
+  UI.editLocationBtn.addEventListener("click", openLocationEditor);
+  UI.saveLocationBtn.addEventListener("click", applyLocationChanges);
+  UI.cancelLocationBtn.addEventListener("click", closeLocationEditor);
+  UI.restartBtn.addEventListener("click", startQuiz);
+
+  UI.textAnswer.addEventListener("input", () => {
+    autoResizeTextAnswer();
+    if (getCurrentQuestion()?.id === "city") handleCityInput(UI.textAnswer, UI.cityAutocomplete);
+  });
+  UI.textAnswer.addEventListener("focus", () => {
+    if (getCurrentQuestion()?.id === "city") handleCityInput(UI.textAnswer, UI.cityAutocomplete);
+  });
+  UI.textAnswer.addEventListener("keydown", (event) => {
+    const question = getCurrentQuestion();
+    if (!question) return;
+    if (event.key === "Enter" && !event.shiftKey && !allowsMultiline(question)) {
+      event.preventDefault();
+      submitText();
+    }
+  });
+
+  UI.resultCityInput.addEventListener("input", () => handleCityInput(UI.resultCityInput, UI.resultCityAutocomplete));
+  UI.resultCityInput.addEventListener("focus", () => handleCityInput(UI.resultCityInput, UI.resultCityAutocomplete));
+  document.addEventListener("click", handleOutsideAutocompleteClick);
+}
+
+function startQuizPreview() {
+  stopVoiceInput(true);
+  UI.hero.classList.remove("hidden");
+  UI.result.classList.add("hidden");
+  UI.quiz.classList.add("hidden");
+  resetState();
+}
+
+function startQuiz() {
+  stopVoiceInput(true);
+  resetState();
+  UI.hero.classList.add("hidden");
+  UI.result.classList.add("hidden");
+  UI.quiz.classList.remove("hidden");
+  UI.locationEditor.classList.add("hidden");
+  render();
+}
+
+function resetState() {
+  STATE.index = 0;
+  STATE.answers = {};
+  STATE.lastRecommendations = [];
+  STATE.citySource = null;
+  STATE.score = {
+    physical: 50,
+    communication: 50,
+    digital: 50,
+    stability: 50,
+    learning: 50
+  };
+  UI.textAnswer.value = "";
+  UI.resultCityInput.value = "";
+  autoResizeTextAnswer();
+  hideAutocomplete(UI.cityAutocomplete);
+  hideAutocomplete(UI.resultCityAutocomplete);
+}
+
+function getVisibleQuestions() {
+  return QUESTIONS.filter((question) => isQuestionVisible(question));
+}
+
+function getCurrentQuestion() {
+  return getVisibleQuestions()[STATE.index] || null;
+}
+
+function isQuestionVisible(question) {
+  return typeof question.showIf !== "function" ? true : Boolean(question.showIf(STATE.answers));
+}
+
+function render() {
+  const question = getCurrentQuestion();
+  if (!question) {
+    showResults();
+    return;
+  }
+
+  stopVoiceInput(true);
+  UI.title.textContent = question.text;
+  UI.hint.textContent = question.hint || "";
+  UI.options.className = "options";
+  UI.options.innerHTML = "";
+  UI.badges.innerHTML = renderBadges(question);
+  UI.inputWrap.classList.add("hidden");
+  UI.multiActions.classList.add("hidden");
+  UI.cityAutocomplete.classList.add("hidden");
+  UI.textAnswer.value = readTextValue(question.id);
+  autoResizeTextAnswer();
+  updateProgress();
+
+  switch (question.type) {
+    case "single":
+      renderSingle(question, false);
+      break;
+    case "single_cards":
+      renderSingle(question, true);
+      break;
+    case "multi_tiles":
+      renderMultiTiles(question);
+      break;
+    case "text":
+    case "text_optional":
+    case "text_voice_optional":
+      renderTextQuestion(question);
+      break;
+    case "message":
+      renderMessageQuestion(question);
+      break;
+    case "digital_matrix":
+      renderDigitalMatrix(question);
+      break;
+    case "range":
+      renderRangeQuestion(question);
+      break;
+    default:
+      renderSingle(question, false);
+      break;
+  }
+}
+
+function renderBadges(question) {
+  const chips = [];
+  if (question.id === "skills_multi" && Array.isArray(STATE.answers.skills_multi) && STATE.answers.skills_multi.length) {
+    chips.push(`${STATE.answers.skills_multi.length} навыков уже отмечено`);
+  }
+  if (question.id === "digital_matrix") chips.push("Оцените 4 инструмента отдельно");
+  if (question.id === "shift_duration") chips.push("Передвиньте ползунок от 1 до 12 часов");
+  return chips.map((item) => `<span class="badge">${escapeHtml(item)}</span>`).join("");
+}
+
+function renderSingle(question, cardMode) {
+  const selectedValue = STATE.answers[question.id] || "";
+  if (cardMode) UI.options.classList.add("options-cards-grid");
+  question.options.forEach((optionText) => {
+    const button = makeOption(optionText, selectedValue === optionText, cardMode);
+    button.addEventListener("click", () => {
+      STATE.answers[question.id] = optionText;
+      goNext();
+    });
+    UI.options.appendChild(button);
+  });
+}
+
+function renderMultiTiles(question) {
+  const selectedSet = new Set(Array.isArray(STATE.answers[question.id]) ? STATE.answers[question.id] : []);
+  UI.options.classList.add("options-tiled", "options-skills-grid");
+  UI.options.innerHTML = "";
+  question.options.forEach((optionText) => {
+    const button = makeOption(optionText, selectedSet.has(optionText), true);
+    button.addEventListener("click", () => {
+      if (selectedSet.has(optionText)) selectedSet.delete(optionText);
+      else selectedSet.add(optionText);
+      STATE.answers[question.id] = [...selectedSet];
+      renderMultiTiles(question);
+    });
+    UI.options.appendChild(button);
+  });
+  UI.multiActions.classList.remove("hidden");
+  UI.doneMultiBtn.textContent = "Продолжить";
+}
+
+function renderTextQuestion(question) {
+  UI.inputWrap.classList.remove("hidden");
+  UI.textAnswer.placeholder = question.placeholder || "";
+  UI.textAnswer.value = readTextValue(question.id);
+  UI.textAnswer.rows = allowsMultiline(question) ? 5 : 1;
+  autoResizeTextAnswer();
+  UI.skipTextBtn.classList.toggle("hidden", question.type === "text");
+  UI.textNextBtn.textContent = "Продолжить";
+  configureVoiceControls(question);
+  if (question.id === "city") handleCityInput(UI.textAnswer, UI.cityAutocomplete);
+}
+
+function renderMessageQuestion(question) {
+  UI.options.innerHTML = `
+    <div class="message-card">
+      <h3>${escapeHtml(question.text)}</h3>
+      <p>${escapeHtml(question.hint || "")}</p>
+    </div>
+  `;
+  UI.multiActions.classList.remove("hidden");
+  UI.doneMultiBtn.textContent = question.ctaLabel || "Продолжить";
+}
+
+function renderDigitalMatrix(question) {
+  const current = STATE.answers[question.id] || createDefaultDigitalMatrix();
+  UI.options.classList.add("options-matrix");
+  UI.options.innerHTML = "";
+
+  DIGITAL_CATEGORIES.forEach((category) => {
+    const value = clamp(Number(current[category.key]), 0, 3);
+    const card = document.createElement("div");
+    card.className = "matrix-card";
+    card.innerHTML = `
+      <div class="matrix-card-head">
+        <strong>${escapeHtml(category.label)}</strong>
+        <span class="matrix-level">${escapeHtml(DIGITAL_LEVELS[value])}</span>
+      </div>
+      <input class="matrix-slider" type="range" min="0" max="3" step="1" value="${value}" data-key="${category.key}" />
+      <div class="matrix-scale">
+        ${DIGITAL_LEVELS.map((label) => `<span>${escapeHtml(shortDigitalLabel(label))}</span>`).join("")}
+      </div>
+    `;
+    const slider = card.querySelector(".matrix-slider");
+    slider.addEventListener("input", () => {
+      const next = { ...(STATE.answers[question.id] || createDefaultDigitalMatrix()) };
+      next[category.key] = Number(slider.value);
+      STATE.answers[question.id] = next;
+      renderDigitalMatrix(question);
+    });
+    UI.options.appendChild(card);
+  });
+
+  STATE.answers[question.id] = current;
+  UI.multiActions.classList.remove("hidden");
+  UI.doneMultiBtn.textContent = "Продолжить";
+}
+
+function renderRangeQuestion(question) {
+  const currentValue = Number(STATE.answers[question.id] || 6);
+  UI.options.classList.add("options-range");
+  UI.options.innerHTML = `
+    <div class="range-card">
+      <div class="range-card-head">
+        <strong>Комфортная длительность смены</strong>
+        <span class="range-output">${formatHours(currentValue)}</span>
+      </div>
+      <input class="range-slider" type="range" min="${question.min}" max="${question.max}" step="1" value="${currentValue}" />
+      <div class="range-scale range-scale-hours">
+        ${Array.from({ length: question.max - question.min + 1 }, (_, index) => `<span>${question.min + index}</span>`).join("")}
+      </div>
+    </div>
+  `;
+  const slider = UI.options.querySelector(".range-slider");
+  slider.addEventListener("input", () => {
+    STATE.answers[question.id] = Number(slider.value);
+    renderRangeQuestion(question);
+  });
+  STATE.answers[question.id] = currentValue;
+  UI.multiActions.classList.remove("hidden");
+  UI.doneMultiBtn.textContent = "Продолжить";
+}
+
+function submitText() {
+  const question = getCurrentQuestion();
+  if (!question) return;
+  const value = UI.textAnswer.value.trim();
+  if (question.type === "text" && !value) {
+    UI.textAnswer.focus();
+    return;
+  }
+  STATE.answers[question.id] = value;
+  if (question.id === "city") STATE.citySource = lookupCityMeta(value)?.label || value;
+  goNext();
+}
+
+function skipTextQuestion() {
+  const question = getCurrentQuestion();
+  if (!question) return;
+  STATE.answers[question.id] = "";
+  goNext();
+}
+
+function submitDynamicScreen() {
+  const question = getCurrentQuestion();
+  if (!question) return;
+  if (question.type === "message" && question.id === "results_prep") {
+    showResults();
+    return;
+  }
+  goNext();
+}
+
+function goNext() {
+  stopVoiceInput(true);
+  STATE.index += 1;
+  if (STATE.index >= getVisibleQuestions().length) {
+    showResults();
+    return;
+  }
+  render();
+}
+
+function updateProgress() {
+  const visible = getVisibleQuestions();
+  const counted = visible.filter((item) => item.countInProgress !== false);
+  const total = counted.length || 1;
+  const current = visible[STATE.index];
+  const passed = visible.slice(0, STATE.index + 1).filter((item) => item.countInProgress !== false).length;
+  const currentNumber = current?.countInProgress === false ? Math.max(1, passed - 1) : Math.max(1, passed);
+  UI.progressText.textContent = `${currentNumber}/${total}`;
+  UI.progressBar.style.width = `${Math.max(6, Math.round((currentNumber / total) * 100))}%`;
+}
+
+function makeOption(label, selected, compact) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `option${selected ? " selected" : ""}${compact ? " option-card" : ""}`;
+  button.textContent = label;
+  return button;
+}
+
+function readTextValue(questionId) {
+  const value = STATE.answers[questionId];
+  return typeof value === "string" ? value : "";
+}
+
+function configureVoiceControls(question) {
+  const shouldShow = question.type === "text_voice_optional";
+  UI.voiceControls.classList.toggle("hidden", !shouldShow);
+  UI.voiceBtn.textContent = speechActive ? "Остановить запись" : "Голосовой ответ";
+  UI.voiceStatus.textContent = shouldShow ? "Можно надиктовать ответ голосом" : "";
+}
+
+function allowsMultiline(question) {
+  return ["text_optional", "text_voice_optional"].includes(question.type);
+}
+
+function autoResizeTextAnswer() {
+  UI.textAnswer.style.height = "auto";
+  UI.textAnswer.style.height = `${Math.max(UI.textAnswer.scrollHeight, 58)}px`;
+}
+function toggleVoiceInput() {
+  const question = getCurrentQuestion();
+  if (!question || question.type !== "text_voice_optional") return;
+
+  const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!RecognitionCtor) {
+    UI.voiceStatus.textContent = "Голосовой ввод не поддерживается в этом браузере";
+    return;
+  }
+
+  if (!speechRecognition) {
+    speechRecognition = new RecognitionCtor();
+    speechRecognition.lang = "ru-RU";
+    speechRecognition.interimResults = true;
+    speechRecognition.continuous = true;
+    speechRecognition.onresult = handleSpeechResult;
+    speechRecognition.onstart = () => {
+      speechActive = true;
+      UI.voiceControls.classList.add("is-recording");
+      UI.voiceBtn.textContent = "Остановить запись";
+      UI.voiceStatus.textContent = "Слушаем вас...";
+    };
+    speechRecognition.onend = () => {
+      speechActive = false;
+      UI.voiceControls.classList.remove("is-recording");
+      UI.voiceBtn.textContent = "Голосовой ответ";
+      if (speechKeepAlive && getCurrentQuestion()?.type === "text_voice_optional") {
+        setTimeout(() => {
+          try { speechRecognition.start(); } catch {}
+        }, 250);
+      } else if (!UI.voiceControls.classList.contains("hidden")) {
+        UI.voiceStatus.textContent = "Можно надиктовать ответ голосом";
+      }
+    };
+    speechRecognition.onerror = () => {
+      speechKeepAlive = false;
+      speechActive = false;
+      UI.voiceControls.classList.remove("is-recording");
+      UI.voiceBtn.textContent = "Голосовой ответ";
+      UI.voiceStatus.textContent = "Не удалось распознать речь, можно попробовать еще раз";
+    };
+  }
+
+  if (speechActive) {
+    stopVoiceInput(false);
+    return;
+  }
+
+  speechCommittedText = UI.textAnswer.value.trim();
+  speechInterimText = "";
+  speechKeepAlive = true;
+  try { speechRecognition.start(); } catch {}
+}
+
+function handleSpeechResult(event) {
+  let finalText = "";
+  let interimText = "";
+  for (let index = event.resultIndex; index < event.results.length; index += 1) {
+    const transcript = event.results[index][0].transcript.trim();
+    if (!transcript) continue;
+    if (event.results[index].isFinal) finalText += `${transcript} `;
+    else interimText += `${transcript} `;
+  }
+  if (finalText) speechCommittedText = [speechCommittedText, finalText.trim()].filter(Boolean).join(" ").trim();
+  speechInterimText = interimText.trim();
+  UI.textAnswer.value = [speechCommittedText, speechInterimText].filter(Boolean).join(" ").trim();
+  autoResizeTextAnswer();
+}
+
+function stopVoiceInput(forceSilent) {
+  speechKeepAlive = false;
+  speechInterimText = "";
+  if (speechRecognition && speechActive) {
+    try { speechRecognition.stop(); } catch {}
+  }
+  speechActive = false;
+  UI.voiceControls.classList.remove("is-recording");
+  UI.voiceBtn.textContent = "Голосовой ответ";
+  if (!forceSilent && !UI.voiceControls.classList.contains("hidden")) {
+    UI.voiceStatus.textContent = "Можно надиктовать ответ голосом";
+  }
+}
+
+async function loadCitiesConfig() {
+  const fallback = [
+    { label: "Москва", aliases: ["Москва", "Moscow", "moscow", "мск", "msk"], offersUrl: "https://offers.smena.yandex.ru/location-213-moscow/podrabotka" },
+    { label: "Санкт-Петербург", aliases: ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "spb", "saint petersburg", "saint-petersburg"], offersUrl: "https://offers.smena.yandex.ru/location-2/podrabotka" },
+    { label: "Екатеринбург", aliases: ["Екатеринбург", "ekaterinburg", "yekaterinburg", "екб"], offersUrl: "https://offers.smena.yandex.ru/location-54-yekaterinburg/podrabotka" },
+    { label: "Нижний Новгород", aliases: ["Нижний Новгород", "Нижний", "nizhny novgorod", "nizhny-novgorod"], offersUrl: "https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka" }
+  ];
+
+  try {
+    const response = await fetch(`./api/cities?ts=${Date.now()}`);
+    const payload = await response.json();
+    CITY_OPTIONS = Array.isArray(payload.cities) && payload.cities.length
+      ? payload.cities.map((city) => ({ label: city.label, aliases: city.aliases || [city.label], offersUrl: city.offersUrl || "" }))
+      : fallback;
+  } catch {
+    CITY_OPTIONS = fallback;
+  }
+
+  CITY_OPTIONS = CITY_OPTIONS.filter((city) => city.label).sort((a, b) => a.label.localeCompare(b.label, "ru"));
+  CITY_MATCHERS = CITY_OPTIONS.flatMap((city) => {
+    const aliases = [...new Set([city.label, ...(city.aliases || [])])];
+    return aliases.map((alias) => ({ key: normalizeCity(alias), label: city.label, offersUrl: city.offersUrl || "" }));
+  });
+  CITIES_LOADED = true;
+}
+
+function handleCityInput(inputEl, panelEl) {
+  ACTIVE_CITY_INPUT = inputEl;
+  const raw = inputEl.value.trim();
+  const key = normalizeCity(raw);
+  if (!CITIES_LOADED) {
+    showAutocomplete(panelEl, [], "Загружаем список городов...");
+    return;
+  }
+  if (!key) {
+    hideAutocomplete(panelEl);
+    return;
+  }
+  const matches = CITY_OPTIONS.filter((item) => {
+    const keys = [item.label, ...(item.aliases || [])].map(normalizeCity);
+    return keys.some((candidate) => candidate.includes(key) || key.includes(candidate));
+  }).slice(0, 8);
+  showAutocomplete(panelEl, matches, matches.length ? "" : "Город не найден в доступном списке", inputEl);
+}
+
+function showAutocomplete(panelEl, matches, emptyText, inputEl) {
+  if (!matches.length) {
+    panelEl.innerHTML = `<div class="autocomplete-empty">${escapeHtml(emptyText)}</div>`;
+    panelEl.classList.remove("hidden");
+    return;
+  }
+  panelEl.innerHTML = matches.map((item) => `<button type="button" class="autocomplete-item" data-city="${escapeHtmlAttr(item.label)}">${escapeHtml(item.label)}</button>`).join("");
+  panelEl.classList.remove("hidden");
+  panelEl.querySelectorAll(".autocomplete-item").forEach((button) => {
+    button.addEventListener("click", () => {
+      inputEl.value = button.dataset.city || "";
+      if (inputEl === UI.textAnswer) STATE.answers.city = inputEl.value;
+      hideAutocomplete(panelEl);
+      inputEl.focus();
+    });
+  });
+}
+
+function hideAutocomplete(panelEl) {
+  panelEl.classList.add("hidden");
+  panelEl.innerHTML = "";
+}
+
+function handleOutsideAutocompleteClick(event) {
+  const insidePrimary = UI.cityAutocomplete.contains(event.target) || event.target === UI.textAnswer;
+  const insideSecondary = UI.resultCityAutocomplete.contains(event.target) || event.target === UI.resultCityInput;
+  if (!insidePrimary) hideAutocomplete(UI.cityAutocomplete);
+  if (!insideSecondary) hideAutocomplete(UI.resultCityAutocomplete);
+}
+
+function normalizeCity(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/^г\.\s*/g, "")
+    .replace(/^город\s+/g, "")
+    .replace(/[.,]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function lookupCityMeta(value) {
+  const key = normalizeCity(value);
+  if (!key) return null;
+  const exact = CITY_MATCHERS.find((item) => item.key === key);
+  if (exact) return exact;
+  return CITY_MATCHERS.find((item) => item.key.includes(key) || key.includes(item.key)) || null;
+}
+
+function openLocationEditor() {
+  UI.locationEditor.classList.remove("hidden");
+  UI.resultCityInput.value = STATE.answers.city || "";
+}
+
+function closeLocationEditor() {
+  UI.locationEditor.classList.add("hidden");
+  hideAutocomplete(UI.resultCityAutocomplete);
+}
+
+function applyLocationChanges() {
+  const value = UI.resultCityInput.value.trim();
+  STATE.answers.city = value;
+  STATE.citySource = lookupCityMeta(value)?.label || value;
+  closeLocationEditor();
+  renderCityOffersLink();
+}
+
+function showResults() {
+  stopVoiceInput(true);
+  UI.quiz.classList.add("hidden");
+  UI.result.classList.remove("hidden");
+  UI.locationEditor.classList.add("hidden");
+
+  const recommendations = computeRecommendations();
+  STATE.lastRecommendations = recommendations;
+  const topRole = recommendations[0];
+  const profile = computeProfileNarrative(topRole);
+
+  UI.profileName.textContent = profile.name;
+  UI.profileDesc.textContent = profile.description;
+  UI.incomeForecast.textContent = formatCurrency(topRole.pay * 4);
+  UI.trainReadiness.textContent = profile.learningReadiness;
+  UI.topScore.textContent = `${topRole.score}%`;
+
+  renderRecommendations(recommendations.slice(0, 3));
+  renderFamilyFit(recommendations);
+  renderCityOffersLink();
+  renderFallback();
+  computeRadarScore(topRole);
+  drawRadar();
+}
+function computeRecommendations() {
+  const scored = ROLES.map((role) => ({ ...role, score: scoreRole(role) }))
+    .sort((a, b) => b.score - a.score || b.pay - a.pay);
+  enforceCleaningRule(scored);
+  return scored;
+}
+
+function scoreRole(role) {
+  let score = 42;
+  const selectedSkills = new Set(STATE.answers.skills_multi || []);
+  const matchedSkills = role.skillMatches.filter((skill) => selectedSkills.has(skill)).length;
+  score += Math.min(30, matchedSkills * 8);
+
+  const interest = STATE.answers.interest_primary;
+  if (interest === "У меня уже есть основной доход, ищу доп заработок") {
+    if (["courier", "promoter", "collector"].includes(role.code)) score += 8;
+    if (["cashier", "barista"].includes(role.code)) score += 4;
+  }
+  if (interest === "Хочу получать основной доход от заданий в Смене") {
+    if (["warehouse", "kitchen", "cashier", "collector"].includes(role.code)) score += 8;
+  }
+  if (interest === "Я в поиске основной работы, но пока ищу - хочу зарабатывать") {
+    if (["retail_floor", "cashier", "warehouse", "kitchen"].includes(role.code)) score += 7;
+  }
+  if (interest === "Хочу попробовать новую сферу") {
+    if (["promoter", "retail_floor", "barista"].includes(role.code)) score += 6;
+  }
+
+  const priority = STATE.answers.priority_now;
+  if (priority === "Стабильный прогнозируемый доход") {
+    if (["cashier", "retail_floor", "kitchen", "cleaner_indoor"].includes(role.code)) score += 9;
+    if (["courier"].includes(role.code)) score -= 6;
+  }
+  if (priority === "Максимум заработка") {
+    if (["courier", "collector", "warehouse"].includes(role.code)) score += 9;
+  }
+  if (priority === "Баланс работы с личными делами и графиком") {
+    if (["promoter", "courier", "cleaner_indoor", "barista"].includes(role.code)) score += 7;
+  }
+
+  const physical = STATE.answers.physical_load;
+  if (physical === "Очень легкая (выполнять задания сидя)") {
+    if (["cashier", "cleaner_indoor", "barista"].includes(role.code)) score += 6;
+    if (["warehouse", "courier", "cleaner_outdoor"].includes(role.code)) score -= 14;
+  }
+  if (physical === "Легкая (без тяжестей и долгих перемещений)") {
+    if (["cashier", "retail_floor", "barista", "cleaner_indoor"].includes(role.code)) score += 8;
+    if (["warehouse", "cleaner_outdoor"].includes(role.code)) score -= 8;
+  }
+  if (physical === "Средняя (активные перемещения и задания на скорость)") {
+    if (["collector", "retail_floor", "courier", "promoter"].includes(role.code)) score += 8;
+  }
+  if (physical === "Тяжелая (интенсивно, как в спортзале, тяжести больше 15 кг)") {
+    if (["warehouse", "cleaner_outdoor", "courier"].includes(role.code)) score += 10;
+    if (["cashier", "barista"].includes(role.code)) score -= 5;
+  }
+
+  const standing = STATE.answers.standing_format;
+  if (standing === "Люблю гулять, поэтому положительно") {
+    if (["courier", "promoter", "retail_floor", "collector"].includes(role.code)) score += 8;
+  }
+  if (standing === "В целом подходят такие задания") {
+    if (["cashier", "retail_floor", "barista", "collector"].includes(role.code)) score += 5;
+  }
+  if (standing === "Могу только с перерывами") {
+    if (["cashier", "barista", "retail_floor", "cleaner_indoor"].includes(role.code)) score += 4;
+    if (["courier", "cleaner_outdoor", "warehouse"].includes(role.code)) score -= 6;
+  }
+  if (standing === "Мне подходит только сидячая работа") {
+    if (["cashier"].includes(role.code)) score += 3;
+    if (["courier", "warehouse", "collector", "cleaner_outdoor"].includes(role.code)) score -= 12;
+  }
+
+  const outdoor = STATE.answers.outdoor_format;
+  if (outdoor === "Да, в любую погоду") {
+    if (["courier", "cleaner_outdoor", "promoter"].includes(role.code)) score += 9;
+  }
+  if (outdoor === "Только в теплый сезон") {
+    if (["courier", "promoter"].includes(role.code)) score += 4;
+    if (["cleaner_outdoor"].includes(role.code)) score -= 3;
+  }
+  if (outdoor === "Можно изредка попробовать") {
+    if (["promoter", "courier"].includes(role.code)) score += 3;
+  }
+  if (outdoor === "Не комфортно, могу только в помещении") {
+    if (["cashier", "retail_floor", "collector", "kitchen", "barista", "cleaner_indoor"].includes(role.code)) score += 6;
+    if (["courier", "cleaner_outdoor"].includes(role.code)) score -= 14;
+  }
+
+  const movement = STATE.answers.movement_preference;
+  if (movement === "Да, люблю быть за рулем, ездить на дальние расстояния") {
+    if (["courier"].includes(role.code)) score += 12;
+  }
+  if (movement === "Да, люблю гулять и ездить на общественном транспорте") {
+    if (["courier", "promoter"].includes(role.code)) score += 9;
+  }
+  if (movement === "Предпочитаю перемещаться немного") {
+    if (["cashier", "barista", "cleaner_indoor"].includes(role.code)) score += 5;
+    if (["courier"].includes(role.code)) score -= 6;
+  }
+
+  const digital = STATE.answers.digital_matrix || createDefaultDigitalMatrix();
+  const digitalAvg = average(Object.values(digital));
+  if (["collector", "warehouse"].includes(role.code)) score += digital.tsd * 4;
+  if (["cashier"].includes(role.code)) score += digital.cashbox * 4 + digital.computer * 2;
+  if (["courier"].includes(role.code)) score += digital.apps * 4;
+  if (["retail_floor", "barista"].includes(role.code)) score += digital.apps * 2 + digital.computer * 2;
+  if (digitalAvg <= 1 && ["collector", "warehouse", "cashier"].includes(role.code)) score -= 6;
+
+  const customer = STATE.answers.customer_contact;
+  if (customer === "Люблю общаться, меня это заряжает") {
+    if (["cashier", "barista", "promoter", "retail_floor"].includes(role.code)) score += 10;
+  }
+  if (customer === "Если надо - пообщаемся") {
+    if (["cashier", "retail_floor", "barista"].includes(role.code)) score += 5;
+  }
+  if (customer === "Если только не целый день, я устаю") {
+    if (["collector", "warehouse", "kitchen"].includes(role.code)) score += 5;
+    if (["promoter"].includes(role.code)) score -= 4;
+  }
+  if (customer === "Стараюсь избегать такую работу, где нужно много общаться") {
+    if (["collector", "warehouse", "kitchen", "cleaner_indoor", "cleaner_outdoor"].includes(role.code)) score += 7;
+    if (["cashier", "barista", "promoter"].includes(role.code)) score -= 10;
+  }
+
+  const team = STATE.answers.team_contact;
+  if (team === "Да, люблю большие коллективы, есть шансы расширить круг общения и найти друзей") {
+    if (["kitchen", "cashier", "promoter", "retail_floor"].includes(role.code)) score += 8;
+  }
+  if (team === "Если нужно, я готов подстроиться") score += 3;
+  if (team === "Не люблю большие компании, предпочитаю небольшие команды (2-3 человека)") {
+    if (["barista", "courier", "cleaner_indoor"].includes(role.code)) score += 5;
+  }
+  if (team === "Я люблю быть сам по себе: работать без начальника и коллег") {
+    if (["courier"].includes(role.code)) score += 8;
+    if (["kitchen", "cashier", "promoter"].includes(role.code)) score -= 6;
+  }
+
+  const pay = STATE.answers.pay_format;
+  if (pay === "Люблю сдельную оплату - можно получать повышенный доход за высокую производительность") {
+    if (["courier", "collector", "warehouse", "promoter"].includes(role.code)) score += 10;
+  }
+  if (pay === "Сдельная оплата подходит, но если есть гарантированный минимум") {
+    if (["courier", "collector", "warehouse", "promoter"].includes(role.code)) score += 5;
+    if (["cashier", "retail_floor"].includes(role.code)) score += 3;
+  }
+  if (pay === "Нравится оплата за результат без ограничений, сколько его делать") {
+    if (["courier", "collector"].includes(role.code)) score += 11;
+  }
+  if (pay === "Мне подходит только почасовая оплата") {
+    if (["cashier", "retail_floor", "kitchen", "cleaner_indoor", "barista"].includes(role.code)) score += 10;
+    if (["courier"].includes(role.code)) score -= 6;
+  }
+
+  const duration = Number(STATE.answers.shift_duration || 6);
+  if (duration <= 4) {
+    if (["promoter", "courier", "barista"].includes(role.code)) score += 7;
+  } else if (duration <= 8) {
+    if (["cashier", "retail_floor", "barista", "kitchen", "collector"].includes(role.code)) score += 6;
+  } else {
+    if (["warehouse", "cleaner_outdoor", "cleaner_indoor", "collector"].includes(role.code)) score += 6;
+  }
+
+  const experienceText = [
+    STATE.answers.experience_details,
+    STATE.answers.interest_primary_details,
+    STATE.answers.hours_week_details,
+    STATE.answers.priority_now_details,
+    STATE.answers.physical_load_limits,
+    STATE.answers.new_jobs_city
+  ].join(" ").toLowerCase();
+
+  role.skillMatches.forEach((skill) => {
+    if (experienceText.includes(skill.toLowerCase().slice(0, 8))) score += 2;
+  });
+
+  return clamp(Math.round(score), 35, 98);
+}
+
+function enforceCleaningRule(list) {
+  if (!list.length) return;
+  const firstNonCleaning = list.find((item) => !item.family.includes("Клининг"));
+  if (list[0]?.family.includes("Клининг") && firstNonCleaning) {
+    const cleanerIndex = list.findIndex((item) => item.code === list[0].code);
+    const nonCleaningIndex = list.findIndex((item) => item.code === firstNonCleaning.code);
+    [list[cleanerIndex], list[nonCleaningIndex]] = [list[nonCleaningIndex], list[cleanerIndex]];
+  }
+  const topScore = list[0]?.score || 0;
+  list.forEach((item) => {
+    if (item.family.includes("Клининг") && item.score >= topScore) item.score = Math.max(30, topScore - 1);
+  });
+  list.sort((a, b) => b.score - a.score || b.pay - a.pay);
+}
+
+function computeProfileNarrative(topRole) {
+  const family = topRole.family;
+  let name = "Гибкий профи подработки";
+  if (family === ROLE_FAMILIES.kitchen) name = "Практичный гастро-профиль";
+  if (family === ROLE_FAMILIES.retail) name = "Уверенный фронт-линейный профиль";
+  if (family === ROLE_FAMILIES.collector) name = "Темповый операционный профиль";
+  if (family === ROLE_FAMILIES.service) name = "Сервисный профиль с человеческим контактом";
+  if (family === ROLE_FAMILIES.delivery) name = "Подвижный профиль с гибким графиком";
+  if (family === ROLE_FAMILIES.warehouse) name = "Сильный операционный профиль";
+  if (family === ROLE_FAMILIES.promo) name = "Коммуникационный профиль быстрого старта";
+  if (family === ROLE_FAMILIES.cleaning) name = "Спокойный прикладной профиль";
+
+  return {
+    name,
+    learningReadiness: computeLearningReadiness(),
+    description: `Судя по ответам, вам лучше всего подходят роли семейства «${family}»: по сочетанию нагрузки, графика, формата оплаты и уже отмеченных навыков.`
+  };
+}
+
+function computeLearningReadiness() {
+  const interest = STATE.answers.interest_primary;
+  const digitalAvg = average(Object.values(STATE.answers.digital_matrix || createDefaultDigitalMatrix()));
+  if (interest === "Хочу попробовать новую сферу" || digitalAvg >= 2.5) return "Высокая";
+  if (digitalAvg >= 1.5) return "Средняя";
+  return "Базовая";
+}
+
+function computeRadarScore(topRole) {
+  const digital = average(Object.values(STATE.answers.digital_matrix || createDefaultDigitalMatrix()));
+  STATE.score.physical = mapPhysicalToScore(STATE.answers.physical_load, STATE.answers.standing_format, STATE.answers.outdoor_format);
+  STATE.score.communication = mapCommunicationToScore(STATE.answers.customer_contact, STATE.answers.team_contact);
+  STATE.score.digital = clamp(Math.round(20 + digital * 25), 10, 100);
+  STATE.score.stability = mapStabilityToScore(STATE.answers.priority_now, STATE.answers.pay_format, Number(STATE.answers.shift_duration || 6));
+  STATE.score.learning = mapLearningToScore(topRole);
+}
+
+function renderRecommendations(items) {
+  UI.recommendations.innerHTML = `
+    <div class="section-head">
+      <div class="section-head-copy">
+        <p class="section-overline">Топ-3 роли</p>
+        <h3>Лучшие направления под ваш профиль</h3>
+      </div>
+    </div>
+    <div class="role-list">
+      ${items.map((item) => `
+        <article class="rec-card hero-rec role-card">
+          <div class="role-card-top">
+            <span class="role-family-pill">${escapeHtml(item.family)}</span>
+            <span class="role-score">${item.score}%</span>
+          </div>
+          <h4>${escapeHtml(item.role)}</h4>
+          <p class="role-lead">${escapeHtml(item.lead)}</p>
+          <div class="role-meta">
+            <div class="role-stat"><span>Ориентир по ставке</span><strong>${formatCurrency(item.pay)} за смену</strong></div>
+            <div class="role-stat"><span>Почему подходит</span><strong>${escapeHtml(item.tags.slice(0, 2).join(" • "))}</strong></div>
+          </div>
+          <div class="role-tags">${item.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderFamilyFit(items) {
+  UI.familyFit.innerHTML = `
+    <div class="section-head">
+      <div class="section-head-copy">
+        <p class="section-overline">Каталог профессий</p>
+        <h3>Твой уровень совпадения по направлениям</h3>
+      </div>
+    </div>
+    <div class="family-columns">
+      ${items.map((item) => `
+        <article class="rec-card compact-family-card family-card">
+          <div class="family-row">
+            <strong>${escapeHtml(item.family)}</strong>
+            <span class="score-chip">${item.score}%</span>
+          </div>
+          <div class="family-copy">${escapeHtml(item.role)}</div>
+          <div class="family-progress compact-family-progress"><span style="width:${item.score}%"></span></div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderCityOffersLink() {
+  const cityValue = String(STATE.answers.city || "").trim();
+  const cityMeta = lookupCityMeta(cityValue);
+  const cityLabel = cityMeta?.label || cityValue;
+  const offersUrl = cityMeta?.offersUrl || "";
+
+  if (!cityLabel) {
+    UI.realShifts.innerHTML = `
+      <div class="section-head">
+        <div class="section-head-copy">
+          <p class="section-overline">Следующий шаг</p>
+          <h3>Смены в вашем городе</h3>
+        </div>
+      </div>
+      <div class="city-link-card">
+        <p class="family-copy">Выберите город, и мы откроем актуальную витрину смен именно для него.</p>
+      </div>
+    `;
+    return;
+  }
+
+  UI.realShifts.innerHTML = `
+    <div class="section-head">
+      <div class="section-head-copy">
+        <p class="section-overline">Следующий шаг</p>
+        <h3>Смены в вашем городе</h3>
+      </div>
+    </div>
+    <div class="city-link-card">
+      <p class="family-copy">Открываем городскую витрину Смены для города ${escapeHtml(cityLabel)}.</p>
+      ${offersUrl ? `<a class="shift-cta" href="${escapeHtmlAttr(offersUrl)}" target="_blank" rel="noopener noreferrer">Открыть смены в ${escapeHtml(cityLabel)}</a>` : `<p class="family-copy">Для этого города пока нет прямой ссылки в конфиге.</p>`}
+    </div>
+  `;
+}
+
+function renderFallback() {
+  UI.fallbackBox.classList.add("hidden");
+  UI.fallbackBox.innerHTML = "";
+}
+function drawRadar() {
+  const canvas = UI.radar;
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const width = canvas.width;
+  const height = canvas.height;
+  ctx.clearRect(0, 0, width, height);
+
+  const cx = width / 2;
+  const cy = height / 2 + 8;
+  const radius = Math.min(width, height) * 0.32;
+  const labels = ["Нагрузка", "Общение", "Цифра", "Стабильность", "Обучение"];
+  const values = [STATE.score.physical, STATE.score.communication, STATE.score.digital, STATE.score.stability, STATE.score.learning];
+
+  ctx.strokeStyle = "rgba(47,108,229,0.12)";
+  ctx.fillStyle = "rgba(47,108,229,0.02)";
+  for (let layer = 1; layer <= 4; layer += 1) {
+    const layerRadius = (radius / 4) * layer;
+    ctx.beginPath();
+    labels.forEach((_, index) => {
+      const angle = (-Math.PI / 2) + (Math.PI * 2 * index / labels.length);
+      const x = cx + Math.cos(angle) * layerRadius;
+      const y = cy + Math.sin(angle) * layerRadius;
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  labels.forEach((label, index) => {
+    const angle = (-Math.PI / 2) + (Math.PI * 2 * index / labels.length);
+    const x = cx + Math.cos(angle) * (radius + 28);
+    const y = cy + Math.sin(angle) * (radius + 28);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius);
+    ctx.strokeStyle = "rgba(47,108,229,0.12)";
+    ctx.stroke();
+    ctx.fillStyle = "#6b7e99";
+    ctx.font = "600 12px Arial";
+    ctx.textAlign = x < cx - 4 ? "right" : x > cx + 4 ? "left" : "center";
+    ctx.fillText(label, x, y);
+  });
+
+  ctx.beginPath();
+  values.forEach((value, index) => {
+    const angle = (-Math.PI / 2) + (Math.PI * 2 * index / values.length);
+    const pointRadius = radius * (value / 100);
+    const x = cx + Math.cos(angle) * pointRadius;
+    const y = cy + Math.sin(angle) * pointRadius;
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = "rgba(255,177,41,0.28)";
+  ctx.strokeStyle = "#ff8b29";
+  ctx.lineWidth = 2;
+  ctx.fill();
+  ctx.stroke();
+}
+
+function isPositiveMovementBase(answers) {
+  const standingOk = ["Люблю гулять, поэтому положительно", "В целом подходят такие задания"].includes(answers.standing_format);
+  const outdoorOk = ["Да, в любую погоду", "Только в теплый сезон"].includes(answers.outdoor_format);
+  return standingOk && outdoorOk;
+}
+
+function createDefaultDigitalMatrix() {
+  return { computer: 2, cashbox: 2, tsd: 2, apps: 2 };
+}
+
+function shortDigitalLabel(label) {
+  if (label.startsWith("Лучше")) return "Без";
+  if (label.startsWith("Нормально")) return "Норм";
+  if (label.startsWith("Поначалу")) return "Учусь";
+  return "Уверенно";
+}
+
+function average(values) {
+  const list = values.map(Number);
+  return list.reduce((sum, value) => sum + value, 0) / (list.length || 1);
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(value);
+}
+
+function formatHours(value) {
+  const safe = Number(value) || 1;
+  const suffix = safe % 10 === 1 && safe % 100 !== 11
+    ? "час"
+    : (safe % 10 >= 2 && safe % 10 <= 4 && (safe % 100 < 10 || safe % 100 >= 20) ? "часа" : "часов");
+  return `${safe} ${suffix}`;
+}
+
+function mapPhysicalToScore(physical, standing, outdoor) {
+  let base = 40;
+  if (physical?.startsWith("Очень")) base = 20;
+  if (physical?.startsWith("Легкая")) base = 40;
+  if (physical?.startsWith("Средняя")) base = 65;
+  if (physical?.startsWith("Тяжелая")) base = 90;
+  if (standing === "Люблю гулять, поэтому положительно") base += 6;
+  if (standing === "Мне подходит только сидячая работа") base -= 8;
+  if (outdoor === "Да, в любую погоду") base += 6;
+  if (outdoor === "Не комфортно, могу только в помещении") base -= 6;
+  return clamp(base, 10, 100);
+}
+
+function mapCommunicationToScore(customer, team) {
+  const customerMap = {
+    "Люблю общаться, меня это заряжает": 90,
+    "Если надо - пообщаемся": 65,
+    "Если только не целый день, я устаю": 45,
+    "Стараюсь избегать такую работу, где нужно много общаться": 20
+  };
+  const teamMap = {
+    "Да, люблю большие коллективы, есть шансы расширить круг общения и найти друзей": 88,
+    "Если нужно, я готов подстроиться": 62,
+    "Не люблю большие компании, предпочитаю небольшие команды (2-3 человека)": 48,
+    "Я люблю быть сам по себе: работать без начальника и коллег": 18,
+    "Мне все равно, какие коллеги, я могу работать с любыми": 58
+  };
+  return clamp(Math.round(((customerMap[customer] || 50) + (teamMap[team] || 50)) / 2), 10, 100);
+}
+
+function mapStabilityToScore(priority, pay, duration) {
+  let value = 55;
+  if (priority === "Стабильный прогнозируемый доход") value += 20;
+  if (priority === "Максимум заработка") value -= 6;
+  if (pay === "Мне подходит только почасовая оплата") value += 16;
+  if (pay === "Люблю сдельную оплату - можно получать повышенный доход за высокую производительность") value -= 10;
+  if (duration >= 8) value += 6;
+  if (duration <= 4) value -= 4;
+  return clamp(value, 10, 100);
+}
+
+function mapLearningToScore(topRole) {
+  const readiness = computeLearningReadiness();
+  let value = readiness === "Высокая" ? 88 : readiness === "Средняя" ? 63 : 40;
+  if (["barista", "cashier", "collector"].includes(topRole.code)) value += 4;
+  return clamp(value, 10, 100);
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function escapeHtmlAttr(value) {
+  return escapeHtml(value);
+}
