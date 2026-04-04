@@ -31,41 +31,12 @@ git push origin main
 
 ## Выгрузка ответов в Google Таблицу
 
-Сейчас фронт отправляет ответы после завершения квеста в `POST /api/answers`.
-Этот endpoint проксирует данные в Google Sheets webhook.
+Фронт отправляет ответы после завершения квеста в `POST /api/answers`, а сервер проксирует payload в Google Sheets webhook.
 
-Что нужно сделать:
+Подробная инструкция подключения к конкретной таблице:
 
-1. Создать Google Таблицу (например: `Smena Quiz Answers`).
-2. В Google Apps Script у таблицы вставить вебхук:
-
-```javascript
-function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sheet1');
-  const data = JSON.parse(e.postData.contents || '{}');
-  sheet.appendRow([
-    new Date(),
-    data.city || '',
-    data.profile?.name || '',
-    data.topRole?.role || '',
-    data.topRole?.score || '',
-    JSON.stringify(data.answers || {})
-  ]);
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-```
-
-3. Опубликовать Apps Script как Web App (`Anyone with the link`).
-4. В Vercel добавить переменную окружения:
-   - `GOOGLE_SHEETS_WEBHOOK_URL` = URL вашего Apps Script web app.
-5. (Опционально) Добавить секрет:
-   - `GOOGLE_SHEETS_WEBHOOK_TOKEN`
-   - и проверить `x-sheets-token` в Apps Script.
-6. Задеплоить обновление (`git push origin main`).
-
-После этого каждый завершенный квест автоматически уходит в таблицу.
+- [Пошаговая настройка Google Sheet webhook](C:\Users\andre\OneDrive\Документы\New project 2\site\manual\google_sheets_setup.md)
+- [Готовый Apps Script (колонки по каждому ответу)](C:\Users\andre\OneDrive\Документы\New project 2\site\manual\google_apps_script_answers.gs)
 
 ## Как проверить, что сайт видит правильные города
 

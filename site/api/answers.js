@@ -24,13 +24,17 @@ module.exports = async (req, res) => {
       });
     }
 
+    const outboundPayload = {
+      ...payload,
+      ...(webhookToken ? { __token: webhookToken } : {})
+    };
+
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
-        "content-type": "application/json; charset=utf-8",
-        ...(webhookToken ? { "x-sheets-token": webhookToken } : {})
+        "content-type": "application/json; charset=utf-8"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(outboundPayload)
     });
 
     if (!response.ok) {
