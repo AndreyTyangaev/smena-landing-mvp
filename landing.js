@@ -8,51 +8,31 @@ let speechKeepAlive = false;
 let speechCommittedText = "";
 let speechInterimText = "";
 
-const DIGITAL_CATEGORIES = [
-  { key: "computer", label: "Компьютерные программы" },
-  { key: "cashbox", label: "Кассовые аппараты" },
-  { key: "tsd", label: "Терминалы сбора данных" },
-  { key: "apps", label: "Мобильные приложения" }
-];
-
-const DIGITAL_LEVELS = [
-  "Лучше если без них",
-  "Нормально, вопрос привычки",
-  "Поначалу вызывает, но я быстро учусь",
-  "Никаких трудностей не вызывает"
-];
-
 const SKILL_OPTIONS = [
-  "Терминалы сбора данных",
   "Работа в пункте выдачи заказов",
-  "Сборка заказов на время",
+  "Сборка заказов",
   "Комплектовка товаров",
   "Мерчендайзинг",
   "Бариста",
   "Работа в копировальном центре",
   "Погрузка с устройствами (рохля, дебаркадер)",
-  "Работа с планограммой",
   "Консультации покупателей",
   "Товароведение",
   "Сложная уборка с бытовой химией",
   "Администратор/ хостес",
   "Приготовление пищи",
   "Обслуживание гостей в общепите",
-  "Работа в отделе гастрономия",
-  "Складские услуги",
-  "Обслуживание в магазинах одежды или косметики",
-  "Консультант в магазинах техники",
-  "Работа с кассой (нал и безнал расчеты)",
+  "Работа на складе",
+  "Работа с кассой",
   "Техобслуживание автомобилей",
   "Мойка автомобилей",
   "Заправка автомобилей",
-  "Хелпер на ивентах",
+  "Работа на АЗС",
+  "Помощь на мероприятиях",
   "Раннер или официант",
-  "Приготовление фастфуда",
   "Работа на линии, конвейере",
   "Строительство",
   "Ремонт и отделка квартир",
-  "Бытовой ремонт",
   "Монтаж (конструкции, мебель, оборудование)",
   "СТО, шиномонтаж",
   "Промоутеры",
@@ -60,232 +40,178 @@ const SKILL_OPTIONS = [
   "Домашний персонал",
   "Аниматоры, ведущие",
   "Салоны красоты",
-  "Электровелосипед",
-  "Водительские права категории B",
-  "Приложения или программы для работы со складом/ ПВЗ",
-  "Логистика",
-  "Медицинская книжка для ритейла",
-  "Медицинская книжка для общепита",
+  "Логистика (хабы, РЦ, СЦ)",
   "Управление погрузчиком / штабелёром / электрокаром",
-  "Текстильная промышленность",
   "Пищевое производство",
-  "Массовые мероприятия",
-  "Текстильное производство",
-  "Пошив одежды"
+  "Кейтеринг",
+  "Пошив одежды",
+  "Озеленение и благоустройство территорий",
+  "Сельское хозяйство",
+  "Почтовые услуги"
+];
+
+const ADDITIONAL_SKILL_OPTIONS = [
+  "медкнижка для работы с продуктами",
+  "медкнижка для общепита",
+  "управление электророхлей",
+  "сертификат на высотные работы",
+  "сертификат по электробезопасности",
+  "приложения для работы мерчендайзером",
+  "повар",
+  "кондитер",
+  "флорист",
+  "1С для складов",
+  "управление электровелосипедом",
+  "водительские права категории B",
+  "управление погрузчиком / штабелёром / электрокаром"
 ];
 
 const QUESTIONS = [
   {
-    id: "interest_primary",
-    text: "Что вас интересует?",
-    hint: "Выберите вариант, который лучше всего описывает вашу ситуацию",
-    type: "single",
-    options: [
-      "У меня уже есть основной доход, ищу доп заработок",
-      "Хочу получать основной доход от заданий в Смене",
-      "Я в поиске основной работы, но пока ищу - хочу зарабатывать",
-      "Хочу попробовать новую сферу",
-      "Другое"
+    id: "screen_1_goals",
+    text: "Расскажите о ваших целях",
+    hint: "Выберите подходящие варианты и при желании оставьте комментарий голосом или текстом.",
+    type: "bundle",
+    blocks: [
+      {
+        id: "interest_primary",
+        text: "Что вас интересует?",
+        type: "single",
+        options: [
+          "У меня уже есть основной доход, ищу доп заработок",
+          "Хочу получать основной доход от заданий в Смене",
+          "Я в поиске основной работы, но пока ищу - хочу зарабатывать",
+          "Хочу попробовать новую сферу"
+        ]
+      },
+      {
+        id: "priority_now",
+        text: "Что сейчас для вас наиболее важно?",
+        type: "single",
+        options: [
+          "Стабильный прогнозируемый доход",
+          "Максимум заработка",
+          "Баланс работы с личными делами и графиком",
+          "Заработать на карманные расходы"
+        ]
+      },
+      {
+        id: "hours_week",
+        text: "Сколько часов в неделю вы готовы уделять сменам?",
+        type: "single",
+        options: ["до 10", "до 20", "до 40", "более 40"]
+      },
+      {
+        id: "hours_week_details",
+        text: "Нет подходящих вариантов? Хотите поделиться, какой формат вам был бы удобен?",
+        hint: "Можно написать или рассказать (выходные, лето, учеба, ночные смены и т.д.)",
+        type: "text_voice_optional",
+        optional: true,
+        placeholder: "Напишите или расскажите, какой формат вам удобен"
+      }
     ]
   },
   {
-    id: "interest_primary_details",
-    text: "Расскажите, что именно вас сейчас интересует",
-    hint: "Можно написать или надиктовать свой вариант",
-    type: "text_voice_optional",
-    placeholder: "Напишите или расскажите, что вы хотите получить от Смены",
-    showIf: (answers) => answers.interest_primary === "Другое"
-  },
-  {
-    id: "hours_week",
-    text: "Сколько часов в неделю вы готовы уделять сменам?",
-    hint: "Оцените комфортный для себя объем времени",
-    type: "single",
-    options: ["до 5", "до 10", "до 20", "до 40", "более 40"]
-  },
-  {
-    id: "hours_week_details",
-    text: "Какой формат по времени был бы вам удобен?",
-    hint: "Можно написать про выходные, лето, учебу, ночные смены или любой другой режим",
-    type: "text_voice_optional",
-    placeholder: "Напишите или расскажите, какой формат вам удобен"
-  },
-  {
-    id: "priority_now",
-    text: "Что сейчас для вас наиболее важно?",
-    hint: "Это поможет понять, как лучше ранжировать подходящие форматы",
-    type: "single",
-    options: [
-      "Стабильный прогнозируемый доход",
-      "Максимум заработка",
-      "Баланс работы с личными делами и графиком",
-      "Что-то еще"
-    ]
-  },
-  {
-    id: "priority_now_details",
-    text: "Расскажите, что еще для вас важно",
-    hint: "Можно коротко описать свой критерий или ожидание от смен",
-    type: "text_voice_optional",
-    placeholder: "Напишите или расскажите, что для вас сейчас в приоритете",
-    showIf: (answers) => answers.priority_now === "Что-то еще"
-  },
-  {
-    id: "section_transition",
+    id: "screen_2_preferences",
     text: "Спасибо, что поделились своими целями.",
     hint: "Давайте теперь посмотрим, какие задания вам нравятся.",
-    type: "message",
-    countInProgress: false,
+    type: "bundle",
+    blocks: [
+      {
+        id: "physical_load",
+        text: "Какая физическая нагрузка вам подходит?",
+        type: "single",
+        options: [
+          "Очень легкая (выполнять задания сидя)",
+          "Легкая (без тяжестей и долгих перемещений)",
+          "Средняя (активные перемещения и задания на скорость)",
+          "Тяжелая (интенсивно, как в спортзале, тяжести больше 15 кг)"
+        ]
+      },
+      {
+        id: "outdoor_format",
+        text: "Вам комфортно работать на улице?",
+        type: "single_cards",
+        options: [
+          "Да, в любую погоду",
+          "Только в теплый сезон",
+          "Можно изредка попробовать",
+          "Не комфортно, могу только в помещении"
+        ]
+      }
+    ],
     ctaLabel: "Продолжить"
   },
   {
-    id: "physical_load",
-    text: "Какая физическая нагрузка вам подходит?",
-    hint: "Выберите самый комфортный для вас вариант",
-    type: "single",
-    options: [
-      "Очень легкая (выполнять задания сидя)",
-      "Легкая (без тяжестей и долгих перемещений)",
-      "Средняя (активные перемещения и задания на скорость)",
-      "Тяжелая (интенсивно, как в спортзале, тяжести больше 15 кг)"
+    id: "screen_3_communication",
+    text: "Формат общения в работе",
+    hint: "Выберите, какой уровень общения вам комфортен в рабочем процессе.",
+    type: "bundle",
+    blocks: [
+      {
+        id: "customer_contact",
+        text: "Вам нравится общаться с клиентами, покупателями?",
+        type: "single",
+        options: [
+          "Люблю общаться, меня это заряжает",
+          "Если только не целый день, я устаю",
+          "Стараюсь избегать такую работу, где нужно много общаться"
+        ]
+      },
+      {
+        id: "team_contact",
+        text: "А с коллегами нравится общаться?",
+        type: "single",
+        options: [
+          "Да, люблю большие коллективы",
+          "Предпочитаю небольшие команды (2-3 человека)",
+          "Я люблю быть сам по себе: работать без начальника и коллег",
+          "Мне все равно"
+        ]
+      }
     ]
   },
   {
-    id: "physical_load_limits",
-    text: "Какие виды нагрузки вам не подходят?",
-    hint: "Можно указать тяжести, долгую ходьбу, скорость или любые другие ограничения",
-    type: "text_voice_optional",
-    placeholder: "Напишите или расскажите, какие виды нагрузки лучше исключить"
-  },
-  {
-    id: "standing_format",
-    text: "Как относитесь к работе на ногах?",
-    hint: "Это поможет отделить более подвижные роли от спокойных форматов",
-    type: "single",
-    options: [
-      "Люблю гулять, поэтому положительно",
-      "В целом подходят такие задания",
-      "Могу только с перерывами",
-      "Мне подходит только сидячая работа"
-    ]
-  },
-  {
-    id: "outdoor_format",
-    text: "Вам комфортно работать на улице?",
-    hint: "Это важно для части городских, выездных и событийных задач",
-    type: "single",
-    options: [
-      "Да, в любую погоду",
-      "Только в теплый сезон",
-      "Можно изредка попробовать",
-      "Не комфортно, могу только в помещении"
-    ]
-  },
-  {
-    id: "movement_preference",
-    text: "Любите работу, на которой нужно постоянно быть в движении - пешком или на транспорте?",
-    hint: "Покажем этот вопрос только если вам в целом подходят подвижные и уличные форматы",
-    type: "single",
-    options: [
-      "Да, люблю быть за рулем, ездить на дальние расстояния",
-      "Да, люблю гулять и ездить на общественном транспорте",
-      "Предпочитаю перемещаться немного"
-    ],
-    showIf: (answers) => isPositiveMovementBase(answers)
-  },
-  {
-    id: "digital_matrix",
-    text: "Вызывает ли у вас трудности работа с компьютерными программами, терминалами сбора данных, кассовыми аппаратами и мобильными приложениями?",
-    hint: "Под каждой категорией выберите свой уровень комфорта: чем правее ползунок, тем увереннее вы себя чувствуете",
-    type: "digital_matrix"
-  },
-  {
-    id: "customer_contact",
-    text: "Вам нравится общаться с клиентами, покупателями?",
-    hint: "Так мы разделим более сервисные роли и более спокойные форматы",
-    type: "single",
-    options: [
-      "Люблю общаться, меня это заряжает",
-      "Если надо - пообщаемся",
-      "Если только не целый день, я устаю",
-      "Стараюсь избегать такую работу, где нужно много общаться"
-    ]
-  },
-  {
-    id: "team_contact",
-    text: "А с коллегами нравится общаться?",
-    hint: "Посмотрим, комфортнее ли вам большая команда, маленькая группа или самостоятельный формат",
-    type: "single",
-    options: [
-      "Да, люблю большие коллективы, есть шансы расширить круг общения и найти друзей",
-      "Если нужно, я готов подстроиться",
-      "Не люблю большие компании, предпочитаю небольшие команды (2-3 человека)",
-      "Я люблю быть сам по себе: работать без начальника и коллег",
-      "Мне все равно, какие коллеги, я могу работать с любыми"
-    ]
-  },
-  {
-    id: "pay_format",
-    text: "Какой формат оплаты предпочитаете?",
-    hint: "Выберите тот вариант, с которым вам спокойнее и понятнее работать",
-    type: "single_cards",
-    options: [
-      "Люблю сдельную оплату - можно получать повышенный доход за высокую производительность",
-      "Сдельная оплата подходит, но если есть гарантированный минимум",
-      "Нравится оплата за результат без ограничений, сколько его делать",
-      "Мне подходит только почасовая оплата"
-    ]
-  },
-  {
-    id: "shift_duration",
-    text: "Выберите оптимальную длительность заданий для вас",
-    hint: "Передвиньте ползунок: так мы поймем, какой формат смены вам комфортнее",
-    type: "range",
-    min: 1,
-    max: 12
+    id: "screen_4_experience_intro",
+    text: "А теперь самое важное - расскажите про свой опыт.",
+    hint: "Если хочется ответить подробно - мы только за. Это поможет учесть весь ваш опыт, знания и навыки для поиска заданий. А чтобы не утомиться - мы сделали голосовой ввод.",
+    type: "message",
+    ctaLabel: "Продолжить"
   },
   {
     id: "skills_multi",
-    text: "Отметьте все навыки, которые у вас есть",
-    hint: "Можно выбрать любое количество навыков",
+    text: "Отметьте все навыки и опыт, которые у вас есть",
+    hint: "Можно выбрать любое количество карточек",
     type: "multi_tiles",
     options: SKILL_OPTIONS
   },
   {
     id: "experience_details",
     text: "Напишите или расскажите о своем опыте, в какой сфере, что умеете, любите, на что учились",
-    hint: "Если хочется ответить подробно - мы только за. Это поможет учесть весь ваш опыт, знания и навыки для поиска заданий.",
+    hint: "Можно ответить подробно голосом или текстом",
     type: "text_voice_optional",
-    placeholder: "Расскажите, где вы работали, что умеете и в чем чувствуете себя уверенно"
+    placeholder: "Опишите свой опыт и сильные стороны"
+  },
+  {
+    id: "additional_skills_multi",
+    text: "Обсудим ваши навыки. Чем еще похвастаетесь?",
+    hint: "Выберите все дополнительные навыки и документы",
+    type: "multi_tiles",
+    options: ADDITIONAL_SKILL_OPTIONS
+  },
+  {
+    id: "other_skills_details",
+    text: "Напишите или расскажите о любых других своих навыках, которые могут пригодиться в работе",
+    hint: "Если есть дополнительные навыки, обязательно расскажите о них",
+    type: "text_voice_optional",
+    placeholder: "Расскажите о любых дополнительных навыках"
   },
   {
     id: "new_jobs_city",
-    text: "Какие задания вы бы добавили в своем городе?",
-    hint: "Можно написать или надиктовать идею новых смен и направлений",
+    text: "Какие задания вы бы добавили в приложение для подработки?",
+    hint: "Напишите или расскажите, каких заданий вам не хватает. Спасибо! Уже готовим результаты :)",
     type: "text_voice_optional",
-    placeholder: "Напишите или расскажите, каких заданий вам не хватает в вашем городе"
-  },
-  {
-    id: "age_text",
-    text: "И последнее: сколько вам лет?",
-    hint: "Можно указать возраст числом",
-    type: "text_optional",
-    placeholder: "Например: 27"
-  },
-  {
-    id: "city",
-    text: "Из какого вы города?",
-    hint: "Начните вводить город и выберите его из списка",
-    type: "text",
-    placeholder: "Например: Санкт-Петербург"
-  },
-  {
-    id: "results_prep",
-    text: "Спасибо! Уже готовим результаты :)",
-    hint: "Остался один клик, и покажем ваш профиль и подходящие направления.",
-    type: "message",
-    countInProgress: false,
-    ctaLabel: "Показать результаты"
+    placeholder: "Ваши идеи по новым заданиям"
   }
 ];
 
@@ -307,7 +233,7 @@ const ROLES = [
     pay: 5000,
     lead: "Подходит тем, кто любит процессы, понятный ритм и аккуратную работу руками.",
     tags: ["Кухня", "Команда", "Стабильность"],
-    skillMatches: ["Приготовление пищи", "Обслуживание гостей в общепите", "Работа в отделе гастрономия", "Приготовление фастфуда", "Медицинская книжка для общепита"]
+    skillMatches: ["Приготовление пищи", "Обслуживание гостей в общепите", "Кейтеринг", "Пищевое производство", "повар", "кондитер", "медкнижка для общепита"]
   },
   {
     code: "cashier",
@@ -316,7 +242,7 @@ const ROLES = [
     pay: 4400,
     lead: "Хороший вариант, если вам важны стабильный доход, понятные процессы и контакт с людьми.",
     tags: ["Касса", "Покупатели", "Почасовая оплата"],
-    skillMatches: ["Работа с кассой (нал и безнал расчеты)", "Консультации покупателей", "Обслуживание в магазинах одежды или косметики", "Консультант в магазинах техники"]
+    skillMatches: ["Работа с кассой", "Консультации покупателей", "Работа в пункте выдачи заказов", "медкнижка для работы с продуктами"]
   },
   {
     code: "collector",
@@ -325,7 +251,7 @@ const ROLES = [
     pay: 4700,
     lead: "Подходит тем, кто любит темп, точность и не боится цифровых инструментов.",
     tags: ["Темп", "Точность", "ТСД"],
-    skillMatches: ["Терминалы сбора данных", "Сборка заказов на время", "Комплектовка товаров", "Работа в пункте выдачи заказов", "Приложения или программы для работы со складом/ ПВЗ"]
+    skillMatches: ["Сборка заказов", "Комплектовка товаров", "Работа в пункте выдачи заказов", "Работа на складе", "Логистика (хабы, РЦ, СЦ)", "1С для складов"]
   },
   {
     code: "retail_floor",
@@ -334,7 +260,7 @@ const ROLES = [
     pay: 4100,
     lead: "Подходит, если вам нравится порядок, понятная структура задач и спокойный вход в работу.",
     tags: ["Полки", "Планограмма", "Магазин"],
-    skillMatches: ["Мерчендайзинг", "Работа с планограммой", "Товароведение", "Консультации покупателей", "Медицинская книжка для ритейла"]
+    skillMatches: ["Мерчендайзинг", "Товароведение", "Консультации покупателей", "приложения для работы мерчендайзером", "медкнижка для работы с продуктами"]
   },
   {
     code: "barista",
@@ -343,7 +269,7 @@ const ROLES = [
     pay: 4800,
     lead: "Идеально для тех, кто любит сервис, динамику и общение в небольших командах.",
     tags: ["Кофе", "Сервис", "Обучение"],
-    skillMatches: ["Бариста", "Обслуживание гостей в общепите", "Раннер или официант"]
+    skillMatches: ["Бариста", "Обслуживание гостей в общепите", "Раннер или официант", "Кейтеринг"]
   },
   {
     code: "courier",
@@ -352,7 +278,7 @@ const ROLES = [
     pay: 5600,
     lead: "Подходит, если вам нравится движение, свобода графика и оплата за результат.",
     tags: ["Движение", "Гибкость", "Сдельность"],
-    skillMatches: ["Электровелосипед", "Водительские права категории B", "Логистика"]
+    skillMatches: ["управление электровелосипедом", "водительские права категории B", "Логистика (хабы, РЦ, СЦ)"]
   },
   {
     code: "warehouse",
@@ -361,7 +287,7 @@ const ROLES = [
     pay: 4900,
     lead: "Подходит тем, кто спокойно чувствует себя в операционной среде и любит четкий процесс.",
     tags: ["Склад", "Процессы", "Физнагрузка"],
-    skillMatches: ["Складские услуги", "Погрузка с устройствами (рохля, дебаркадер)", "Управление погрузчиком / штабелёром / электрокаром", "Логистика", "Терминалы сбора данных"]
+    skillMatches: ["Работа на складе", "Погрузка с устройствами (рохля, дебаркадер)", "Управление погрузчиком / штабелёром / электрокаром", "управление электророхлей", "Логистика (хабы, РЦ, СЦ)", "1С для складов"]
   },
   {
     code: "promoter",
@@ -370,7 +296,7 @@ const ROLES = [
     pay: 3900,
     lead: "Хороший вход, если вам нравится движение, новые люди и гибкие короткие задания.",
     tags: ["Люди", "События", "Гибкий график"],
-    skillMatches: ["Промоутеры", "Хелпер на ивентах", "Массовые мероприятия", "Аниматоры, ведущие", "Администратор/ хостес"]
+    skillMatches: ["Промоутеры", "Помощь на мероприятиях", "Аниматоры, ведущие", "Администратор/ хостес", "Call-центр"]
   }
 ];
 
@@ -419,6 +345,7 @@ const STATE = {
   answers: {},
   lastRecommendations: [],
   citySource: null,
+  activeBundleTextId: "",
   submissionSent: false,
   submissionError: "",
   score: {
@@ -488,6 +415,7 @@ function resetState() {
   STATE.answers = {};
   STATE.lastRecommendations = [];
   STATE.citySource = null;
+  STATE.activeBundleTextId = "";
   STATE.submissionSent = false;
   STATE.submissionError = "";
   STATE.score = {
@@ -528,6 +456,7 @@ function render() {
   UI.hint.textContent = question.hint || "";
   UI.options.className = "options";
   UI.options.innerHTML = "";
+  STATE.activeBundleTextId = "";
   UI.badges.innerHTML = renderBadges(question);
   UI.inputWrap.classList.add("hidden");
   UI.multiActions.classList.add("hidden");
@@ -560,6 +489,9 @@ function render() {
     case "range":
       renderRangeQuestion(question);
       break;
+    case "bundle":
+      renderBundle(question);
+      break;
     default:
       renderSingle(question, false);
       break;
@@ -571,16 +503,18 @@ function renderBadges(question) {
   if (question.id === "skills_multi" && Array.isArray(STATE.answers.skills_multi) && STATE.answers.skills_multi.length) {
     chips.push(`${STATE.answers.skills_multi.length} навыков уже отмечено`);
   }
-  if (question.id === "digital_matrix") chips.push("Оцените 4 инструмента отдельно");
-  if (question.id === "shift_duration") chips.push("Передвиньте ползунок от 1 до 12 часов");
+  if (question.id === "additional_skills_multi" && Array.isArray(STATE.answers.additional_skills_multi) && STATE.answers.additional_skills_multi.length) {
+    chips.push(`${STATE.answers.additional_skills_multi.length} доп. навыков отмечено`);
+  }
   return chips.map((item) => `<span class="badge">${escapeHtml(item)}</span>`).join("");
 }
 
 function renderSingle(question, cardMode) {
   const selectedValue = STATE.answers[question.id] || "";
-  if (cardMode) UI.options.classList.add("options-cards-grid");
+  const useCardMode = cardMode || (Array.isArray(question.options) && question.options.length >= 5);
+  if (useCardMode) UI.options.classList.add("options-cards-grid");
   question.options.forEach((optionText) => {
-    const button = makeOption(optionText, selectedValue === optionText, cardMode);
+    const button = makeOption(optionText, selectedValue === optionText, useCardMode);
     button.addEventListener("click", () => {
       STATE.answers[question.id] = optionText;
       goNext();
@@ -613,10 +547,62 @@ function renderTextQuestion(question) {
   UI.textAnswer.value = readTextValue(question.id);
   UI.textAnswer.rows = allowsMultiline(question) ? 5 : 1;
   autoResizeTextAnswer();
+  UI.textNextBtn.classList.remove("hidden");
+  UI.skipTextBtn.classList.remove("hidden");
   UI.skipTextBtn.classList.toggle("hidden", question.type === "text");
   UI.textNextBtn.textContent = "Продолжить";
-  configureVoiceControls(question);
+  configureVoiceControls(question.type === "text_voice_optional");
   if (question.id === "city") handleCityInput(UI.textAnswer, UI.cityAutocomplete);
+}
+
+function renderBundle(question) {
+  UI.options.classList.add("options-bundle");
+  UI.options.innerHTML = "";
+  const blocks = Array.isArray(question.blocks) ? question.blocks : [];
+  const textBlock = blocks.find((block) => block.type === "text_voice_optional");
+
+  blocks.forEach((block) => {
+    const card = document.createElement("div");
+    card.className = "bundle-block";
+    const hintPart = block.hint ? `<p class="bundle-block-hint">${escapeHtml(block.hint)}</p>` : "";
+
+    if (block.type === "single" || block.type === "single_cards") {
+      const selected = STATE.answers[block.id] || "";
+      const useCardMode = block.type === "single_cards" || (Array.isArray(block.options) && block.options.length >= 5);
+      card.innerHTML = `
+        <h3 class="bundle-block-title">${escapeHtml(block.text)}</h3>
+        ${hintPart}
+        <div class="bundle-options${useCardMode ? " options-cards-grid" : ""}" data-bundle-id="${escapeHtmlAttr(block.id)}"></div>
+      `;
+      UI.options.appendChild(card);
+      const container = card.querySelector(".bundle-options");
+      (block.options || []).forEach((optionText) => {
+        const button = makeOption(optionText, selected === optionText, useCardMode);
+        button.addEventListener("click", () => {
+          STATE.answers[block.id] = optionText;
+          renderBundle(question);
+        });
+        container.appendChild(button);
+      });
+    }
+  });
+
+  if (textBlock) {
+    STATE.activeBundleTextId = textBlock.id;
+    UI.inputWrap.classList.remove("hidden");
+    UI.textAnswer.placeholder = textBlock.placeholder || "";
+    UI.textAnswer.value = readTextValue(textBlock.id);
+    UI.textAnswer.rows = 5;
+    autoResizeTextAnswer();
+    UI.textNextBtn.classList.add("hidden");
+    UI.skipTextBtn.classList.add("hidden");
+    configureVoiceControls(true);
+  } else {
+    configureVoiceControls(false);
+  }
+
+  UI.multiActions.classList.remove("hidden");
+  UI.doneMultiBtn.textContent = question.ctaLabel || "Продолжить";
 }
 
 function renderMessageQuestion(question) {
@@ -712,8 +698,16 @@ function skipTextQuestion() {
 function submitDynamicScreen() {
   const question = getCurrentQuestion();
   if (!question) return;
-  if (question.type === "message" && question.id === "results_prep") {
-    showResults();
+  if (question.type === "bundle") {
+    const blocks = Array.isArray(question.blocks) ? question.blocks : [];
+    const requiredSingles = blocks.filter((block) => (block.type === "single" || block.type === "single_cards") && !block.optional);
+    const firstMissing = requiredSingles.find((block) => !STATE.answers[block.id]);
+    if (firstMissing) return;
+
+    if (STATE.activeBundleTextId) {
+      STATE.answers[STATE.activeBundleTextId] = UI.textAnswer.value.trim();
+    }
+    goNext();
     return;
   }
   goNext();
@@ -753,8 +747,7 @@ function readTextValue(questionId) {
   return typeof value === "string" ? value : "";
 }
 
-function configureVoiceControls(question) {
-  const shouldShow = question.type === "text_voice_optional";
+function configureVoiceControls(shouldShow) {
   UI.voiceControls.classList.toggle("hidden", !shouldShow);
   UI.voiceBtn.textContent = speechActive ? "Остановить запись" : "Голосовой ответ";
   UI.voiceStatus.textContent = shouldShow ? "Можно надиктовать ответ голосом" : "";
@@ -769,8 +762,8 @@ function autoResizeTextAnswer() {
   UI.textAnswer.style.height = `${Math.max(UI.textAnswer.scrollHeight, 58)}px`;
 }
 function toggleVoiceInput() {
-  const question = getCurrentQuestion();
-  if (!question || question.type !== "text_voice_optional") return;
+  const fieldId = getCurrentVoiceFieldId();
+  if (!fieldId) return;
 
   const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!RecognitionCtor) {
@@ -794,7 +787,7 @@ function toggleVoiceInput() {
       speechActive = false;
       UI.voiceControls.classList.remove("is-recording");
       UI.voiceBtn.textContent = "Голосовой ответ";
-      if (speechKeepAlive && getCurrentQuestion()?.type === "text_voice_optional") {
+      if (speechKeepAlive && getCurrentVoiceFieldId()) {
         setTimeout(() => {
           try { speechRecognition.start(); } catch {}
         }, 250);
@@ -820,6 +813,14 @@ function toggleVoiceInput() {
   speechInterimText = "";
   speechKeepAlive = true;
   try { speechRecognition.start(); } catch {}
+}
+
+function getCurrentVoiceFieldId() {
+  const question = getCurrentQuestion();
+  if (!question) return "";
+  if (question.type === "text_voice_optional") return question.id;
+  if (question.type === "bundle" && STATE.activeBundleTextId) return STATE.activeBundleTextId;
+  return "";
 }
 
 function handleSpeechResult(event) {
@@ -1042,7 +1043,10 @@ function computeRecommendations() {
 
 function scoreRole(role) {
   let score = 42;
-  const selectedSkills = new Set(STATE.answers.skills_multi || []);
+  const selectedSkills = new Set([
+    ...(Array.isArray(STATE.answers.skills_multi) ? STATE.answers.skills_multi : []),
+    ...(Array.isArray(STATE.answers.additional_skills_multi) ? STATE.answers.additional_skills_multi : [])
+  ]);
   const matchedSkills = role.skillMatches.filter((skill) => selectedSkills.has(skill)).length;
   score += Math.min(30, matchedSkills * 8);
 
@@ -1063,145 +1067,80 @@ function scoreRole(role) {
 
   const priority = STATE.answers.priority_now;
   if (priority === "Стабильный прогнозируемый доход") {
-    if (["cashier", "retail_floor", "kitchen", "cleaner_indoor"].includes(role.code)) score += 9;
+    if (["cashier", "retail_floor", "kitchen"].includes(role.code)) score += 9;
     if (["courier"].includes(role.code)) score -= 6;
   }
   if (priority === "Максимум заработка") {
     if (["courier", "collector", "warehouse"].includes(role.code)) score += 9;
   }
   if (priority === "Баланс работы с личными делами и графиком") {
-    if (["promoter", "courier", "cleaner_indoor", "barista"].includes(role.code)) score += 7;
+    if (["promoter", "courier", "barista"].includes(role.code)) score += 7;
+  }
+  if (priority === "Заработать на карманные расходы") {
+    if (["promoter", "retail_floor", "cashier", "barista"].includes(role.code)) score += 8;
   }
 
   const physical = STATE.answers.physical_load;
   if (physical === "Очень легкая (выполнять задания сидя)") {
-    if (["cashier", "cleaner_indoor", "barista"].includes(role.code)) score += 6;
-    if (["warehouse", "courier", "cleaner_outdoor"].includes(role.code)) score -= 14;
+    if (["cashier", "barista"].includes(role.code)) score += 6;
+    if (["warehouse", "courier"].includes(role.code)) score -= 14;
   }
   if (physical === "Легкая (без тяжестей и долгих перемещений)") {
-    if (["cashier", "retail_floor", "barista", "cleaner_indoor"].includes(role.code)) score += 8;
-    if (["warehouse", "cleaner_outdoor"].includes(role.code)) score -= 8;
+    if (["cashier", "retail_floor", "barista"].includes(role.code)) score += 8;
+    if (["warehouse"].includes(role.code)) score -= 8;
   }
   if (physical === "Средняя (активные перемещения и задания на скорость)") {
     if (["collector", "retail_floor", "courier", "promoter"].includes(role.code)) score += 8;
   }
   if (physical === "Тяжелая (интенсивно, как в спортзале, тяжести больше 15 кг)") {
-    if (["warehouse", "cleaner_outdoor", "courier"].includes(role.code)) score += 10;
+    if (["warehouse", "courier"].includes(role.code)) score += 10;
     if (["cashier", "barista"].includes(role.code)) score -= 5;
-  }
-
-  const standing = STATE.answers.standing_format;
-  if (standing === "Люблю гулять, поэтому положительно") {
-    if (["courier", "promoter", "retail_floor", "collector"].includes(role.code)) score += 8;
-  }
-  if (standing === "В целом подходят такие задания") {
-    if (["cashier", "retail_floor", "barista", "collector"].includes(role.code)) score += 5;
-  }
-  if (standing === "Могу только с перерывами") {
-    if (["cashier", "barista", "retail_floor", "cleaner_indoor"].includes(role.code)) score += 4;
-    if (["courier", "cleaner_outdoor", "warehouse"].includes(role.code)) score -= 6;
-  }
-  if (standing === "Мне подходит только сидячая работа") {
-    if (["cashier"].includes(role.code)) score += 3;
-    if (["courier", "warehouse", "collector", "cleaner_outdoor"].includes(role.code)) score -= 12;
   }
 
   const outdoor = STATE.answers.outdoor_format;
   if (outdoor === "Да, в любую погоду") {
-    if (["courier", "cleaner_outdoor", "promoter"].includes(role.code)) score += 9;
+    if (["courier", "promoter"].includes(role.code)) score += 9;
   }
   if (outdoor === "Только в теплый сезон") {
     if (["courier", "promoter"].includes(role.code)) score += 4;
-    if (["cleaner_outdoor"].includes(role.code)) score -= 3;
   }
   if (outdoor === "Можно изредка попробовать") {
     if (["promoter", "courier"].includes(role.code)) score += 3;
   }
   if (outdoor === "Не комфортно, могу только в помещении") {
-    if (["cashier", "retail_floor", "collector", "kitchen", "barista", "cleaner_indoor"].includes(role.code)) score += 6;
-    if (["courier", "cleaner_outdoor"].includes(role.code)) score -= 14;
+    if (["cashier", "retail_floor", "collector", "kitchen", "barista"].includes(role.code)) score += 6;
+    if (["courier"].includes(role.code)) score -= 14;
   }
-
-  const movement = STATE.answers.movement_preference;
-  if (movement === "Да, люблю быть за рулем, ездить на дальние расстояния") {
-    if (["courier"].includes(role.code)) score += 12;
-  }
-  if (movement === "Да, люблю гулять и ездить на общественном транспорте") {
-    if (["courier", "promoter"].includes(role.code)) score += 9;
-  }
-  if (movement === "Предпочитаю перемещаться немного") {
-    if (["cashier", "barista", "cleaner_indoor"].includes(role.code)) score += 5;
-    if (["courier"].includes(role.code)) score -= 6;
-  }
-
-  const digital = STATE.answers.digital_matrix || createDefaultDigitalMatrix();
-  const digitalAvg = average(Object.values(digital));
-  if (["collector", "warehouse"].includes(role.code)) score += digital.tsd * 4;
-  if (["cashier"].includes(role.code)) score += digital.cashbox * 4 + digital.computer * 2;
-  if (["courier"].includes(role.code)) score += digital.apps * 4;
-  if (["retail_floor", "barista"].includes(role.code)) score += digital.apps * 2 + digital.computer * 2;
-  if (digitalAvg <= 1 && ["collector", "warehouse", "cashier"].includes(role.code)) score -= 6;
 
   const customer = STATE.answers.customer_contact;
   if (customer === "Люблю общаться, меня это заряжает") {
     if (["cashier", "barista", "promoter", "retail_floor"].includes(role.code)) score += 10;
-  }
-  if (customer === "Если надо - пообщаемся") {
-    if (["cashier", "retail_floor", "barista"].includes(role.code)) score += 5;
   }
   if (customer === "Если только не целый день, я устаю") {
     if (["collector", "warehouse", "kitchen"].includes(role.code)) score += 5;
     if (["promoter"].includes(role.code)) score -= 4;
   }
   if (customer === "Стараюсь избегать такую работу, где нужно много общаться") {
-    if (["collector", "warehouse", "kitchen", "cleaner_indoor", "cleaner_outdoor"].includes(role.code)) score += 7;
+    if (["collector", "warehouse", "kitchen"].includes(role.code)) score += 7;
     if (["cashier", "barista", "promoter"].includes(role.code)) score -= 10;
   }
 
   const team = STATE.answers.team_contact;
-  if (team === "Да, люблю большие коллективы, есть шансы расширить круг общения и найти друзей") {
+  if (team === "Да, люблю большие коллективы") {
     if (["kitchen", "cashier", "promoter", "retail_floor"].includes(role.code)) score += 8;
   }
-  if (team === "Если нужно, я готов подстроиться") score += 3;
-  if (team === "Не люблю большие компании, предпочитаю небольшие команды (2-3 человека)") {
-    if (["barista", "courier", "cleaner_indoor"].includes(role.code)) score += 5;
+  if (team === "Предпочитаю небольшие команды (2-3 человека)") {
+    if (["barista", "courier"].includes(role.code)) score += 5;
   }
   if (team === "Я люблю быть сам по себе: работать без начальника и коллег") {
     if (["courier"].includes(role.code)) score += 8;
     if (["kitchen", "cashier", "promoter"].includes(role.code)) score -= 6;
   }
 
-  const pay = STATE.answers.pay_format;
-  if (pay === "Люблю сдельную оплату - можно получать повышенный доход за высокую производительность") {
-    if (["courier", "collector", "warehouse", "promoter"].includes(role.code)) score += 10;
-  }
-  if (pay === "Сдельная оплата подходит, но если есть гарантированный минимум") {
-    if (["courier", "collector", "warehouse", "promoter"].includes(role.code)) score += 5;
-    if (["cashier", "retail_floor"].includes(role.code)) score += 3;
-  }
-  if (pay === "Нравится оплата за результат без ограничений, сколько его делать") {
-    if (["courier", "collector"].includes(role.code)) score += 11;
-  }
-  if (pay === "Мне подходит только почасовая оплата") {
-    if (["cashier", "retail_floor", "kitchen", "cleaner_indoor", "barista"].includes(role.code)) score += 10;
-    if (["courier"].includes(role.code)) score -= 6;
-  }
-
-  const duration = Number(STATE.answers.shift_duration || 6);
-  if (duration <= 4) {
-    if (["promoter", "courier", "barista"].includes(role.code)) score += 7;
-  } else if (duration <= 8) {
-    if (["cashier", "retail_floor", "barista", "kitchen", "collector"].includes(role.code)) score += 6;
-  } else {
-    if (["warehouse", "cleaner_outdoor", "cleaner_indoor", "collector"].includes(role.code)) score += 6;
-  }
-
   const experienceText = [
     STATE.answers.experience_details,
-    STATE.answers.interest_primary_details,
     STATE.answers.hours_week_details,
-    STATE.answers.priority_now_details,
-    STATE.answers.physical_load_limits,
+    STATE.answers.other_skills_details,
     STATE.answers.new_jobs_city
   ].join(" ").toLowerCase();
 
@@ -1231,9 +1170,10 @@ function computeProfileNarrative(topRole) {
 
 function computeLearningReadiness() {
   const interest = STATE.answers.interest_primary;
-  const digitalAvg = average(Object.values(STATE.answers.digital_matrix || createDefaultDigitalMatrix()));
-  if (interest === "Хочу попробовать новую сферу" || digitalAvg >= 2.5) return "Высокая";
-  if (digitalAvg >= 1.5) return "Средняя";
+  const detailsSize = String(STATE.answers.experience_details || "").trim().length;
+  const extraSkills = (STATE.answers.additional_skills_multi || []).length;
+  if (interest === "Хочу попробовать новую сферу" || extraSkills >= 4 || detailsSize >= 80) return "Высокая";
+  if (extraSkills >= 1 || detailsSize >= 20) return "Средняя";
   return "Базовая";
 }
 

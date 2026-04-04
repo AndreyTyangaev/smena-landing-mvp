@@ -1064,6 +1064,35 @@ h1 {
   line-height: 1.25;
 }
 
+.options.options-bundle {
+  gap: 16px;
+}
+
+.bundle-block {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(47, 108, 229, 0.12);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.bundle-block-title {
+  margin: 0 0 10px;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #1d2b3f;
+}
+
+.bundle-block-hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.bundle-options {
+  display: grid;
+  gap: 10px;
+}
+
 .input-wrap {
   margin-top: 16px;
   display: grid;

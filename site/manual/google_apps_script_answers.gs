@@ -49,29 +49,18 @@ function getHeaders() {
     'top_role_score',
     'top_role_pay',
     'interest_primary',
-    'interest_primary_details',
     'hours_week',
     'hours_week_details',
     'priority_now',
-    'priority_now_details',
     'physical_load',
-    'physical_load_limits',
-    'standing_format',
     'outdoor_format',
-    'movement_preference',
-    'digital_computer',
-    'digital_cashbox',
-    'digital_tsd',
-    'digital_apps',
     'customer_contact',
     'team_contact',
-    'pay_format',
-    'shift_duration_hours',
     'skills_multi',
+    'additional_skills_multi',
     'experience_details',
+    'other_skills_details',
     'new_jobs_city',
-    'age_text',
-    'city_raw',
     'rec_1_role',
     'rec_1_score',
     'rec_2_role',
@@ -79,13 +68,13 @@ function getHeaders() {
     'rec_3_role',
     'rec_3_score',
     'page_url',
-    'user_agent'
+    'user_agent',
+    'answers_json'
   ];
 }
 
 function buildRow(payload) {
   const answers = payload.answers || {};
-  const digital = answers.digital_matrix || {};
   const rec = Array.isArray(payload.recommendations) ? payload.recommendations : [];
 
   return [
@@ -100,29 +89,18 @@ function buildRow(payload) {
     value(payload, ['topRole', 'score']),
     value(payload, ['topRole', 'pay']),
     answers.interest_primary || '',
-    answers.interest_primary_details || '',
     answers.hours_week || '',
     answers.hours_week_details || '',
     answers.priority_now || '',
-    answers.priority_now_details || '',
     answers.physical_load || '',
-    answers.physical_load_limits || '',
-    answers.standing_format || '',
     answers.outdoor_format || '',
-    answers.movement_preference || '',
-    digital.computer ?? '',
-    digital.cashbox ?? '',
-    digital.tsd ?? '',
-    digital.apps ?? '',
     answers.customer_contact || '',
     answers.team_contact || '',
-    answers.pay_format || '',
-    answers.shift_duration ?? '',
     joinList(answers.skills_multi),
+    joinList(answers.additional_skills_multi),
     answers.experience_details || '',
+    answers.other_skills_details || '',
     answers.new_jobs_city || '',
-    answers.age_text || '',
-    answers.city || '',
     value(rec[0], ['role']),
     value(rec[0], ['score']),
     value(rec[1], ['role']),
@@ -130,7 +108,8 @@ function buildRow(payload) {
     value(rec[2], ['role']),
     value(rec[2], ['score']),
     payload.pageUrl || '',
-    payload.userAgent || ''
+    payload.userAgent || '',
+    JSON.stringify(answers)
   ];
 }
 
