@@ -419,6 +419,8 @@ const STATE = {
   answers: {},
   lastRecommendations: [],
   citySource: null,
+  submissionSent: false,
+  submissionError: "",
   score: {
     physical: 50,
     communication: 50,
@@ -486,6 +488,8 @@ function resetState() {
   STATE.answers = {};
   STATE.lastRecommendations = [];
   STATE.citySource = null;
+  STATE.submissionSent = false;
+  STATE.submissionError = "";
   STATE.score = {
     physical: 50,
     communication: 50,
@@ -980,6 +984,55 @@ function showResults() {
   renderFamilyFit(recommendations);
   renderCityOffersLink();
   renderFallback();
+  queueAnswersExport(topRole, recommendations.slice(0, 3), profile);
+}
+
+function queueAnswersExport(topRole, topRecommendations, profile) {
+  if (STATE.submissionSent) return;
+  STATE.submissionSent = true;
+
+  const payload = {
+    submittedAt: new Date().toISOString(),
+    pageUrl: window.location.href,
+    userAgent: navigator.userAgent,
+    city: String(STATE.answers.city || "").trim(),
+    profile: {
+      name: profile.name,
+      learningReadiness: profile.learningReadiness
+    },
+    topRole: {
+      code: topRole.code,
+      role: topRole.role,
+      family: topRole.family,
+      score: topRole.score,
+      pay: topRole.pay
+    },
+    recommendations: topRecommendations.map((item) => ({
+      code: item.code,
+      role: item.role,
+      family: item.family,
+      score: item.score,
+      pay: item.pay
+    })),
+    answers: STATE.answers
+  };
+
+  fetch("./api/answers", {
+    method: "POST",
+    headers: { "content-type": "application/json; charset=utf-8" },
+    body: JSON.stringify(payload)
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `HTTP ${response.status}`);
+      }
+    })
+    .catch((error) => {
+      STATE.submissionSent = false;
+      STATE.submissionError = String(error?.message || error || "unknown error");
+      console.warn("Не удалось отправить ответы в Google Sheets:", STATE.submissionError);
+    });
 }
 function computeRecommendations() {
   const scored = ROLES.map((role) => ({ ...role, score: scoreRole(role) }))
