@@ -1241,33 +1241,33 @@ function renderCityOffersLink() {
   const cityValue = String(STATE.answers.city || "").trim();
   const cityMeta = lookupCityMeta(cityValue);
   const cityLabel = cityMeta?.label || cityValue;
-  const offersUrl = cityMeta?.offersUrl || "";
+  const offersUrl = "https://offers.smena.yandex.ru/";
 
   if (!cityLabel) {
     UI.realShifts.innerHTML = `
       <div class="section-head">
-        <div class="section-head-copy">
-          <p class="section-overline">Следующий шаг</p>
-          <h3>Смены в вашем городе</h3>
-        </div>
+      <div class="section-head-copy">
+        <p class="section-overline">Следующий шаг</p>
+        <h3>Посмотреть реальные смены</h3>
       </div>
-      <div class="city-link-card">
-        <p class="family-copy">Выберите город, и мы откроем актуальную витрину смен именно для него.</p>
-      </div>
-    `;
-    return;
+    </div>
+    <div class="city-link-card">
+      <p class="family-copy">Откройте витрину Смены и посмотрите актуальные задания.</p>
+    </div>
+  `;
+  return;
   }
 
   UI.realShifts.innerHTML = `
     <div class="section-head">
       <div class="section-head-copy">
         <p class="section-overline">Следующий шаг</p>
-        <h3>Смены в вашем городе</h3>
+        <h3>Посмотреть реальные смены</h3>
       </div>
     </div>
     <div class="city-link-card">
-      <p class="family-copy">Открываем городскую витрину Смены для города ${escapeHtml(cityLabel)}.</p>
-      ${offersUrl ? `<a class="shift-cta" href="${escapeHtmlAttr(offersUrl)}" target="_blank" rel="noopener noreferrer">Открыть смены в городе ${escapeHtml(cityLabel)}</a>` : `<p class="family-copy">Для этого города пока нет прямой ссылки в конфиге.</p>`}
+      <p class="family-copy">Открываем витрину Смены с реальными заданиями${cityLabel ? ` для города ${escapeHtml(cityLabel)}` : ""}.</p>
+      <a class="shift-cta" href="${escapeHtmlAttr(offersUrl)}" target="_blank" rel="noopener noreferrer">Перейти на витрину смен</a>
     </div>
   `;
 }
