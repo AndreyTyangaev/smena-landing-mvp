@@ -296,8 +296,7 @@ const ROLE_FAMILIES = {
   service: "Кофе и сервис",
   delivery: "Доставка",
   warehouse: "Склад",
-  promo: "Промо и события",
-  cleaning: "Клининг"
+  promo: "Промо и события"
 };
 
 const ROLES = [
@@ -372,24 +371,6 @@ const ROLES = [
     lead: "Хороший вход, если вам нравится движение, новые люди и гибкие короткие задания.",
     tags: ["Люди", "События", "Гибкий график"],
     skillMatches: ["Промоутеры", "Хелпер на ивентах", "Массовые мероприятия", "Аниматоры, ведущие", "Администратор/ хостес"]
-  },
-  {
-    code: "cleaner_indoor",
-    role: "Уборка помещений",
-    family: ROLE_FAMILIES.cleaning,
-    pay: 3900,
-    lead: "Подходит тем, кто хочет понятные задачи и спокойный, предсказуемый формат работы.",
-    tags: ["Спокойный ритм", "Почасовая оплата", "Простой вход"],
-    skillMatches: ["Сложная уборка с бытовой химией", "Домашний персонал"]
-  },
-  {
-    code: "cleaner_outdoor",
-    role: "Уборка территории",
-    family: ROLE_FAMILIES.cleaning,
-    pay: 4700,
-    lead: "Подходит, если вам нормально на улице, в движении и в более физическом формате.",
-    tags: ["Улица", "Движение", "Физнагрузка"],
-    skillMatches: ["Мойка автомобилей", "Заправка автомобилей", "Техобслуживание автомобилей"]
   }
 ];
 
@@ -999,13 +980,10 @@ function showResults() {
   renderFamilyFit(recommendations);
   renderCityOffersLink();
   renderFallback();
-  computeRadarScore(topRole);
-  drawRadar();
 }
 function computeRecommendations() {
   const scored = ROLES.map((role) => ({ ...role, score: scoreRole(role) }))
     .sort((a, b) => b.score - a.score || b.pay - a.pay);
-  enforceCleaningRule(scored);
   return scored;
 }
 
@@ -1181,21 +1159,6 @@ function scoreRole(role) {
   return clamp(Math.round(score), 35, 98);
 }
 
-function enforceCleaningRule(list) {
-  if (!list.length) return;
-  const firstNonCleaning = list.find((item) => !item.family.includes("Клининг"));
-  if (list[0]?.family.includes("Клининг") && firstNonCleaning) {
-    const cleanerIndex = list.findIndex((item) => item.code === list[0].code);
-    const nonCleaningIndex = list.findIndex((item) => item.code === firstNonCleaning.code);
-    [list[cleanerIndex], list[nonCleaningIndex]] = [list[nonCleaningIndex], list[cleanerIndex]];
-  }
-  const topScore = list[0]?.score || 0;
-  list.forEach((item) => {
-    if (item.family.includes("Клининг") && item.score >= topScore) item.score = Math.max(30, topScore - 1);
-  });
-  list.sort((a, b) => b.score - a.score || b.pay - a.pay);
-}
-
 function computeProfileNarrative(topRole) {
   const family = topRole.family;
   let name = "Гибкий профи подработки";
@@ -1206,8 +1169,6 @@ function computeProfileNarrative(topRole) {
   if (family === ROLE_FAMILIES.delivery) name = "Подвижный профиль с гибким графиком";
   if (family === ROLE_FAMILIES.warehouse) name = "Сильный операционный профиль";
   if (family === ROLE_FAMILIES.promo) name = "Коммуникационный профиль быстрого старта";
-  if (family === ROLE_FAMILIES.cleaning) name = "Спокойный прикладной профиль";
-
   return {
     name,
     learningReadiness: computeLearningReadiness(),
@@ -1313,7 +1274,7 @@ function renderCityOffersLink() {
     </div>
     <div class="city-link-card">
       <p class="family-copy">Открываем городскую витрину Смены для города ${escapeHtml(cityLabel)}.</p>
-      ${offersUrl ? `<a class="shift-cta" href="${escapeHtmlAttr(offersUrl)}" target="_blank" rel="noopener noreferrer">Открыть смены в ${escapeHtml(cityLabel)}</a>` : `<p class="family-copy">Для этого города пока нет прямой ссылки в конфиге.</p>`}
+      ${offersUrl ? `<a class="shift-cta" href="${escapeHtmlAttr(offersUrl)}" target="_blank" rel="noopener noreferrer">Открыть смены в городе ${escapeHtml(cityLabel)}</a>` : `<p class="family-copy">Для этого города пока нет прямой ссылки в конфиге.</p>`}
     </div>
   `;
 }
