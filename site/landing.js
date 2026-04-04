@@ -1246,16 +1246,17 @@ function renderCityOffersLink() {
   if (!cityLabel) {
     UI.realShifts.innerHTML = `
       <div class="section-head">
-      <div class="section-head-copy">
-        <p class="section-overline">Следующий шаг</p>
-        <h3>Посмотреть реальные смены</h3>
+        <div class="section-head-copy">
+          <p class="section-overline">Следующий шаг</p>
+          <h3>Посмотреть реальные смены</h3>
+        </div>
       </div>
-    </div>
-    <div class="city-link-card">
-      <p class="family-copy">Откройте витрину Смены и посмотрите актуальные задания.</p>
-    </div>
-  `;
-  return;
+      <div class="city-link-card">
+        <p class="family-copy">Откройте витрину Смены и посмотрите актуальные задания.</p>
+        <a class="shift-cta" href="${escapeHtmlAttr(offersUrl)}" target="_blank" rel="noopener noreferrer">Перейти на витрину смен</a>
+      </div>
+    `;
+    return;
   }
 
   UI.realShifts.innerHTML = `
