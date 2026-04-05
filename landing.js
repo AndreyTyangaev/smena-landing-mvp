@@ -782,7 +782,8 @@ async function loadCitiesConfig() {
     { label: "Москва", aliases: ["Москва", "Moscow", "moscow", "мск", "msk"], offersUrl: "https://offers.smena.yandex.ru/location-213-moscow/podrabotka" },
     { label: "Санкт-Петербург", aliases: ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "spb", "saint petersburg", "saint-petersburg"], offersUrl: "https://offers.smena.yandex.ru/location-2/podrabotka" },
     { label: "Екатеринбург", aliases: ["Екатеринбург", "ekaterinburg", "yekaterinburg", "екб"], offersUrl: "https://offers.smena.yandex.ru/location-54-yekaterinburg/podrabotka" },
-    { label: "Нижний Новгород", aliases: ["Нижний Новгород", "Нижний", "nizhny novgorod", "nizhny-novgorod"], offersUrl: "https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka" }
+    { label: "Нижний Новгород", aliases: ["Нижний Новгород", "Нижний", "nizhny novgorod", "nizhny-novgorod"], offersUrl: "https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka" },
+    { label: "Омск", aliases: ["Омск", "omsk"], offersUrl: "https://offers.smena.yandex.ru/location-55-omsk/podrabotka" }
   ];
 
   try {

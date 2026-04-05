@@ -5,32 +5,36 @@ const DEFAULT_CITIES = [
   { city_name_ru: "Москва", city_name_en: "Moscow", city_slug: "moscow", location_id: 213, offers_url: "https://offers.smena.yandex.ru/location-213-moscow/podrabotka", enabled: true, supports_metro: true, aliases: ["Москва", "moscow", "msk"] },
   { city_name_ru: "Санкт-Петербург", city_name_en: "Saint Petersburg", city_slug: "", location_id: 2, offers_url: "https://offers.smena.yandex.ru/location-2/podrabotka", enabled: true, supports_metro: true, aliases: ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "spb", "saint-petersburg", "saint petersburg"] },
   { city_name_ru: "Екатеринбург", city_name_en: "Yekaterinburg", city_slug: "yekaterinburg", location_id: 54, offers_url: "https://offers.smena.yandex.ru/location-54-yekaterinburg/podrabotka", enabled: true, supports_metro: true, aliases: ["Екатеринбург", "ekaterinburg", "yekaterinburg", "екб"] },
-  { city_name_ru: "Нижний Новгород", city_name_en: "Nizhny Novgorod", city_slug: "nizhny-novgorod", location_id: 47, offers_url: "https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka", enabled: true, supports_metro: true, aliases: ["Нижний Новгород", "Нижний", "nizhny novgorod", "nizhny-novgorod"] }
+  { city_name_ru: "Нижний Новгород", city_name_en: "Nizhny Novgorod", city_slug: "nizhny-novgorod", location_id: 47, offers_url: "https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka", enabled: true, supports_metro: true, aliases: ["Нижний Новгород", "Нижний", "nizhny novgorod", "nizhny-novgorod"] },
+  { city_name_ru: "Омск", city_name_en: "Omsk", city_slug: "omsk", location_id: 55, offers_url: "https://offers.smena.yandex.ru/location-55-omsk/podrabotka", enabled: true, supports_metro: false, aliases: ["Омск", "omsk"] }
 ];
 
 function loadCityItems() {
+  let loadedItems = null;
   const jsonPath = findJsonPath();
   if (jsonPath && fs.existsSync(jsonPath)) {
     try {
       const parsed = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-      if (Array.isArray(parsed) && parsed.length) return parsed.map(normalizeItem);
+      if (Array.isArray(parsed) && parsed.length) loadedItems = parsed.map(normalizeItem);
     } catch {}
   }
 
-  const csvPath = findCsvPath();
-  if (csvPath && fs.existsSync(csvPath)) {
-    try {
-      const raw = fs.readFileSync(csvPath, "utf8").replace(/^\uFEFF/, "");
-      const lines = raw.split(/\r?\n/).filter(Boolean);
-      if (lines.length >= 2) {
-        const headers = lines[0].split(",").map((x) => x.trim());
-        const rows = lines.slice(1).map((line) => parseCsvLine(line, headers)).map(normalizeItem);
-        if (rows.length) return rows;
-      }
-    } catch {}
+  if (!loadedItems || !loadedItems.length) {
+    const csvPath = findCsvPath();
+    if (csvPath && fs.existsSync(csvPath)) {
+      try {
+        const raw = fs.readFileSync(csvPath, "utf8").replace(/^\uFEFF/, "");
+        const lines = raw.split(/\r?\n/).filter(Boolean);
+        if (lines.length >= 2) {
+          const headers = lines[0].split(",").map((x) => x.trim());
+          const rows = lines.slice(1).map((line) => parseCsvLine(line, headers)).map(normalizeItem);
+          if (rows.length) loadedItems = rows;
+        }
+      } catch {}
+    }
   }
 
-  return DEFAULT_CITIES.map(normalizeItem);
+  return mergeWithDefaults(loadedItems || []);
 }
 
 function normalizeItem(item) {
@@ -146,6 +150,21 @@ function extractRouteFromOffersUrl(url) {
 
 function decodeMaybeMojibake(value) {
   return String(value || "");
+}
+
+function mergeWithDefaults(items) {
+  const merged = [...(Array.isArray(items) ? items : [])];
+  const keys = new Set(
+    merged.map((item) => normalizeCity(item.city_name_ru || item.city_name_en || item.city_slug || ""))
+      .filter(Boolean)
+  );
+  DEFAULT_CITIES.map(normalizeItem).forEach((item) => {
+    const key = normalizeCity(item.city_name_ru || item.city_name_en || item.city_slug || "");
+    if (!key || keys.has(key)) return;
+    merged.push(item);
+    keys.add(key);
+  });
+  return merged;
 }
 
 
