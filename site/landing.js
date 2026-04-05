@@ -216,8 +216,8 @@ const ROLES = [
     role: "Курьер",
     family: ROLE_FAMILIES.delivery,
     pay: 5600,
-    lead: "Подходит, если вам нравится движение, свобода графика и оплата за результат.",
-    tags: ["Движение", "Гибкость", "Сдельность"],
+    lead: "Подходит, если вам нравится движение, самостоятельность и оплата за результат.",
+    tags: ["Движение", "Самостоятельность", "Сдельность"],
     skillMatches: ["управление электровелосипедом", "водительские права категории B", "Логистика (хабы, РЦ, СЦ)"]
   },
   {
@@ -235,7 +235,7 @@ const ROLES = [
     family: ROLE_FAMILIES.promo,
     pay: 3900,
     lead: "Хороший вход, если вам нравится движение, новые люди и гибкие короткие задания.",
-    tags: ["Люди", "События", "Гибкий график"],
+    tags: ["Люди", "События", "Короткие задания"],
     skillMatches: ["Промоутеры", "Помощь на мероприятиях", "Аниматоры, ведущие", "Администратор/ хостес", "Call-центр"]
   }
 ];
@@ -264,18 +264,11 @@ const UI = {
   profileName: document.getElementById("profileName"),
   profileDesc: document.getElementById("profileDesc"),
   incomeForecast: document.getElementById("incomeForecast"),
-  trainReadiness: document.getElementById("trainReadiness"),
   topScore: document.getElementById("topScore"),
   recommendations: document.getElementById("recommendations"),
   realShifts: document.getElementById("realShifts"),
   familyFit: document.getElementById("familyFit"),
   fallbackBox: document.getElementById("fallbackBox"),
-  editLocationBtn: document.getElementById("editLocationBtn"),
-  locationEditor: document.getElementById("locationEditor"),
-  resultCityInput: document.getElementById("resultCityInput"),
-  resultCityAutocomplete: document.getElementById("resultCityAutocomplete"),
-  saveLocationBtn: document.getElementById("saveLocationBtn"),
-  cancelLocationBtn: document.getElementById("cancelLocationBtn"),
   restartBtn: document.getElementById("restartBtn"),
   radar: document.getElementById("radar")
 };
@@ -306,9 +299,6 @@ function bindEvents() {
   UI.textNextBtn.addEventListener("click", submitText);
   UI.skipTextBtn.addEventListener("click", skipTextQuestion);
   UI.voiceBtn.addEventListener("click", toggleVoiceInput);
-  UI.editLocationBtn.addEventListener("click", openLocationEditor);
-  UI.saveLocationBtn.addEventListener("click", applyLocationChanges);
-  UI.cancelLocationBtn.addEventListener("click", closeLocationEditor);
   UI.restartBtn.addEventListener("click", startQuiz);
 
   UI.textAnswer.addEventListener("input", () => {
@@ -327,8 +317,6 @@ function bindEvents() {
     }
   });
 
-  UI.resultCityInput.addEventListener("input", () => handleCityInput(UI.resultCityInput, UI.resultCityAutocomplete));
-  UI.resultCityInput.addEventListener("focus", () => handleCityInput(UI.resultCityInput, UI.resultCityAutocomplete));
   document.addEventListener("click", handleOutsideAutocompleteClick);
 }
 
@@ -346,7 +334,6 @@ function startQuiz() {
   UI.hero.classList.add("hidden");
   UI.result.classList.add("hidden");
   UI.quiz.classList.remove("hidden");
-  UI.locationEditor.classList.add("hidden");
   render();
 }
 
@@ -366,10 +353,8 @@ function resetState() {
     learning: 50
   };
   UI.textAnswer.value = "";
-  UI.resultCityInput.value = "";
   autoResizeTextAnswer();
   hideAutocomplete(UI.cityAutocomplete);
-  hideAutocomplete(UI.resultCityAutocomplete);
 }
 
 function getVisibleQuestions() {
@@ -862,9 +847,7 @@ function hideAutocomplete(panelEl) {
 
 function handleOutsideAutocompleteClick(event) {
   const insidePrimary = UI.cityAutocomplete.contains(event.target) || event.target === UI.textAnswer;
-  const insideSecondary = UI.resultCityAutocomplete.contains(event.target) || event.target === UI.resultCityInput;
   if (!insidePrimary) hideAutocomplete(UI.cityAutocomplete);
-  if (!insideSecondary) hideAutocomplete(UI.resultCityAutocomplete);
 }
 
 function normalizeCity(value) {
@@ -886,29 +869,10 @@ function lookupCityMeta(value) {
   return CITY_MATCHERS.find((item) => item.key.includes(key) || key.includes(item.key)) || null;
 }
 
-function openLocationEditor() {
-  UI.locationEditor.classList.remove("hidden");
-  UI.resultCityInput.value = STATE.answers.city || "";
-}
-
-function closeLocationEditor() {
-  UI.locationEditor.classList.add("hidden");
-  hideAutocomplete(UI.resultCityAutocomplete);
-}
-
-function applyLocationChanges() {
-  const value = UI.resultCityInput.value.trim();
-  STATE.answers.city = value;
-  STATE.citySource = lookupCityMeta(value)?.label || value;
-  closeLocationEditor();
-  renderCityOffersLink();
-}
-
 function showResults() {
   stopVoiceInput(true);
   UI.quiz.classList.add("hidden");
   UI.result.classList.remove("hidden");
-  UI.locationEditor.classList.add("hidden");
 
   const recommendations = computeRecommendations();
   STATE.lastRecommendations = recommendations;
@@ -918,7 +882,6 @@ function showResults() {
   UI.profileName.textContent = profile.name;
   UI.profileDesc.textContent = profile.description;
   UI.incomeForecast.textContent = formatCurrency(topRole.pay * 4);
-  UI.trainReadiness.textContent = profile.learningReadiness;
   UI.topScore.textContent = `${topRole.score}%`;
 
   renderRecommendations(recommendations.slice(0, 3));
@@ -1060,19 +1023,31 @@ function scoreRole(role) {
 }
 
 function computeProfileNarrative(topRole) {
-  const family = topRole.family;
-  let name = "Гибкий профи подработки";
-  if (family === ROLE_FAMILIES.kitchen) name = "Практичный гастро-профиль";
-  if (family === ROLE_FAMILIES.retail) name = "Уверенный фронт-линейный профиль";
-  if (family === ROLE_FAMILIES.collector) name = "Темповый операционный профиль";
-  if (family === ROLE_FAMILIES.service) name = "Сервисный профиль с человеческим контактом";
-  if (family === ROLE_FAMILIES.delivery) name = "Подвижный профиль с гибким графиком";
-  if (family === ROLE_FAMILIES.warehouse) name = "Сильный операционный профиль";
-  if (family === ROLE_FAMILIES.promo) name = "Коммуникационный профиль быстрого старта";
+  const physical = STATE.answers.physical_load;
+  const outdoor = STATE.answers.outdoor_format;
+  const customer = STATE.answers.customer_contact;
+  const team = STATE.answers.team_contact;
+
+  let name = "Сбалансированный рабочий профиль";
+  if (customer === "Люблю общаться, меня это заряжает" && team === "Да, люблю большие коллективы") {
+    name = "Коммуникационный профиль";
+  } else if (customer === "Стараюсь избегать такую работу, где нужно много общаться" && (physical?.includes("Средняя") || physical?.includes("Тяжелая"))) {
+    name = "Операционный профиль";
+  } else if (physical?.includes("Очень легкая") || physical?.includes("Легкая")) {
+    name = "Спокойный прикладной профиль";
+  } else if (outdoor === "Да, в любую погоду" || outdoor === "Можно изредка попробовать") {
+    name = "Подвижный практический профиль";
+  }
+
+  const pieces = [];
+  if (physical) pieces.push(`нагрузка: ${physical.toLowerCase()}`);
+  if (outdoor) pieces.push(`формат работы: ${outdoor.toLowerCase()}`);
+  if (customer) pieces.push(`контакт с клиентами: ${customer.toLowerCase()}`);
+  if (team) pieces.push(`командное взаимодействие: ${team.toLowerCase()}`);
+
   return {
     name,
-    learningReadiness: computeLearningReadiness(),
-    description: `Судя по ответам, вам лучше всего подходят роли семейства «${family}»: по сочетанию нагрузки, графика, формата оплаты и уже отмеченных навыков.`
+    description: `Профиль сформирован только по вашим ответам и предпочтениям: ${pieces.join("; ")}.`
   };
 }
 
