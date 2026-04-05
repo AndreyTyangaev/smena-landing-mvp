@@ -1543,6 +1543,30 @@ h1 {
     linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(246,250,255,0.98) 100%);
 }
 
+.city-prompt {
+  font-weight: 800;
+  color: #223041;
+  font-size: 16px;
+}
+
+.city-input {
+  width: min(100%, 520px);
+  margin-top: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(47, 108, 229, 0.18);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.35;
+  padding: 12px 14px;
+  outline: none;
+}
+
+.city-input:focus {
+  border-color: rgba(47, 108, 229, 0.5);
+  box-shadow: 0 0 0 3px rgba(47, 108, 229, 0.12);
+}
+
 .city-link-top {
   display: flex;
   justify-content: space-between;

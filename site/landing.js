@@ -801,6 +801,9 @@ async function loadCitiesConfig() {
     return aliases.map((alias) => ({ key: normalizeCity(alias), label: city.label, offersUrl: city.offersUrl || "" }));
   });
   CITIES_LOADED = true;
+  if (!UI.result.classList.contains("hidden")) {
+    renderCityOffersLink();
+  }
 }
 
 function handleCityInput(inputEl, panelEl) {
@@ -1194,24 +1197,17 @@ function renderFamilyFit(items) {
 function renderCityOffersLink() {
   const cityValue = String(STATE.answers.city || "").trim();
   const cityMeta = lookupCityMeta(cityValue);
-  const cityLabel = cityMeta?.label || cityValue;
   const offersUrl = "https://offers.smena.yandex.ru/";
-
-  if (!cityLabel) {
-    UI.realShifts.innerHTML = `
-      <div class="section-head">
-        <div class="section-head-copy">
-          <p class="section-overline">Следующий шаг</p>
-          <h3>Посмотреть реальные смены</h3>
-        </div>
-      </div>
-      <div class="city-link-card">
-        <p class="family-copy">Откройте витрину Смены и посмотрите актуальные задания.</p>
-        <a class="shift-cta" href="${escapeHtmlAttr(offersUrl)}" target="_blank" rel="noopener noreferrer">Перейти на витрину смен</a>
-      </div>
-    `;
-    return;
-  }
+  const initialUrl = cityMeta?.offersUrl || offersUrl;
+  const cityOptionsMarkup = CITY_OPTIONS.map((item) => `<option value="${escapeHtmlAttr(item.label)}"></option>`).join("");
+  const initialHint = cityValue
+    ? (cityMeta?.offersUrl
+      ? `Найден город в базе: ${escapeHtml(cityMeta.label)}. Откроем его витрину смен.`
+      : "Город не найден в таблице. Откроем общую витрину Смены.")
+    : "Введите город и выберите подсказку из списка, чтобы открыть витрину именно этого города.";
+  const initialBtnText = cityMeta?.offersUrl
+    ? `Открыть смены в городе ${cityMeta.label}`
+    : "Перейти на витрину смен";
 
   UI.realShifts.innerHTML = `
     <div class="section-head">
@@ -1221,10 +1217,38 @@ function renderCityOffersLink() {
       </div>
     </div>
     <div class="city-link-card">
-      <p class="family-copy">Открываем витрину Смены с реальными заданиями${cityLabel ? ` для города ${escapeHtml(cityLabel)}` : ""}.</p>
-      <a class="shift-cta" href="${escapeHtmlAttr(offersUrl)}" target="_blank" rel="noopener noreferrer">Перейти на витрину смен</a>
+      <label class="city-prompt" for="resultCityInput">Из какого вы города?</label>
+      <input id="resultCityInput" class="city-input" type="text" list="resultCityList" value="${escapeHtmlAttr(cityValue)}" placeholder="Начните вводить название города" autocomplete="address-level2" />
+      <datalist id="resultCityList">${cityOptionsMarkup}</datalist>
+      <p id="resultCityHint" class="family-copy">${initialHint}</p>
+      <a id="resultCityCta" class="shift-cta" href="${escapeHtmlAttr(initialUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(initialBtnText)}</a>
     </div>
   `;
+
+  const cityInput = UI.realShifts.querySelector("#resultCityInput");
+  const cityHint = UI.realShifts.querySelector("#resultCityHint");
+  const cityCta = UI.realShifts.querySelector("#resultCityCta");
+  if (!cityInput || !cityHint || !cityCta) return;
+
+  const updateCityCta = () => {
+    const value = cityInput.value.trim();
+    STATE.answers.city = value;
+    const meta = lookupCityMeta(value);
+    const resolvedUrl = meta?.offersUrl || offersUrl;
+    cityCta.href = resolvedUrl;
+    cityCta.textContent = meta?.offersUrl
+      ? `Открыть смены в городе ${meta.label}`
+      : "Перейти на витрину смен";
+    cityHint.textContent = value
+      ? (meta?.offersUrl
+        ? `Найден город в базе: ${meta.label}. Откроем его витрину смен.`
+        : "Город не найден в таблице. Откроем общую витрину Смены.")
+      : "Введите город и выберите подсказку из списка, чтобы открыть витрину именно этого города.";
+  };
+
+  cityInput.addEventListener("input", updateCityCta);
+  cityInput.addEventListener("change", updateCityCta);
+  cityInput.addEventListener("blur", updateCityCta);
 }
 
 function renderFallback() {
