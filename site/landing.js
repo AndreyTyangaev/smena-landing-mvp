@@ -1155,8 +1155,7 @@ function buildFitReasons(role) {
   }
 
   if (matchedSkills.length > 0) {
-    const topSkillMatches = matchedSkills.slice(0, 2).join(", ");
-    reasons.push(`Есть релевантный опыт: ${topSkillMatches}`);
+    reasons.push("Есть релевантный опыт");
   }
   if (experienceDetails.length >= 20) {
     reasons.push("Учли ваш дополнительный опыт");
