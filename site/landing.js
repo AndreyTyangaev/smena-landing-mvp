@@ -181,7 +181,7 @@ const ROLES = [
     family: ROLE_FAMILIES.retail,
     pay: 4400,
     lead: "Хороший вариант, если вам важны стабильный доход, понятные процессы и контакт с людьми.",
-    tags: ["Касса", "Покупатели", "Почасовая оплата"],
+    tags: ["Касса", "Покупатели", "Процессы"],
     skillMatches: ["Работа с кассой", "Консультации покупателей", "Работа в пункте выдачи заказов", "медкнижка для работы с продуктами"]
   },
   {
@@ -234,7 +234,7 @@ const ROLES = [
     role: "Промоутер / хелпер на ивентах",
     family: ROLE_FAMILIES.promo,
     pay: 3900,
-    lead: "Хороший вход, если вам нравится движение, новые люди и гибкие короткие задания.",
+    lead: "Хороший вход, если вам нравится движение, новые люди и событийный формат задач.",
     tags: ["Люди", "События", "Короткие задания"],
     skillMatches: ["Промоутеры", "Помощь на мероприятиях", "Аниматоры, ведущие", "Администратор/ хостес", "Call-центр"]
   }
@@ -1087,13 +1087,86 @@ function renderRecommendations(items) {
           <p class="role-lead">${escapeHtml(item.lead)}</p>
           <div class="role-meta">
             <div class="role-stat"><span>Ориентир по ставке</span><strong>${formatCurrency(item.pay)} за смену</strong></div>
-            <div class="role-stat"><span>Почему подходит</span><strong>${escapeHtml(item.tags.slice(0, 2).join(" • "))}</strong></div>
+            <div class="role-stat role-stat-fit"><span>Почему подходит</span><strong>${escapeHtml(buildFitReasons(item).join(" • "))}</strong></div>
           </div>
           <div class="role-tags">${item.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
         </article>
       `).join("")}
     </div>
   `;
+}
+
+function buildFitReasons(role) {
+  const reasons = [];
+  const physical = STATE.answers.physical_load;
+  const outdoor = STATE.answers.outdoor_format;
+  const customer = STATE.answers.customer_contact;
+  const team = STATE.answers.team_contact;
+  const selectedSkills = new Set([
+    ...(Array.isArray(STATE.answers.skills_multi) ? STATE.answers.skills_multi : []),
+    ...(Array.isArray(STATE.answers.additional_skills_multi) ? STATE.answers.additional_skills_multi : [])
+  ]);
+  const matchedSkills = role.skillMatches.filter((skill) => selectedSkills.has(skill));
+  const experienceDetails = String(STATE.answers.other_skills_details || "").trim();
+
+  if (physical?.includes("Очень легкая") || physical?.includes("Легкая")) {
+    if (["cashier", "retail_floor", "barista", "kitchen"].includes(role.code)) {
+      reasons.push("Комфортная нагрузка");
+    }
+  }
+  if (physical?.includes("Средняя") || physical?.includes("Тяжелая")) {
+    if (["collector", "warehouse", "courier", "promoter"].includes(role.code)) {
+      reasons.push("Подходящий темп и активность");
+    }
+  }
+
+  if (outdoor === "Не комфортно, могу только в помещении") {
+    if (["cashier", "retail_floor", "collector", "kitchen", "barista", "warehouse"].includes(role.code)) {
+      reasons.push("Формат в помещении");
+    }
+  } else if (outdoor === "Да, в любую погоду" || outdoor === "Только в теплый сезон" || outdoor === "Можно изредка попробовать") {
+    if (["courier", "promoter"].includes(role.code)) {
+      reasons.push("Подходит уличный формат");
+    }
+  }
+
+  if (customer === "Люблю общаться, меня это заряжает") {
+    if (["cashier", "barista", "promoter", "retail_floor"].includes(role.code)) {
+      reasons.push("Много контакта с людьми");
+    }
+  } else if (customer === "Стараюсь избегать такую работу, где нужно много общаться") {
+    if (["collector", "warehouse", "kitchen"].includes(role.code)) {
+      reasons.push("Меньше клиентского общения");
+    }
+  } else if (customer === "Если только не целый день, я устаю") {
+    reasons.push("Сбалансированное общение");
+  }
+
+  if (team === "Да, люблю большие коллективы") {
+    if (["kitchen", "cashier", "promoter", "retail_floor"].includes(role.code)) {
+      reasons.push("Командная среда");
+    }
+  } else if (team === "Я люблю быть сам по себе: работать без начальника и коллег") {
+    if (["courier"].includes(role.code)) {
+      reasons.push("Больше самостоятельности");
+    }
+  } else if (team === "Предпочитаю небольшие команды (2-3 человека)") {
+    reasons.push("Небольшая команда");
+  }
+
+  if (matchedSkills.length > 0) {
+    const topSkillMatches = matchedSkills.slice(0, 2).join(", ");
+    reasons.push(`Есть релевантный опыт: ${topSkillMatches}`);
+  }
+  if (experienceDetails.length >= 20) {
+    reasons.push("Учли ваш дополнительный опыт");
+  }
+
+  if (reasons.length < 2) {
+    reasons.push(...role.tags.slice(0, 2));
+  }
+
+  return reasons.slice(0, 4);
 }
 
 function renderFamilyFit(items) {
