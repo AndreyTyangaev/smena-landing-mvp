@@ -20,7 +20,9 @@ const SKILL_OPTIONS = [
   "Товароведение",
   "Сложная уборка с бытовой химией",
   "Администратор/ хостес",
-  "Приготовление пищи",
+  "Повар/ приготовление пищи",
+  "Кондитер",
+  "Флорист",
   "Обслуживание гостей в общепите",
   "Работа на складе",
   "Работа с кассой",
@@ -57,9 +59,6 @@ const ADDITIONAL_SKILL_OPTIONS = [
   "сертификат на высотные работы",
   "сертификат по электробезопасности",
   "приложения для работы мерчендайзером",
-  "повар",
-  "кондитер",
-  "флорист",
   "1С для складов",
   "управление электровелосипедом",
   "водительские права категории B",
@@ -68,53 +67,9 @@ const ADDITIONAL_SKILL_OPTIONS = [
 
 const QUESTIONS = [
   {
-    id: "screen_1_goals",
-    text: "Расскажите о ваших целях",
-    hint: "Выберите подходящие варианты и при желании оставьте комментарий голосом или текстом.",
-    type: "bundle",
-    blocks: [
-      {
-        id: "interest_primary",
-        text: "Что вас интересует?",
-        type: "single",
-        options: [
-          "У меня уже есть основной доход, ищу доп заработок",
-          "Хочу получать основной доход от заданий в Смене",
-          "Я в поиске основной работы, но пока ищу - хочу зарабатывать",
-          "Хочу попробовать новую сферу"
-        ]
-      },
-      {
-        id: "priority_now",
-        text: "Что сейчас для вас наиболее важно?",
-        type: "single",
-        options: [
-          "Стабильный прогнозируемый доход",
-          "Максимум заработка",
-          "Баланс работы с личными делами и графиком",
-          "Заработать на карманные расходы"
-        ]
-      },
-      {
-        id: "hours_week",
-        text: "Сколько часов в неделю вы готовы уделять сменам?",
-        type: "single",
-        options: ["до 10", "до 20", "до 40", "более 40"]
-      },
-      {
-        id: "hours_week_details",
-        text: "Нет подходящих вариантов? Хотите поделиться, какой формат вам был бы удобен (могу только в выходные; только летом; могу в любое время, когда не учусь; ночные смены и прочее)? Напишите или расскажите",
-        hint: "",
-        type: "text_voice_optional",
-        optional: true,
-        placeholder: "Нет подходящих вариантов? Хотите поделиться, какой формат вам был бы удобен (могу только в выходные; только летом; могу в любое время, когда не учусь; ночные смены и прочее)? Напишите или расскажите"
-      }
-    ]
-  },
-  {
-    id: "screen_2_preferences",
-    text: "Спасибо, что поделились своими целями.",
-    hint: "Давайте теперь посмотрим, какие задания вам нравятся.",
+    id: "screen_1_load",
+    text: "Пара вопросов про формат работы",
+    hint: "Отметьте, какой уровень нагрузки и уличный формат вам подходит.",
     type: "bundle",
     blocks: [
       {
@@ -139,11 +94,10 @@ const QUESTIONS = [
           "Не комфортно, могу только в помещении"
         ]
       }
-    ],
-    ctaLabel: "Продолжить"
+    ]
   },
   {
-    id: "screen_3_communication",
+    id: "screen_2_communication",
     text: "Формат общения в работе",
     hint: "Выберите, какой уровень общения вам комфортен в рабочем процессе.",
     type: "bundle",
@@ -172,25 +126,11 @@ const QUESTIONS = [
     ]
   },
   {
-    id: "screen_4_experience_intro",
-    text: "А теперь самое важное - расскажите про свой опыт.",
-    hint: "Если хочется ответить подробно - мы только за. Это поможет учесть весь ваш опыт, знания и навыки для поиска заданий. А чтобы не утомиться - мы сделали голосовой ввод.",
-    type: "message",
-    ctaLabel: "Продолжить"
-  },
-  {
     id: "skills_multi",
-    text: "Отметьте все навыки и опыт, которые у вас есть",
+    text: "Отметьте все профессии и сферы, где у вас есть опыт",
     hint: "Можно выбрать любое количество карточек",
     type: "multi_tiles",
     options: SKILL_OPTIONS
-  },
-  {
-    id: "experience_details",
-    text: "Напишите или расскажите о своем опыте, в какой сфере, что умеете, любите, на что учились",
-    hint: "Можно ответить подробно голосом или текстом",
-    type: "text_voice_optional",
-    placeholder: "Опишите свой опыт и сильные стороны"
   },
   {
     id: "additional_skills_multi",
@@ -201,17 +141,17 @@ const QUESTIONS = [
   },
   {
     id: "other_skills_details",
-    text: "Напишите или расскажите о любых других своих навыках, которые могут пригодиться в работе",
-    hint: "Если есть дополнительные навыки, обязательно расскажите о них",
+    text: "Напишите или расскажите о любых других своих навыках, которые могут пригодиться в работе, опыте, в какой сфере, что умеете, любите, на что учились",
+    hint: "",
     type: "text_voice_optional",
-    placeholder: "Расскажите о любых дополнительных навыках"
+    placeholder: "Напишите или расскажите о любых других своих навыках, которые могут пригодиться в работе, опыте, в какой сфере, что умеете, любите, на что учились"
   },
   {
     id: "new_jobs_city",
     text: "Какие задания вы бы добавили в приложение для подработки?",
-    hint: "Напишите или расскажите, каких заданий вам не хватает. Спасибо! Уже готовим результаты :)",
+    hint: "",
     type: "text_voice_optional",
-    placeholder: "Ваши идеи по новым заданиям"
+    placeholder: "Какие задания вы бы добавили в приложение для подработки? Напишите или расскажите"
   }
 ];
 
@@ -233,7 +173,7 @@ const ROLES = [
     pay: 5000,
     lead: "Подходит тем, кто любит процессы, понятный ритм и аккуратную работу руками.",
     tags: ["Кухня", "Команда", "Стабильность"],
-    skillMatches: ["Приготовление пищи", "Обслуживание гостей в общепите", "Кейтеринг", "Пищевое производство", "повар", "кондитер", "медкнижка для общепита"]
+    skillMatches: ["Повар/ приготовление пищи", "Кондитер", "Обслуживание гостей в общепите", "Кейтеринг", "Пищевое производство", "медкнижка для общепита"]
   },
   {
     code: "cashier",
@@ -269,7 +209,7 @@ const ROLES = [
     pay: 4800,
     lead: "Идеально для тех, кто любит сервис, динамику и общение в небольших командах.",
     tags: ["Кофе", "Сервис", "Обучение"],
-    skillMatches: ["Бариста", "Обслуживание гостей в общепите", "Раннер или официант", "Кейтеринг"]
+    skillMatches: ["Бариста", "Обслуживание гостей в общепите", "Раннер или официант", "Кейтеринг", "Флорист"]
   },
   {
     code: "courier",
@@ -1050,36 +990,6 @@ function scoreRole(role) {
   const matchedSkills = role.skillMatches.filter((skill) => selectedSkills.has(skill)).length;
   score += Math.min(30, matchedSkills * 8);
 
-  const interest = STATE.answers.interest_primary;
-  if (interest === "У меня уже есть основной доход, ищу доп заработок") {
-    if (["courier", "promoter", "collector"].includes(role.code)) score += 8;
-    if (["cashier", "barista"].includes(role.code)) score += 4;
-  }
-  if (interest === "Хочу получать основной доход от заданий в Смене") {
-    if (["warehouse", "kitchen", "cashier", "collector"].includes(role.code)) score += 8;
-  }
-  if (interest === "Я в поиске основной работы, но пока ищу - хочу зарабатывать") {
-    if (["retail_floor", "cashier", "warehouse", "kitchen"].includes(role.code)) score += 7;
-  }
-  if (interest === "Хочу попробовать новую сферу") {
-    if (["promoter", "retail_floor", "barista"].includes(role.code)) score += 6;
-  }
-
-  const priority = STATE.answers.priority_now;
-  if (priority === "Стабильный прогнозируемый доход") {
-    if (["cashier", "retail_floor", "kitchen"].includes(role.code)) score += 9;
-    if (["courier"].includes(role.code)) score -= 6;
-  }
-  if (priority === "Максимум заработка") {
-    if (["courier", "collector", "warehouse"].includes(role.code)) score += 9;
-  }
-  if (priority === "Баланс работы с личными делами и графиком") {
-    if (["promoter", "courier", "barista"].includes(role.code)) score += 7;
-  }
-  if (priority === "Заработать на карманные расходы") {
-    if (["promoter", "retail_floor", "cashier", "barista"].includes(role.code)) score += 8;
-  }
-
   const physical = STATE.answers.physical_load;
   if (physical === "Очень легкая (выполнять задания сидя)") {
     if (["cashier", "barista"].includes(role.code)) score += 6;
@@ -1138,8 +1048,6 @@ function scoreRole(role) {
   }
 
   const experienceText = [
-    STATE.answers.experience_details,
-    STATE.answers.hours_week_details,
     STATE.answers.other_skills_details,
     STATE.answers.new_jobs_city
   ].join(" ").toLowerCase();
@@ -1169,10 +1077,9 @@ function computeProfileNarrative(topRole) {
 }
 
 function computeLearningReadiness() {
-  const interest = STATE.answers.interest_primary;
-  const detailsSize = String(STATE.answers.experience_details || "").trim().length;
+  const detailsSize = String(STATE.answers.other_skills_details || "").trim().length;
   const extraSkills = (STATE.answers.additional_skills_multi || []).length;
-  if (interest === "Хочу попробовать новую сферу" || extraSkills >= 4 || detailsSize >= 80) return "Высокая";
+  if (extraSkills >= 4 || detailsSize >= 80) return "Высокая";
   if (extraSkills >= 1 || detailsSize >= 20) return "Средняя";
   return "Базовая";
 }
