@@ -149,7 +149,25 @@ function extractRouteFromOffersUrl(url) {
 }
 
 function decodeMaybeMojibake(value) {
-  return String(value || "");
+  let text = String(value || "").trim();
+  if (!text) return "";
+
+  const cyrillicScore = (input) => (String(input || "").match(/[А-Яа-яЁё]/g) || []).length;
+
+  for (let i = 0; i < 3; i += 1) {
+    if (cyrillicScore(text) > 0 || !/[ÐÑÃ]/.test(text)) break;
+    let decoded = text;
+    try {
+      decoded = Buffer.from(text, "latin1").toString("utf8");
+    } catch {
+      break;
+    }
+    if (!decoded || decoded === text) break;
+    if (cyrillicScore(decoded) < cyrillicScore(text)) break;
+    text = decoded;
+  }
+
+  return text;
 }
 
 function mergeWithDefaults(items) {

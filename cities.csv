@@ -1,5 +1,31 @@
-city_name_ru,city_name_en,enabled,supports_metro
-Москва,https://offers.smena.yandex.ru/location-213-moscow/podrabotka,1,1
-Санкт-Петербург,https://offers.smena.yandex.ru/location-2/podrabotka,1,1
-Екатеринбург,https://offers.smena.yandex.ru/location-54-yekaterinburg/podrabotka,1,1
-Нижний Новгород,https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka,1,1
+﻿"city_name_ru","city_name_en","enabled","supports_metro"
+"ÐÐ¾ÑÐºÐ²Ð°","https://offers.smena.yandex.ru/location-213-moscow/podrabotka","1","0"
+"Ð¡Ð°Ð½ÐºÑ-ÐÐµÑÐµÑÐ±ÑÑÐ³","https://offers.smena.yandex.ru/location-2-saint-petersburg/podrabotka","1","0"
+"ÐÐºÐ°ÑÐµÑÐ¸Ð½Ð±ÑÑÐ³","https://offers.smena.yandex.ru/location-54-yekaterinburg/podrabotka","1","0"
+"ÐÐ¸Ð¶Ð½Ð¸Ð¹ ÐÐ¾Ð²Ð³Ð¾ÑÐ¾Ð´","https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka","1","0"
+"ÐÐ°Ð·Ð°Ð½Ñ","https://offers.smena.yandex.ru/location-43-kazan/podrabotka","1","0"
+"Ð£ÑÐ°","https://offers.smena.yandex.ru/location-172-ufa/podrabotka","1","0"
+"ÐÐ¾Ð²Ð¾ÑÐ¸Ð±Ð¸ÑÑÐº","https://offers.smena.yandex.ru/location-65-novosibirsk/podrabotka","1","0"
+"ÐÑÐ°ÑÐ½Ð¾Ð´Ð°Ñ","https://offers.smena.yandex.ru/location-35-krasnodar/podrabotka","1","0"
+"Ð Ð¾ÑÑÐ¾Ð²-Ð½Ð°-ÐÐ¾Ð½Ñ","https://offers.smena.yandex.ru/location-39-rostov-na-donu/podrabotka","1","0"
+"Ð§ÐµÐ»ÑÐ±Ð¸Ð½ÑÐº","https://offers.smena.yandex.ru/location-56-chelyabinsk/podrabotka","1","0"
+"Ð¡Ð°Ð¼Ð°ÑÐ°","https://offers.smena.yandex.ru/location-51-samara/podrabotka","1","0"
+"ÐÐµÑÐ¼Ñ","https://offers.smena.yandex.ru/location-50-perm/podrabotka","1","0"
+"ÐÑÐ°ÑÐ½Ð¾ÑÑÑÐº","https://offers.smena.yandex.ru/location-62-krasnoyarsk/podrabotka","1","0"
+"Ð¢ÑÐ¼ÐµÐ½Ñ","https://offers.smena.yandex.ru/location-55-tyumen/podrabotka","1","0"
+"ÐÐ¾ÑÐ¾Ð½ÐµÐ¶","https://offers.smena.yandex.ru/location-193-voronezh/podrabotka","1","0"
+"ÐÐ¾Ð»Ð³Ð¾Ð³ÑÐ°Ð´","https://offers.smena.yandex.ru/location-38-volgograd/podrabotka","1","0"
+"Ð¡Ð°ÑÐ°ÑÐ¾Ð²","https://offers.smena.yandex.ru/location-194-saratov/podrabotka","1","0"
+"ÐÐ¼ÑÐº","https://offers.smena.yandex.ru/location-66-omsk/podrabotka","1","0"
+"ÐÐ°Ð»Ð°ÑÐ¸ÑÐ°","https://offers.smena.yandex.ru/location-10716-balashiha/podrabotka","1","0"
+"ÐÐ¾Ð´Ð¾Ð»ÑÑÐº","https://offers.smena.yandex.ru/location-10747-podolsk/podrabotka","1","0"
+"ÐÑÑÐ¸ÑÐ¸","https://offers.smena.yandex.ru/location-10740-mytischi/podrabotka","1","0"
+"ÐÐµÐ»ÐµÐ½Ð¾Ð³ÑÐ°Ð´","https://offers.smena.yandex.ru/location-216-zelenograd/podrabotka","1","0"
+"Ð¥Ð¸Ð¼ÐºÐ¸","https://offers.smena.yandex.ru/location-10758-himki/podrabotka","1","0"
+"ÐÑÐ±ÐµÑÑÑ","https://offers.smena.yandex.ru/location-10738-lubercy/podrabotka","1","0"
+"ÐÑÐ°ÑÐ½Ð¾Ð³Ð¾ÑÑÐº","https://offers.smena.yandex.ru/location-10735-krasnogorsk/podrabotka","1","0"
+"ÐÐ¾ÑÐ¾Ð»ÑÐ²","https://offers.smena.yandex.ru/location-20728-korolev/podrabotka","1","0"
+"ÐÐ´Ð¸Ð½ÑÐ¾Ð²Ð¾","https://offers.smena.yandex.ru/location-10743-odincovo/podrabotka","1","0"
+"ÐÑÑÐ¸Ð½Ð¾","https://offers.smena.yandex.ru/location-118936-murino/podrabotka","1","0"
+"ÐÐ°ÑÑÐ¸Ð½Ð°","https://offers.smena.yandex.ru/location-10867-gatchina/podrabotka","1","0"
+"ÐÑÐµÐ²Ð¾Ð»Ð¾Ð¶ÑÐº","https://offers.smena.yandex.ru/location-10865-vsevolgsk/podrabotka","1","0"

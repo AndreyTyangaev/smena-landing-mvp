@@ -1,42 +1,362 @@
-﻿[
-  {
-    "city_name_ru": "Москва",
-    "city_name_en": "",
-    "city_slug": "moscow",
-    "offers_url": "https://offers.smena.yandex.ru/location-213-moscow/podrabotka",
-    "location_id": 213,
-    "enabled": true,
-    "supports_metro": true,
-    "aliases": ["Москва", "Moscow", "moscow", "мск", "msk"]
-  },
-  {
-    "city_name_ru": "Санкт-Петербург",
-    "city_name_en": "",
-    "city_slug": "",
-    "offers_url": "https://offers.smena.yandex.ru/location-2/podrabotka",
-    "location_id": 2,
-    "enabled": true,
-    "supports_metro": true,
-    "aliases": ["Санкт-Петербург", "Санкт Петербург", "Питер", "СПб", "spb", "saint petersburg", "saint-petersburg"]
-  },
-  {
-    "city_name_ru": "Екатеринбург",
-    "city_name_en": "",
-    "city_slug": "yekaterinburg",
-    "offers_url": "https://offers.smena.yandex.ru/location-54-yekaterinburg/podrabotka",
-    "location_id": 54,
-    "enabled": true,
-    "supports_metro": true,
-    "aliases": ["Екатеринбург", "ekaterinburg", "yekaterinburg", "екб"]
-  },
-  {
-    "city_name_ru": "Нижний Новгород",
-    "city_name_en": "",
-    "city_slug": "nizhny-novgorod",
-    "offers_url": "https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka",
-    "location_id": 47,
-    "enabled": true,
-    "supports_metro": true,
-    "aliases": ["Нижний Новгород", "Нижний", "nizhny novgorod", "nizhny-novgorod"]
-  }
+[
+    {
+        "city_name_ru":  "ÐÐ¾ÑÐºÐ²Ð°",
+        "city_name_en":  "",
+        "city_slug":  "moscow",
+        "offers_url":  "https://offers.smena.yandex.ru/location-213-moscow/podrabotka",
+        "location_id":  213,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ¾ÑÐºÐ²Ð°"
+                    ]
+    },
+    {
+        "city_name_ru":  "Ð¡Ð°Ð½ÐºÑ-ÐÐµÑÐµÑÐ±ÑÑÐ³",
+        "city_name_en":  "",
+        "city_slug":  "saint-petersburg",
+        "offers_url":  "https://offers.smena.yandex.ru/location-2-saint-petersburg/podrabotka",
+        "location_id":  2,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "Ð¡Ð°Ð½ÐºÑ-ÐÐµÑÐµÑÐ±ÑÑÐ³"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐºÐ°ÑÐµÑÐ¸Ð½Ð±ÑÑÐ³",
+        "city_name_en":  "",
+        "city_slug":  "yekaterinburg",
+        "offers_url":  "https://offers.smena.yandex.ru/location-54-yekaterinburg/podrabotka",
+        "location_id":  54,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐºÐ°ÑÐµÑÐ¸Ð½Ð±ÑÑÐ³"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ¸Ð¶Ð½Ð¸Ð¹ ÐÐ¾Ð²Ð³Ð¾ÑÐ¾Ð´",
+        "city_name_en":  "",
+        "city_slug":  "nizhny-novgorod",
+        "offers_url":  "https://offers.smena.yandex.ru/location-47-nizhny-novgorod/podrabotka",
+        "location_id":  47,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ¸Ð¶Ð½Ð¸Ð¹ ÐÐ¾Ð²Ð³Ð¾ÑÐ¾Ð´"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ°Ð·Ð°Ð½Ñ",
+        "city_name_en":  "",
+        "city_slug":  "kazan",
+        "offers_url":  "https://offers.smena.yandex.ru/location-43-kazan/podrabotka",
+        "location_id":  43,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ°Ð·Ð°Ð½Ñ"
+                    ]
+    },
+    {
+        "city_name_ru":  "Ð£ÑÐ°",
+        "city_name_en":  "",
+        "city_slug":  "ufa",
+        "offers_url":  "https://offers.smena.yandex.ru/location-172-ufa/podrabotka",
+        "location_id":  172,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "Ð£ÑÐ°"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ¾Ð²Ð¾ÑÐ¸Ð±Ð¸ÑÑÐº",
+        "city_name_en":  "",
+        "city_slug":  "novosibirsk",
+        "offers_url":  "https://offers.smena.yandex.ru/location-65-novosibirsk/podrabotka",
+        "location_id":  65,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ¾Ð²Ð¾ÑÐ¸Ð±Ð¸ÑÑÐº"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÑÐ°ÑÐ½Ð¾Ð´Ð°Ñ",
+        "city_name_en":  "",
+        "city_slug":  "krasnodar",
+        "offers_url":  "https://offers.smena.yandex.ru/location-35-krasnodar/podrabotka",
+        "location_id":  35,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÑÐ°ÑÐ½Ð¾Ð´Ð°Ñ"
+                    ]
+    },
+    {
+        "city_name_ru":  "Ð Ð¾ÑÑÐ¾Ð²-Ð½Ð°-ÐÐ¾Ð½Ñ",
+        "city_name_en":  "",
+        "city_slug":  "rostov-na-donu",
+        "offers_url":  "https://offers.smena.yandex.ru/location-39-rostov-na-donu/podrabotka",
+        "location_id":  39,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "Ð Ð¾ÑÑÐ¾Ð²-Ð½Ð°-ÐÐ¾Ð½Ñ"
+                    ]
+    },
+    {
+        "city_name_ru":  "Ð§ÐµÐ»ÑÐ±Ð¸Ð½ÑÐº",
+        "city_name_en":  "",
+        "city_slug":  "chelyabinsk",
+        "offers_url":  "https://offers.smena.yandex.ru/location-56-chelyabinsk/podrabotka",
+        "location_id":  56,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "Ð§ÐµÐ»ÑÐ±Ð¸Ð½ÑÐº"
+                    ]
+    },
+    {
+        "city_name_ru":  "Ð¡Ð°Ð¼Ð°ÑÐ°",
+        "city_name_en":  "",
+        "city_slug":  "samara",
+        "offers_url":  "https://offers.smena.yandex.ru/location-51-samara/podrabotka",
+        "location_id":  51,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "Ð¡Ð°Ð¼Ð°ÑÐ°"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐµÑÐ¼Ñ",
+        "city_name_en":  "",
+        "city_slug":  "perm",
+        "offers_url":  "https://offers.smena.yandex.ru/location-50-perm/podrabotka",
+        "location_id":  50,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐµÑÐ¼Ñ"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÑÐ°ÑÐ½Ð¾ÑÑÑÐº",
+        "city_name_en":  "",
+        "city_slug":  "krasnoyarsk",
+        "offers_url":  "https://offers.smena.yandex.ru/location-62-krasnoyarsk/podrabotka",
+        "location_id":  62,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÑÐ°ÑÐ½Ð¾ÑÑÑÐº"
+                    ]
+    },
+    {
+        "city_name_ru":  "Ð¢ÑÐ¼ÐµÐ½Ñ",
+        "city_name_en":  "",
+        "city_slug":  "tyumen",
+        "offers_url":  "https://offers.smena.yandex.ru/location-55-tyumen/podrabotka",
+        "location_id":  55,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "Ð¢ÑÐ¼ÐµÐ½Ñ"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ¾ÑÐ¾Ð½ÐµÐ¶",
+        "city_name_en":  "",
+        "city_slug":  "voronezh",
+        "offers_url":  "https://offers.smena.yandex.ru/location-193-voronezh/podrabotka",
+        "location_id":  193,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ¾ÑÐ¾Ð½ÐµÐ¶"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ¾Ð»Ð³Ð¾Ð³ÑÐ°Ð´",
+        "city_name_en":  "",
+        "city_slug":  "volgograd",
+        "offers_url":  "https://offers.smena.yandex.ru/location-38-volgograd/podrabotka",
+        "location_id":  38,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ¾Ð»Ð³Ð¾Ð³ÑÐ°Ð´"
+                    ]
+    },
+    {
+        "city_name_ru":  "Ð¡Ð°ÑÐ°ÑÐ¾Ð²",
+        "city_name_en":  "",
+        "city_slug":  "saratov",
+        "offers_url":  "https://offers.smena.yandex.ru/location-194-saratov/podrabotka",
+        "location_id":  194,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "Ð¡Ð°ÑÐ°ÑÐ¾Ð²"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ¼ÑÐº",
+        "city_name_en":  "",
+        "city_slug":  "omsk",
+        "offers_url":  "https://offers.smena.yandex.ru/location-66-omsk/podrabotka",
+        "location_id":  66,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ¼ÑÐº"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ°Ð»Ð°ÑÐ¸Ñ\u0085Ð°",
+        "city_name_en":  "",
+        "city_slug":  "balashiha",
+        "offers_url":  "https://offers.smena.yandex.ru/location-10716-balashiha/podrabotka",
+        "location_id":  10716,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ°Ð»Ð°ÑÐ¸Ñ\u0085Ð°"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ¾Ð´Ð¾Ð»ÑÑÐº",
+        "city_name_en":  "",
+        "city_slug":  "podolsk",
+        "offers_url":  "https://offers.smena.yandex.ru/location-10747-podolsk/podrabotka",
+        "location_id":  10747,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ¾Ð´Ð¾Ð»ÑÑÐº"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÑÑÐ¸ÑÐ¸",
+        "city_name_en":  "",
+        "city_slug":  "mytischi",
+        "offers_url":  "https://offers.smena.yandex.ru/location-10740-mytischi/podrabotka",
+        "location_id":  10740,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÑÑÐ¸ÑÐ¸"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐµÐ»ÐµÐ½Ð¾Ð³ÑÐ°Ð´",
+        "city_name_en":  "",
+        "city_slug":  "zelenograd",
+        "offers_url":  "https://offers.smena.yandex.ru/location-216-zelenograd/podrabotka",
+        "location_id":  216,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐµÐ»ÐµÐ½Ð¾Ð³ÑÐ°Ð´"
+                    ]
+    },
+    {
+        "city_name_ru":  "Ð¥Ð¸Ð¼ÐºÐ¸",
+        "city_name_en":  "",
+        "city_slug":  "himki",
+        "offers_url":  "https://offers.smena.yandex.ru/location-10758-himki/podrabotka",
+        "location_id":  10758,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "Ð¥Ð¸Ð¼ÐºÐ¸"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÑÐ±ÐµÑÑÑ",
+        "city_name_en":  "",
+        "city_slug":  "lubercy",
+        "offers_url":  "https://offers.smena.yandex.ru/location-10738-lubercy/podrabotka",
+        "location_id":  10738,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÑÐ±ÐµÑÑÑ"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÑÐ°ÑÐ½Ð¾Ð³Ð¾ÑÑÐº",
+        "city_name_en":  "",
+        "city_slug":  "krasnogorsk",
+        "offers_url":  "https://offers.smena.yandex.ru/location-10735-krasnogorsk/podrabotka",
+        "location_id":  10735,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÑÐ°ÑÐ½Ð¾Ð³Ð¾ÑÑÐº"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ¾ÑÐ¾Ð»ÑÐ²",
+        "city_name_en":  "",
+        "city_slug":  "korolev",
+        "offers_url":  "https://offers.smena.yandex.ru/location-20728-korolev/podrabotka",
+        "location_id":  20728,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ¾ÑÐ¾Ð»ÑÐ²"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ´Ð¸Ð½ÑÐ¾Ð²Ð¾",
+        "city_name_en":  "",
+        "city_slug":  "odincovo",
+        "offers_url":  "https://offers.smena.yandex.ru/location-10743-odincovo/podrabotka",
+        "location_id":  10743,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ´Ð¸Ð½ÑÐ¾Ð²Ð¾"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÑÑÐ¸Ð½Ð¾",
+        "city_name_en":  "",
+        "city_slug":  "murino",
+        "offers_url":  "https://offers.smena.yandex.ru/location-118936-murino/podrabotka",
+        "location_id":  118936,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÑÑÐ¸Ð½Ð¾"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÐ°ÑÑÐ¸Ð½Ð°",
+        "city_name_en":  "",
+        "city_slug":  "gatchina",
+        "offers_url":  "https://offers.smena.yandex.ru/location-10867-gatchina/podrabotka",
+        "location_id":  10867,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÐ°ÑÑÐ¸Ð½Ð°"
+                    ]
+    },
+    {
+        "city_name_ru":  "ÐÑÐµÐ²Ð¾Ð»Ð¾Ð¶ÑÐº",
+        "city_name_en":  "",
+        "city_slug":  "vsevolgsk",
+        "offers_url":  "https://offers.smena.yandex.ru/location-10865-vsevolgsk/podrabotka",
+        "location_id":  10865,
+        "enabled":  true,
+        "supports_metro":  false,
+        "aliases":  [
+                        "ÐÑÐµÐ²Ð¾Ð»Ð¾Ð¶ÑÐº"
+                    ]
+    }
 ]
